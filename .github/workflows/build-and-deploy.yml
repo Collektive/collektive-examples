@@ -1,0 +1,40 @@
+
+name: CI/CD Process
+on:
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows, macos, ubuntu]
+    runs-on: ${{ matrix.os }}-latest
+    concurrency:
+      group: build-${{ github.workflow }}-${{ matrix.os }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.0.0
+      - name: Check the simulations on CI
+        uses: DanySK/build-check-deploy-gradle-action@2.2.9
+        with:
+          check-command: ./gradlew runAll
+          should-run-codecov: false
+          should-validate-wrapper: ${{ runner.os == 'Linux' }}
+  success:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    if: >-
+      always() && (
+        contains(join(needs.*.result, ','), 'failure')
+        || !contains(join(needs.*.result, ','), 'cancelled')
+      )
+    steps:
+      - name: Verify that there were no failures
+        run: ${{ !contains(join(needs.*.result, ','), 'failure') }}

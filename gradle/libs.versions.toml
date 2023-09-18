@@ -1,0 +1,14 @@
+[versions]
+alchemist = "28.0.1"
+
+[libraries]
+alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
+alchemist-incarnation-protelis = { module = "it.unibo.alchemist:alchemist-incarnation-protelis", version.ref = "alchemist" }
+alchemist-swingui = { module = "it.unibo.alchemist:alchemist-swingui", version.ref = "alchemist" }
+
+[bundles]
+alchemist = ["alchemist", "alchemist-incarnation-protelis", "alchemist-swingui"]
+
+[plugins]
+multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:0.5.5"
+taskTree = "com.dorongold.task-tree:2.1.1"
