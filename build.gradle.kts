@@ -6,24 +6,19 @@ plugins {
     application
     alias(libs.plugins.multiJvmTesting) // Pre-configures the Java toolchains
     alias(libs.plugins.taskTree) // Helps debugging dependencies among gradle tasks
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.collektive)
 }
 
 repositories {
     mavenCentral()
 }
-/*
- * Only required if you plan to use Protelis, remove otherwise
- */
-sourceSets {
-    main {
-        resources {
-            srcDir("src/main/protelis")
-        }
-    }
-}
+
 dependencies {
     // Check the catalog at gradle/libs.versions.gradle
     implementation(libs.bundles.alchemist)
+    implementation(libs.collektive.integration)
+    implementation(libs.collektive)
 }
 
 multiJvm {

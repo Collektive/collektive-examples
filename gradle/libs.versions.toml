@@ -1,14 +1,21 @@
 [versions]
+kotlin = "1.9.0"
 alchemist = "28.0.1"
+collektive = "0.3.1"
 
 [libraries]
 alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
 alchemist-incarnation-protelis = { module = "it.unibo.alchemist:alchemist-incarnation-protelis", version.ref = "alchemist" }
 alchemist-swingui = { module = "it.unibo.alchemist:alchemist-swingui", version.ref = "alchemist" }
+alchemist-euclidean-geometry = { module = "it.unibo.alchemist:alchemist-euclidean-geometry", version.ref = "alchemist" }
+collektive = { module = "it.unibo.collektive:dsl", version.ref = "collektive" }
+collektive-integration = { module = "it.unibo.collektive:alchemist-incarnation-collektive", version = "0.2.0" }
 
 [bundles]
-alchemist = ["alchemist", "alchemist-incarnation-protelis", "alchemist-swingui"]
+alchemist = ["alchemist", "alchemist-euclidean-geometry", "alchemist-incarnation-protelis", "alchemist-swingui"]
 
 [plugins]
 multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:0.5.5"
 taskTree = "com.dorongold.task-tree:2.1.1"
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+collektive = { id = "it.unibo.collektive.collektive-plugin", version.ref = "collektive" }
