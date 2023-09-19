@@ -1,12 +1,12 @@
 [
   {
     "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
-    "curIncarnation": "collektive",
+    "curIncarnation": "protelis",
     "mode": "FILL_ELLIPSE",
     "red": {
       "max": 255,
       "min": 0,
-      "val": 0
+      "val": 140
     },
     "blue": {
       "max": 255,
@@ -31,79 +31,19 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 19
-    },
-    "molFilter": false,
-    "molString": "",
-    "molPropertyFilter": false,
-    "property": "",
-    "writingPropertyValue": false,
-    "c": "ALPHA",
-    "reverse": false,
-    "propoom": {
-      "max": 10,
-      "min": -10,
-      "val": 0
-    },
-    "minprop": {
-      "max": 10,
-      "min": -10,
-      "val": 0
-    },
-    "maxprop": {
-      "max": 10,
-      "min": -10,
       "val": 10
     },
-    "colorCache": {
-      "value": -16777216
-    }
-  },
-  {
-    "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
-    "curIncarnation": "collektive",
-    "mode": "FILL_ELLIPSE",
-    "red": {
-      "max": 255,
-      "min": 0,
-      "val": 255
-    },
-    "blue": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "green": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "alpha": {
-      "max": 255,
-      "min": 0,
-      "val": 255
-    },
-    "scaleFactor": {
-      "max": 100,
-      "min": 0,
-      "val": 50
-    },
-    "size": {
-      "max": 100,
-      "min": 0,
-      "val": 13
-    },
-    "molFilter": true,
+    "molFilter": false,
     "molString": "it.unibo.collektive.Aggregate.entrypoint",
     "molPropertyFilter": true,
-    "property": "",
+    "property": "\u003cvalue\u003e",
     "writingPropertyValue": false,
-    "c": "HUE",
-    "reverse": false,
+    "c": "SATURATION",
+    "reverse": true,
     "propoom": {
       "max": 10,
       "min": -10,
-      "val": 1
+      "val": 0
     },
     "minprop": {
       "max": 10,
@@ -113,16 +53,16 @@
     "maxprop": {
       "max": 10,
       "min": -10,
-      "val": 2
+      "val": 5
     },
     "colorCache": {
-      "value": -65536
+      "value": -7602176
     }
   },
   {
     "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
     "curIncarnation": "protelis",
-    "mode": "FILL_RECTANGLE",
+    "mode": "FILL_ELLIPSE",
     "red": {
       "max": 255,
       "min": 0,
@@ -151,7 +91,7 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 35
+      "val": 25
     },
     "molFilter": true,
     "molString": "it.unibo.collektive.Aggregate.entrypoint",
@@ -182,7 +122,7 @@
   {
     "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
     "curIncarnation": "protelis",
-    "mode": "FILL_RECTANGLE",
+    "mode": "FILL_ELLIPSE",
     "red": {
       "max": 255,
       "min": 0,
@@ -211,7 +151,7 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 19
+      "val": 15
     },
     "molFilter": true,
     "molString": "it.unibo.collektive.Aggregate.entrypoint",
@@ -237,66 +177,6 @@
     },
     "colorCache": {
       "value": -65536
-    }
-  },
-  {
-    "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
-    "curIncarnation": "collektive",
-    "mode": "FILL_ELLIPSE",
-    "red": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "blue": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "green": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "alpha": {
-      "max": 255,
-      "min": 0,
-      "val": 255
-    },
-    "scaleFactor": {
-      "max": 100,
-      "min": 0,
-      "val": 50
-    },
-    "size": {
-      "max": 100,
-      "min": 0,
-      "val": 14
-    },
-    "molFilter": true,
-    "molString": "",
-    "molPropertyFilter": false,
-    "property": "",
-    "writingPropertyValue": false,
-    "c": "ALPHA",
-    "reverse": false,
-    "propoom": {
-      "max": 10,
-      "min": -10,
-      "val": 0
-    },
-    "minprop": {
-      "max": 10,
-      "min": -10,
-      "val": 0
-    },
-    "maxprop": {
-      "max": 10,
-      "min": -10,
-      "val": 10
-    },
-    "colorCache": {
-      "value": -16777216
     }
   }
 ]
