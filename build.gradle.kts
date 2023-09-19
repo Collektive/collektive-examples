@@ -25,6 +25,16 @@ multiJvm {
     jvmVersionForCompilation.set(latestJava)
 }
 
+kotlin {
+    target {
+        compilations.all {
+            kotlinOptions {
+                freeCompilerArgs += listOf("-Xcontext-receivers")
+            }
+        }
+    }
+}
+
 val batch: String by project
 val maxTime: String by project
 

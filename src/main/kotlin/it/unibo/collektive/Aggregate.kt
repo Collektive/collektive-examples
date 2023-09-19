@@ -6,12 +6,17 @@ import it.unibo.collektive.field.Field
 import it.unibo.collektive.field.min
 import it.unibo.collektive.stack.Path
 
-class Aggregate(private val node: CollektiveDevice<*>) {
-    private val nodeId = node.node.id
+class Aggregate(private val device: CollektiveDevice<*>) {
+    private val nodeId = device.node.id
     private var state = emptyMap<Path, Any?>()
-    fun entrypoint() = aggregate(IntId(nodeId), node.receive(), state) {
-        gradient(nodeId == 0, node)
-    }.also { state = it.newState }
+
+    fun entrypoint(): AggregateContext.AggregateResult<Double> = with(device) {
+        val gradientResult = aggregate(IntId(nodeId), receive(), state) {
+            gradient(nodeId == 0)
+        }
+        state = gradientResult.newState
+        gradientResult
+    }
 }
 
 operator fun Field<Double>.plus(field: Field<Double>): Field<Double> {
@@ -22,13 +27,13 @@ operator fun Field<Double>.plus(field: Field<Double>): Field<Double> {
     return Field(this.localId, res)
 }
 
-fun AggregateContext.gradient(source: Boolean, sensor: DistanceSensor) =
-    sharing(Double.POSITIVE_INFINITY) { distances ->
-        val paths: Field<Double> = sensor.distances() + distances
-        val minByPath = paths.min(includingSelf = false)?.value // field to map, excluding local
-        when {
-            source -> 0.0
-            minByPath == null -> Double.POSITIVE_INFINITY
-            else -> minByPath
-        }
+context(AggregateContext, DistanceSensor)
+fun gradient(source: Boolean) = sharing(Double.POSITIVE_INFINITY) { dist ->
+    val paths = distances() + dist
+    val minByPath = paths.min(includingSelf = false)?.value // field to map, excluding local
+    when {
+        source -> 0.0
+        minByPath == null -> Double.POSITIVE_INFINITY
+        else -> minByPath
     }
+}
