@@ -26,6 +26,11 @@ multiJvm {
 }
 
 kotlin {
+    sourceSets.all {
+        languageSettings {
+            languageVersion = "2.0"
+        }
+    }
     target {
         compilations.all {
             kotlinOptions {
