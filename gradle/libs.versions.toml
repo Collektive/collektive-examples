@@ -9,7 +9,7 @@ alchemist-incarnation-protelis = { module = "it.unibo.alchemist:alchemist-incarn
 alchemist-swingui = { module = "it.unibo.alchemist:alchemist-swingui", version.ref = "alchemist" }
 alchemist-euclidean-geometry = { module = "it.unibo.alchemist:alchemist-euclidean-geometry", version.ref = "alchemist" }
 collektive = { module = "it.unibo.collektive:dsl", version.ref = "collektive" }
-collektive-integration = { module = "it.unibo.collektive:alchemist-incarnation-collektive", version = "1.0.1" }
+collektive-integration = { module = "it.unibo.collektive:alchemist-incarnation-collektive", version = "1.0.2" }
 
 [bundles]
 alchemist = ["alchemist", "alchemist-euclidean-geometry", "alchemist-incarnation-protelis", "alchemist-swingui"]
