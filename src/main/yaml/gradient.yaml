@@ -2,11 +2,6 @@ network-model:
   type: ConnectWithinDistance
   parameters: [5]
 
-launcher:
-  type: SingleRunSwingUI
-  parameters:
-    graphics: /effects/gradient.json
-
 incarnation: collektive
 
 _pool: &program
@@ -31,3 +26,9 @@ deployments:
     contents:
       - molecule: source
         concentration: true
+
+monitors:
+  type: SwingGUI
+  parameters:
+    graphics: effects/gradient.json
+    failOnHeadless: false
