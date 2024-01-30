@@ -33,16 +33,19 @@ val runAll by tasks.register<DefaultTask>("runAll") {
 }
 
 fun String.capitalizeString(): String = this.replaceFirstChar {
-    if (it.isLowerCase()) it.titlecase(
-        Locale.getDefault()
-    ) else it.toString()
+    if (it.isLowerCase()) {
+        it.titlecase(
+            Locale.getDefault(),
+        )
+    } else {
+        it.toString()
+    }
 }
 
 /*
  * Scan the folder with the simulation files, and create a task for each one of them.
  */
-
-println("PATH ${rootProject.rootDir.path}")
+println(rootProject.rootDir.path)
 File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
     .orEmpty()
     .apply { check(isNotEmpty()) }
@@ -53,7 +56,7 @@ File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
             javaLauncher.set(
                 javaToolchains.launcherFor {
                     languageVersion.set(JavaLanguageVersion.of(multiJvm.latestJava))
-                }
+                },
             )
             group = alchemistGroup
             description = "Launches simulation ${it.nameWithoutExtension}"
@@ -66,15 +69,11 @@ File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
                 }
             }
             args("run", it.absolutePath)
-            args(
-                "--override",
-                "{ launcher: { parameters: { graphics: \"effects/${it.nameWithoutExtension}.json\" } } }"
-            )
             outputs.dir(exportsDir)
         }
         runAll.dependsOn(task)
     }
 
-tasks.withType<KotlinCompile>().configureEach {
+tasks.withType(KotlinCompile::class).all {
     kotlinOptions.freeCompilerArgs = listOf("-Xcontext-receivers")
 }
