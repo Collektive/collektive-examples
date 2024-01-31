@@ -15,7 +15,7 @@ collektive-integration = { module = "it.unibo.collektive:alchemist-incarnation-c
 alchemist = ["alchemist", "alchemist-euclidean-geometry", "alchemist-incarnation-protelis", "alchemist-swingui"]
 
 [plugins]
-multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:0.5.7"
+multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:0.5.8"
 taskTree = "com.dorongold.task-tree:2.1.1"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 collektive = { id = "it.unibo.collektive.collektive-plugin", version.ref = "collektive" }
