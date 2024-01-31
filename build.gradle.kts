@@ -17,8 +17,7 @@ repositories {
 
 dependencies {
     implementation(libs.bundles.alchemist)
-    implementation(libs.collektive.integration)
-    implementation(libs.collektive)
+    implementation(libs.bundles.collektive)
 }
 
 multiJvm {
