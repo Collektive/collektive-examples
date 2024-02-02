@@ -9,7 +9,7 @@ _pool: &program
     type: Event
     actions:
       - type: RunCollektiveProgram
-        parameters: [it.unibo.collektive.examples.aggregate.AggregateFunctionsKt.entrypoint]
+        parameters: [it.unibo.collektive.examples.entrypoint.SimulationEntrypointKt.gradientEntrypoint]
 
 deployments:
   - type: Rectangle
