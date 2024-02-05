@@ -44,10 +44,8 @@ fun String.capitalizeString(): String = this.replaceFirstChar {
 /*
  * Scan the folder with the simulation files, and create a task for each one of them.
  */
-println(rootProject.rootDir.path)
 File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
     .orEmpty()
-    .apply { check(isNotEmpty()) }
     .filter { it.extension == "yaml" }
     .sortedBy { it.nameWithoutExtension }
     .forEach {
