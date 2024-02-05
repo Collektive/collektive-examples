@@ -9,7 +9,7 @@ import it.unibo.collektive.examples.neighbors.neighborCounter
  * The entrypoint of the simulation running a gradient.
  */
 context(DistanceSensor)
-fun Aggregate<Int>.gradientEntrypoint(): Double = gradient()
+fun Aggregate<Int>.gradientEntrypoint(): Double = gradient(localId == 0)
 
 /**
  * The entrypoint of the simulation running a counter of neighbors.
