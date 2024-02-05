@@ -1,5 +1,5 @@
-import java.util.Locale
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Locale
 
 apply(plugin = libs.plugins.kotlin.jvm.get().pluginId)
 
@@ -31,15 +31,16 @@ val runAll by tasks.register<DefaultTask>("runAll") {
     description = "Launches all simulations"
 }
 
-fun String.capitalizeString(): String = this.replaceFirstChar {
-    if (it.isLowerCase()) {
-        it.titlecase(
-            Locale.getDefault(),
-        )
-    } else {
-        it.toString()
+fun String.capitalizeString(): String =
+    this.replaceFirstChar {
+        if (it.isLowerCase()) {
+            it.titlecase(
+                Locale.getDefault(),
+            )
+        } else {
+            it.toString()
+        }
     }
-}
 
 /*
  * Scan the folder with the simulation files, and create a task for each one of them.
