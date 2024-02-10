@@ -32,3 +32,7 @@ monitors:
   parameters:
     graphics: effects/gradient.json
     failOnHeadless: false
+
+terminate:
+  type: AfterTime
+  parameters: 30
