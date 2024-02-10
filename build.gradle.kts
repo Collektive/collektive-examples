@@ -1,6 +1,9 @@
-/*
- * DEFAULT GRADLE BUILD FOR ALCHEMIST SIMULATOR
- */
+import java.awt.GraphicsEnvironment
+import java.io.ByteArrayOutputStream
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Locale
+
+apply(plugin = libs.plugins.kotlin.jvm.get().pluginId)
 
 plugins {
     application
@@ -15,88 +18,97 @@ repositories {
 }
 
 dependencies {
-    // Check the catalog at gradle/libs.versions.gradle
     implementation(libs.bundles.alchemist)
-    implementation(libs.collektive.integration)
-    implementation(libs.collektive)
+    implementation(libs.bundles.collektive)
+    if (!GraphicsEnvironment.isHeadless()) {
+        implementation("it.unibo.alchemist:alchemist-swingui:${libs.versions.alchemist.get()}")
+    }
 }
 
 multiJvm {
     jvmVersionForCompilation.set(latestJava)
 }
 
-kotlin {
-    target {
-        compilations.all {
-            kotlinOptions {
-                freeCompilerArgs += listOf("-Xcontext-receivers")
-            }
+// Heap size estimation for batches
+val maxHeap: Long? by project
+val heap: Long = maxHeap ?: if (System.getProperty("os.name").lowercase().contains("linux")) {
+    ByteArrayOutputStream().use { output ->
+        exec {
+            executable = "bash"
+            args = listOf("-c", "cat /proc/meminfo | grep MemAvailable | grep -o '[0-9]*'")
+            standardOutput = output
         }
-    }
+        output.toString().trim().toLong() / 1024
+    }.also { println("Detected ${it}MB RAM available.") } * 9 / 10
+} else {
+    // Guess 16GB RAM of which 2 used by the OS
+    14 * 1024L
 }
+val taskSizeFromProject: Int? by project
+val taskSize = taskSizeFromProject ?: 512
+val threadCount = maxOf(1, minOf(Runtime.getRuntime().availableProcessors(), heap.toInt() / taskSize))
 
-val batch: String by project
-val maxTime: String by project
+val runAllGraphic by tasks.register<DefaultTask>("runAllGraphic") {
+    group = alchemistGroup
+    description = "Launches all simulations with the graphic subsystem enabled"
+}
+val runAllBatch by tasks.register<DefaultTask>("runAllBatch") {
+    group = alchemistGroup
+    description = "Launches all experiments"
+}
 
 val alchemistGroup = "Run Alchemist"
-/*
- * This task is used to run all experiments in sequence
- */
-val runAll by tasks.register<DefaultTask>("runAll") {
-    group = alchemistGroup
-    description = "Launches all simulations"
-}
-/*
- * Scan the folder with the simulation files, and create a task for each one of them.
- */
+
+fun String.capitalizeString(): String =
+    this.replaceFirstChar {
+        if (it.isLowerCase()) {
+            it.titlecase(
+                Locale.getDefault(),
+            )
+        } else {
+            it.toString()
+        }
+    }
+
 File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
-    ?.filter { it.extension == "yml" } // pick all yml files in src/main/yaml
-    ?.sortedBy { it.nameWithoutExtension } // sort them, we like reproducibility
+    ?.filter { it.extension == "yml" }
+    ?.sortedBy { it.nameWithoutExtension }
     ?.forEach {
-        // one simulation file -> one gradle task
-        val task by tasks.register<JavaExec>("run${it.nameWithoutExtension.uppercase()}") {
-            group = alchemistGroup // This is for better organization when running ./gradlew tasks
-            description = "Launches simulation ${it.nameWithoutExtension}" // Just documentation
-            mainClass.set("it.unibo.alchemist.Alchemist") // The class to launch
-            classpath = sourceSets["main"].runtimeClasspath // The classpath to use
-            // Uses the latest version of java
+        fun basetask(name: String, additionalConfiguration: JavaExec.() -> Unit = {}) = tasks.register<JavaExec>(name) {
+            group = alchemistGroup
+            description = "Launches graphic simulation ${it.nameWithoutExtension}"
+            mainClass.set("it.unibo.alchemist.Alchemist")
+            classpath = sourceSets["main"].runtimeClasspath
+            args("run", it.absolutePath)
             javaLauncher.set(
                 javaToolchains.launcherFor {
                     languageVersion.set(JavaLanguageVersion.of(multiJvm.latestJava))
                 },
             )
-            // These are the program arguments
-            args("run", it.absolutePath, "--override")
-            if (System.getenv("CI") == "true" || batch == "true") {
-                // If it is running in a Continuous Integration environment, use the "headless" mode of the simulator
-                // Namely, force the simulator not to use graphical output.
-                args(
-                    """
-                        terminate:
-                        - type: AfterTime
-                          parameters: $maxTime
-                    """.trimIndent(),
-                )
+            if (System.getenv("CI") == "true") {
+                args("--override", "terminate: { type: AfterTime, parameters: [20] } ")
             } else {
-                // A graphics environment should be available, so load the effects for the UI from the "effects" folder
-                // Effects are expected to be named after the simulation file
-                args(
-                    """
-                        launcher:
-                          type: SingleRunSwingUI
-                          parameters:
-                            graphics: effects/${it.nameWithoutExtension}.json
-                    """,
-                )
+                this.additionalConfiguration()
             }
         }
-        // task.dependsOn(classpathJar) // Uncomment to switch to jar-based classpath resolution
-        runAll.dependsOn(task)
+        val capitalizedName = it.nameWithoutExtension.capitalizeString()
+        val graphic by basetask("run${capitalizedName}Graphic") {
+            args(
+                "--override",
+                "monitors: { type: SwingGUI, parameters: { graphics: effects/${it.nameWithoutExtension}.json } }",
+                "--override",
+                "launcher: { parameters: { batch: [], autoStart: true } }",
+            )
+        }
+        runAllGraphic.dependsOn(graphic)
+        val batch by basetask("run${capitalizedName}Batch") {
+            description = "Launches batch experiments for $capitalizedName"
+            maxHeapSize = "${minOf(heap.toInt(), Runtime.getRuntime().availableProcessors() * taskSize)}m"
+            File("data").mkdirs()
+        }
+        runAllBatch.dependsOn(batch)
     }
 
-tasks.withType<Tar>().configureEach {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-}
-tasks.withType<Zip>().configureEach {
-    duplicatesStrategy = DuplicatesStrategy.WARN
+tasks.withType(KotlinCompile::class).all {
+    kotlinOptions.freeCompilerArgs = listOf("-Xcontext-receivers")
 }

@@ -23,9 +23,11 @@ jobs:
       - name: Check the simulations on CI
         uses: DanySK/build-check-deploy-gradle-action@2.4.0
         with:
-          check-command: ./gradlew runAll
+          build-command: true
+          check-command: ./gradlew runAllGraphic
+          deploy-command: true
           should-run-codecov: false
-          should-validate-wrapper: ${{ runner.os == 'Linux' }}
+          should-validate-wrapper: ${{ contains('Linux', runner.os) }}
   success:
     runs-on: ubuntu-latest
     needs:
