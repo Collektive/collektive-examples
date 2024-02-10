@@ -26,9 +26,3 @@ deployments:
     contents:
       - molecule: source
         concentration: true
-
-monitors:
-  type: SwingGUI
-  parameters:
-    graphics: effects/gradient.json
-    failOnHeadless: false

@@ -86,7 +86,7 @@ File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
                 },
             )
             if (System.getenv("CI") == "true") {
-                args("--override", "terminate: { type: AfterTime, parameters: [20] } ")
+                args("--override", "terminate: { type: AfterTime, parameters: [2] } ")
             } else {
                 this.additionalConfiguration()
             }
@@ -97,7 +97,7 @@ File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
                 "--override",
                 "monitors: { type: SwingGUI, parameters: { graphics: effects/${it.nameWithoutExtension}.json } }",
                 "--override",
-                "launcher: { parameters: { batch: [], autoStart: true } }",
+                "launcher: { parameters: { batch: [], autoStart: false } }",
             )
         }
         runAllGraphic.dependsOn(graphic)
