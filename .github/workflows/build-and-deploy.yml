@@ -23,7 +23,7 @@ jobs:
       - name: Check the simulations on CI
         uses: DanySK/build-check-deploy-gradle-action@2.4.0
         with:
-          check-command: ./gradlew runAllBatch
+          check-command: ./gradlew runAllGraphic
           should-run-codecov: false
           should-validate-wrapper: ${{ runner.os == 'Linux' }}
   success:
