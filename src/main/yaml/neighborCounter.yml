@@ -32,7 +32,3 @@ monitors:
   parameters:
     graphics: effects/neighborCounter.json
     failOnHeadless: false
-
-terminate:
-  type: AfterTime
-  parameters: 30
