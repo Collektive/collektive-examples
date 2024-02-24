@@ -24,7 +24,9 @@ fun Aggregate<Int>.broadcast(source: Boolean, value: Double, accumulator: (Doubl
         when {
             source -> 0.0 to value
             else -> {
-                val resultField = dist.alignedMap(field) { distField, (dist2, value) -> distField + dist2 to accumulator(value) }
+                val resultField = dist.alignedMap(field) { distField, (currDist, value) ->
+                    distField + currDist to accumulator(value)
+                }
                 resultField.fold(Double.POSITIVE_INFINITY to Double.POSITIVE_INFINITY) { acc, value ->
                     if (value.first < acc.first) value else acc
                 }
