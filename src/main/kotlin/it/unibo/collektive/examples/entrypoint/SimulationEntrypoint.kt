@@ -18,4 +18,8 @@ fun Aggregate<Int>.gradientEntrypoint(): Double = gradient(localId == 0)
 fun Aggregate<Int>.neighborCounterEntrypoint(): Int = neighborCounter()
 
 context(DistanceSensor)
-fun Aggregate<Int>.channelEntrypoint(): Boolean = channel(localId == 0, localId == 99, 1.0)
+fun Aggregate<Int>.channelEntrypoint(): Boolean {
+    return if (localId !in 181..199) {
+        return channel(localId == 0, localId == 399, 0.1)
+    } else false
+}
