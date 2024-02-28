@@ -5,7 +5,7 @@ network-model:
 incarnation: collektive
 
 _pool: &program
-  - time-distribution: 2
+  - time-distribution: 1
     type: Event
     actions:
       - type: RunCollektiveProgram
@@ -13,14 +13,14 @@ _pool: &program
 
 deployments:
   - type: Rectangle
-    parameters: [200, 0, 0, 20, 20]
+    parameters: [199, 0, 0, 20, 20]
     programs:
       - *program
     contents:
       - molecule: source
         concentration: false
   - type: Point
-    parameters: [2, 2]
+    parameters: [10, 10]
     programs:
       - *program
     contents:

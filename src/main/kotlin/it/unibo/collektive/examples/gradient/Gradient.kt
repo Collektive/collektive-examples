@@ -20,7 +20,6 @@ fun Aggregate<Int>.gradient(source: Boolean): Double =
         }
     }
 
-
 /**
  * The entrypoint of the simulation running a gradient.
  */
