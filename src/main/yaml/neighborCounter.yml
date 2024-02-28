@@ -9,7 +9,7 @@ _pool: &program
     type: Event
     actions:
       - type: RunCollektiveProgram
-        parameters: [it.unibo.collektive.examples.entrypoint.SimulationEntrypointKt.neighborCounterEntrypoint]
+        parameters: [it.unibo.collektive.examples.neighbors.NeighborCounterKt.neighborCounter]
 
 deployments:
   - type: Rectangle
