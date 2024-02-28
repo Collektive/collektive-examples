@@ -19,3 +19,10 @@ fun Aggregate<Int>.gradient(source: Boolean): Double =
             else -> (it + dist).min(POSITIVE_INFINITY)
         }
     }
+
+
+/**
+ * The entrypoint of the simulation running a gradient.
+ */
+context(DistanceSensor)
+fun Aggregate<Int>.gradientEntrypoint(): Double = gradient(localId == 0)
