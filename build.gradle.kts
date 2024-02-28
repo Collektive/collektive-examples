@@ -47,17 +47,18 @@ val heap: Long = maxHeap ?: if (System.getProperty("os.name").lowercase().contai
 val taskSizeFromProject: Int? by project
 val taskSize = taskSizeFromProject ?: 512
 val threadCount = maxOf(1, minOf(Runtime.getRuntime().availableProcessors(), heap.toInt() / taskSize))
+val alchemistGroupBatch = "Run batch simulations"
+val alchemistGroupGraphic = "Run graphic simulations with Alchemist"
 
 val runAllGraphic by tasks.register<DefaultTask>("runAllGraphic") {
-    group = alchemistGroup
+    group = alchemistGroupGraphic
     description = "Launches all simulations with the graphic subsystem enabled"
 }
 val runAllBatch by tasks.register<DefaultTask>("runAllBatch") {
-    group = alchemistGroup
+    group = alchemistGroupBatch
     description = "Launches all experiments"
 }
 
-val alchemistGroup = "Run Alchemist"
 
 fun String.capitalizeString(): String =
     this.replaceFirstChar {
@@ -75,7 +76,6 @@ File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
     ?.sortedBy { it.nameWithoutExtension }
     ?.forEach {
         fun basetask(name: String, additionalConfiguration: JavaExec.() -> Unit = {}) = tasks.register<JavaExec>(name) {
-            group = alchemistGroup
             description = "Launches graphic simulation ${it.nameWithoutExtension}"
             mainClass.set("it.unibo.alchemist.Alchemist")
             classpath = sourceSets["main"].runtimeClasspath
@@ -93,6 +93,7 @@ File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
         }
         val capitalizedName = it.nameWithoutExtension.capitalizeString()
         val graphic by basetask("run${capitalizedName}Graphic") {
+            group = alchemistGroupGraphic
             args(
                 "--override",
                 "monitors: { type: SwingGUI, parameters: { graphics: effects/${it.nameWithoutExtension}.json } }",
@@ -102,6 +103,7 @@ File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
         }
         runAllGraphic.dependsOn(graphic)
         val batch by basetask("run${capitalizedName}Batch") {
+            group = alchemistGroupBatch
             description = "Launches batch experiments for $capitalizedName"
             maxHeapSize = "${minOf(heap.toInt(), Runtime.getRuntime().availableProcessors() * taskSize)}m"
             File("data").mkdirs()
