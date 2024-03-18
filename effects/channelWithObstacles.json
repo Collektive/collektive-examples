@@ -94,7 +94,7 @@
       "val": 10
     },
     "molFilter": true,
-    "molString": "channelWithObstacles",
+    "molString": "it.unibo.collektive.examples.channel.ChannelWithObstaclesKt.channelWithObstacles",
     "molPropertyFilter": true,
     "property": "if (it \u003d\u003d true) 1 else 0",
     "writingPropertyValue": false,
