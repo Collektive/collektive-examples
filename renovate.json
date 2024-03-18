@@ -1,7 +1,6 @@
 {
-    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": [
-      "github>DanySK/renovate-config"
-    ],
-    "includeForks": true
-  }
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>Collektive/renovate-config:kotlin"
+  ]
+}
