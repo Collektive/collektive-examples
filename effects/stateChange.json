@@ -11,12 +11,12 @@
     "blue": {
       "max": 255,
       "min": 0,
-      "val": 0
+      "val": 231
     },
     "green": {
       "max": 255,
       "min": 0,
-      "val": 255
+      "val": 148
     },
     "alpha": {
       "max": 255,
@@ -31,19 +31,19 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 11
+      "val": 12
     },
     "molFilter": true,
-    "molString": "it.unibo.collektive.examples.gradient.GradientKt.gradientEntrypoint",
+    "molString": "stateChangeEntrypoint",
     "molPropertyFilter": true,
     "property": "",
-    "writingPropertyValue": false,
-    "c": "HUE",
+    "writingPropertyValue": true,
+    "c": "ALPHA",
     "reverse": false,
     "propoom": {
       "max": 10,
       "min": -10,
-      "val": 0
+      "val": 1
     },
     "minprop": {
       "max": 10,
@@ -56,7 +56,7 @@
       "val": 10
     },
     "colorCache": {
-      "value": -16711936
+      "value": -16739097
     }
   }
 ]
