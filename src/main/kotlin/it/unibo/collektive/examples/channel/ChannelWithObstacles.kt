@@ -1,9 +1,9 @@
 package it.unibo.collektive.examples.channel
 
+import it.unibo.alchemist.collektive.device.DistanceSensor
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.operators.share
-import it.unibo.collektive.alchemist.device.sensors.DistanceSensor
-import it.unibo.collektive.alchemist.device.sensors.LocalSensing
+import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.examples.gradient.gradient
 import it.unibo.collektive.field.Field.Companion.fold
 import kotlin.Double.Companion.POSITIVE_INFINITY
@@ -11,12 +11,12 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 /**
  * Compute the channel between the source and the target with obstacles.
  */
-context(LocalSensing, DistanceSensor)
+context(EnvironmentVariables, DistanceSensor)
 fun Aggregate<Int>.channelWithObstacles(): Any =
-    if (sense("obstacle")) {
+    if (get("obstacle")) {
         false
     } else {
-        channel(sense("source"), sense("target"), channelWidth = 0.3)
+        channel(get("source"), get("target"), channelWidth = 0.5)
     }
 
 /**
@@ -24,24 +24,19 @@ fun Aggregate<Int>.channelWithObstacles(): Any =
  */
 context(DistanceSensor)
 fun Aggregate<Int>.channel(source: Boolean, destination: Boolean, channelWidth: Double): Boolean {
-    val distancesToSource = gradient(source)
-    val distanceToDestination = gradient(destination)
-    val dBetween = distanceBetween(source, destination)
-    return !((distancesToSource + distanceToDestination).isInfinite() && dBetween.isInfinite()) &&
-        distancesToSource + distanceToDestination <= dBetween + channelWidth
+    require(channelWidth.isFinite() && channelWidth > 0)
+    val toSource = gradient(source)
+    val toDestination = gradient(destination)
+    val sourceToDestination = broadcast(from = source, payload = toDestination)
+    val channel = toSource + toDestination - sourceToDestination
+    return if (channel.isFinite()) channel <= channelWidth else false
 }
-
-/**
- * Compute the distance between the [source] and the [target].
- */
-context(DistanceSensor)
-fun Aggregate<Int>.distanceBetween(source: Boolean, target: Boolean): Double = broadcast(source, gradient(target))
 
 /**
  * Computes the [gradientCast] from the [source] with the [value] that is the distance from the [source] to the target.
  */
 context(DistanceSensor)
-fun Aggregate<Int>.broadcast(source: Boolean, value: Double): Double = gradientCast(source, value) { it }
+fun Aggregate<Int>.broadcast(from: Boolean, payload: Double): Double = gradientCast(from, payload) { it }
 
 /**
  * Compute the gradient of the aggregate from the [source] to the [target].
