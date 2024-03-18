@@ -1,7 +1,7 @@
 package it.unibo.collektive.examples.entrypoint
 
+import it.unibo.alchemist.collektive.device.DistanceSensor
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.alchemist.device.DistanceSensor
 import it.unibo.collektive.examples.gradient.gradient
 import it.unibo.collektive.examples.neighbors.neighborCounter
 
