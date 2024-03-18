@@ -1,7 +1,7 @@
 import java.awt.GraphicsEnvironment
 import java.io.ByteArrayOutputStream
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Locale
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 apply(plugin = libs.plugins.kotlin.jvm.get().pluginId)
 
