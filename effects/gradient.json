@@ -34,7 +34,7 @@
       "val": 11
     },
     "molFilter": true,
-    "molString": "it.unibo.collektive.examples.entrypoint.SimulationEntrypointKt.gradientEntrypoint",
+    "molString": "it.unibo.collektive.examples.gradient.GradientKt.gradientEntrypoint",
     "molPropertyFilter": true,
     "property": "",
     "writingPropertyValue": false,
