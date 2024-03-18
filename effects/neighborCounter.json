@@ -34,7 +34,7 @@
       "val": 11
     },
     "molFilter": true,
-    "molString": "neighborCounterEntrypoint",
+    "molString": "it.unibo.collektive.examples.neighbors.NeighborCounterKt.neighborCounter",
     "molPropertyFilter": true,
     "property": "",
     "writingPropertyValue": true,
