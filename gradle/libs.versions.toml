@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.9.24"
+kotlin = "2.0.0"
 alchemist = "34.0.6"
 collektive = "9.2.4"
 
