@@ -17,7 +17,7 @@ alchemist = ["alchemist", "alchemist-euclidean-geometry", "alchemist-incarnation
 collektive = ["collektive", "collektive-incarnation", "collektive-plugin"]
 
 [plugins]
-multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:1.2.1"
+multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:1.2.2"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 taskTree = "com.dorongold.task-tree:4.0.0"
 collektive = { id = "it.unibo.collektive.collektive-plugin", version.ref = "collektive" }
