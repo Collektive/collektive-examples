@@ -19,7 +19,7 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.0
       - name: Check the simulations on CI
         uses: DanySK/build-check-deploy-gradle-action@3.5.8
         with:
