@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.0.21"
 alchemist = "34.1.10"
-collektive = "10.0.0"
+collektive = "10.6.0"
 
 [libraries]
 alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
@@ -11,10 +11,11 @@ alchemist-euclidean-geometry = { module = "it.unibo.alchemist:alchemist-euclidea
 collektive = { module = "it.unibo.collektive:dsl", version.ref = "collektive" }
 collektive-incarnation = { module = "it.unibo.collektive:alchemist-incarnation-collektive", version.ref = "collektive" }
 collektive-plugin = { module = "it.unibo.collektive:compiler-plugin", version.ref = "collektive" }
+collektive-stdlib = { module = "it.unibo.collektive:stdlib", version.ref = "collektive" }
 
 [bundles]
 alchemist = ["alchemist", "alchemist-euclidean-geometry", "alchemist-incarnation-protelis", "alchemist-swingui"]
-collektive = ["collektive", "collektive-incarnation", "collektive-plugin"]
+collektive = ["collektive", "collektive-incarnation", "collektive-plugin", "collektive-stdlib"]
 
 [plugins]
 multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:1.2.8"
