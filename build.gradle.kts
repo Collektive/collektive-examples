@@ -20,6 +20,7 @@ repositories {
 dependencies {
     implementation(libs.bundles.alchemist)
     implementation(libs.bundles.collektive)
+    implementation(kotlin("reflect"))
     if (!GraphicsEnvironment.isHeadless()) {
         implementation("it.unibo.alchemist:alchemist-swingui:${libs.versions.alchemist.get()}")
     }
@@ -99,6 +100,8 @@ File(rootProject.rootDir.path + "/src/main/yaml").listFiles()
                 "monitors: { type: SwingGUI, parameters: { graphics: effects/${it.nameWithoutExtension}.json } }",
                 "--override",
                 "launcher: { parameters: { batch: [], autoStart: false } }",
+                "--verbosity",
+                "error",
             )
         }
         runAllGraphic.dependsOn(graphic)
