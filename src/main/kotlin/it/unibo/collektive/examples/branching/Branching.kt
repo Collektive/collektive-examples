@@ -11,7 +11,7 @@ import it.unibo.collektive.field.Field.Companion.hood
 context(EnvironmentVariables)
 fun Aggregate<Int>.branching() =
     if (get("source")) {
-        neighboringViaExchange(1).hood(0) { acc, _ -> acc + 1 }
-    } else {
         0
+    } else {
+        neighboringViaExchange(1).hood(0) { acc, _ -> acc + 1 }
     }
