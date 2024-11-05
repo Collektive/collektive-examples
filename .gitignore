@@ -9,3 +9,5 @@ bin/
 
 # Ignore Alchemist folder specified for export
 data
+
+.kotlin/
