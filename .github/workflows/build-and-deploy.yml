@@ -21,7 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.2.2
       - name: Check the simulations on CI
-        uses: DanySK/build-check-deploy-gradle-action@3.5.19
+        uses: DanySK/build-check-deploy-gradle-action@3.5.20
         with:
           build-command: true
           check-command: ./gradlew runAllGraphic
