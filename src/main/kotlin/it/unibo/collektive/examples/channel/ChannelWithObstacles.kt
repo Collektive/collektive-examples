@@ -11,23 +11,29 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 /**
  * Compute the channel between the source and the target with obstacles.
  */
-context(EnvironmentVariables, DistanceSensor)
-fun Aggregate<Int>.channelWithObstacles(): Any =
-    if (get("obstacle")) {
+fun Aggregate<Int>.channelWithObstacles(
+    environmentVariables: EnvironmentVariables,
+    distanceSensor: DistanceSensor,
+): Boolean =
+    if (environmentVariables["obstacle"]) {
         false
     } else {
-        channel(get("source"), get("target"), channelWidth = 0.5)
+        channel(distanceSensor, environmentVariables["source"], environmentVariables["target"], channelWidth = 0.5)
     }
 
 /**
  * Compute the channel between the [source] and the [target] with a specific [channelWidth].
  */
-context(DistanceSensor)
-fun Aggregate<Int>.channel(source: Boolean, destination: Boolean, channelWidth: Double): Boolean {
+fun Aggregate<Int>.channel(
+    distanceSensor: DistanceSensor,
+    source: Boolean,
+    destination: Boolean,
+    channelWidth: Double
+): Boolean {
     require(channelWidth.isFinite() && channelWidth > 0)
-    val toSource = gradient(source)
-    val toDestination = gradient(destination)
-    val sourceToDestination = broadcast(from = source, payload = toDestination)
+    val toSource = gradient(distanceSensor, source)
+    val toDestination = gradient(distanceSensor, destination)
+    val sourceToDestination = broadcast(distanceSensor, from = source, payload = toDestination)
     val channel = toSource + toDestination - sourceToDestination
     return if (channel.isFinite()) channel <= channelWidth else false
 }
@@ -35,26 +41,29 @@ fun Aggregate<Int>.channel(source: Boolean, destination: Boolean, channelWidth: 
 /**
  * Computes the [gradientCast] from the [source] with the [value] that is the distance from the [source] to the target.
  */
-context(DistanceSensor)
-fun Aggregate<Int>.broadcast(from: Boolean, payload: Double): Double = gradientCast(from, payload) { it }
+fun Aggregate<Int>.broadcast(distanceSensor: DistanceSensor, from: Boolean, payload: Double): Double =
+    gradientCast(distanceSensor, from, payload) { it }
 
 /**
  * Compute the gradient of the aggregate from the [source] to the [target].
  * The [accumulate] function is used to accumulate the value of the aggregate.
  */
-context(DistanceSensor)
-fun Aggregate<Int>.gradientCast(source: Boolean, initial: Double, accumulate: (Double) -> Double): Double =
-    share(POSITIVE_INFINITY to initial) { field ->
-        val dist = distances()
-        when {
-            source -> 0.0 to initial
-            else -> {
-                val resultField = dist.alignedMap(field) { distField, (currentDist, value) ->
-                    distField + currentDist to accumulate(value)
-                }
-                resultField.fold(POSITIVE_INFINITY to POSITIVE_INFINITY) { acc, value ->
-                    if (value.first < acc.first) value else acc
-                }
+fun Aggregate<Int>.gradientCast(
+    distanceSensor: DistanceSensor,
+    source: Boolean,
+    initial: Double,
+    accumulate: (Double) -> Double
+): Double = share(POSITIVE_INFINITY to initial) { field ->
+    val dist = with(distanceSensor) { distances() }
+    when {
+        source -> 0.0 to initial
+        else -> {
+            val resultField = dist.alignedMap(field) { distField, (currentDist, value) ->
+                distField + currentDist to accumulate(value)
+            }
+            resultField.fold(POSITIVE_INFINITY to POSITIVE_INFINITY) { acc, value ->
+                if (value.first < acc.first) value else acc
             }
         }
-    }.second
+    }
+}.second

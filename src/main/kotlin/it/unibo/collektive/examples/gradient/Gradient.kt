@@ -11,10 +11,9 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 /**
  * Extension function to evaluate the gradient in an [Aggregate] context.
  */
-context(DistanceSensor)
-fun Aggregate<Int>.gradient(source: Boolean): Double =
+fun Aggregate<Int>.gradient(distanceSensor: DistanceSensor, source: Boolean): Double =
     share(POSITIVE_INFINITY) {
-        val dist = distances()
+        val dist = with(distanceSensor) { distances() }
         when {
             source -> 0.0
             else -> (it + dist).min(POSITIVE_INFINITY)
@@ -24,5 +23,7 @@ fun Aggregate<Int>.gradient(source: Boolean): Double =
 /**
  * The entrypoint of the simulation running a gradient.
  */
-context(EnvironmentVariables,DistanceSensor)
-fun Aggregate<Int>.gradientEntrypoint(): Double = gradient(get("source"))
+fun Aggregate<Int>.gradientEntrypoint(
+    environmentVariables: EnvironmentVariables,
+    distanceSensor: DistanceSensor
+): Double = gradient(distanceSensor, environmentVariables["source"])

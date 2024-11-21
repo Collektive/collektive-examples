@@ -8,9 +8,8 @@ import it.unibo.collektive.field.Field.Companion.hood
 /**
  * A simple example of branching.
  */
-context(EnvironmentVariables)
-fun Aggregate<Int>.branching() =
-    if (get("source")) {
+fun Aggregate<Int>.branching(environment: EnvironmentVariables) =
+    if (environment["source"]) {
         0
     } else {
         neighboringViaExchange(1).hood(0) { acc, _ -> acc + 1 }
