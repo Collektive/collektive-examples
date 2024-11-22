@@ -23,7 +23,5 @@ fun Aggregate<Int>.gradient(distanceSensor: DistanceSensor, source: Boolean): Do
 /**
  * The entrypoint of the simulation running a gradient.
  */
-fun Aggregate<Int>.gradientEntrypoint(
-    environmentVariables: EnvironmentVariables,
-    distanceSensor: DistanceSensor
-): Double = gradient(distanceSensor, environmentVariables["source"])
+fun Aggregate<Int>.gradientEntrypoint(environment: EnvironmentVariables, distanceSensor: DistanceSensor): Double =
+    gradient(distanceSensor, environment["source"])

@@ -12,14 +12,17 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
  * Compute the channel between the source and the target with obstacles.
  */
 fun Aggregate<Int>.channelWithObstacles(
-    environmentVariables: EnvironmentVariables,
+    environment: EnvironmentVariables,
     distanceSensor: DistanceSensor,
-): Boolean =
-    if (environmentVariables["obstacle"]) {
-        false
-    } else {
-        channel(distanceSensor, environmentVariables["source"], environmentVariables["target"], channelWidth = 0.5)
-    }
+): Boolean = when (environment.get<Boolean>("obstacle")) {
+    true -> false
+    false -> channel(
+        distanceSensor,
+        environment["source"],
+        environment["target"],
+        channelWidth = 0.5
+    )
+}
 
 /**
  * Compute the channel between the [source] and the [target] with a specific [channelWidth].
