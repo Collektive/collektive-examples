@@ -1,9 +1,6 @@
 import java.awt.GraphicsEnvironment
 import java.io.ByteArrayOutputStream
 import java.util.Locale
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-apply(plugin = libs.plugins.kotlin.jvm.get().pluginId)
 
 plugins {
     application
@@ -13,8 +10,16 @@ plugins {
     alias(libs.plugins.collektive)
 }
 
-repositories {
-    mavenCentral()
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    with(rootProject.libs.plugins) {
+        apply(plugin = kotlin.jvm.id)
+        apply(plugin = collektive.id)
+        apply(plugin = taskTree.id)
+    }
 }
 
 dependencies {
@@ -59,7 +64,6 @@ val runAllBatch by tasks.register<DefaultTask>("runAllBatch") {
     group = alchemistGroupBatch
     description = "Launches all experiments"
 }
-
 
 fun String.capitalizeString(): String =
     this.replaceFirstChar {
