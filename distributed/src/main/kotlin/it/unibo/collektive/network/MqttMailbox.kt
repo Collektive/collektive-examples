@@ -49,13 +49,9 @@ class MqttMailbox private constructor(
     host: String,
     port: Int = 1883,
     private val serializer: SerialFormat = Json,
-    private val retentionTime: Duration = 5.seconds,
+    retentionTime: Duration = 5.seconds,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : Mailbox<Int> {
-    private data class TimedMessage(val message: Message<Int, Any?>, val timestamp: Instant)
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val factory = object : SerializedMessageFactory<Int, Any?>(serializer) {}
-    private val messages = ConcurrentHashMap<Int, TimedMessage>()
+) : AbstractSerializableMailbox<Int>(serializer, retentionTime) {
     private val channel = MutableSharedFlow<Message<Int, Any?>>()
     private val internalScope = CoroutineScope(dispatcher)
     private val client =
@@ -86,8 +82,7 @@ class MqttMailbox private constructor(
                 .filter { it.topic.toString().split("/")[1].toInt() != deviceId } // Ignore messages from self
                 .collect { mqtt5Publish ->
                     mqtt5Publish.payload.getOrNull()?.let {
-                        val serializedMessage = processMessage(it)
-                        messages[serializedMessage.senderId] = TimedMessage(serializedMessage, System.now())
+                        deliverableReceived(processMessage(it))
                     }
                 }
         }
@@ -104,84 +99,17 @@ class MqttMailbox private constructor(
         }
     }
 
-    suspend fun close() {
+    override suspend fun close() {
         internalScope.cancel()
         client.disconnect().await()
         logger.info("$deviceId disconnected from HiveMQ")
     }
 
-    override val inMemory: Boolean
-        get() = false
-
-    override fun deliverableFor(
-        id: Int,
-        outboundMessage: OutboundEnvelope<Int>
-    ) {
-        val message = outboundMessage.prepareMessageFor(id, factory)
+    override fun onDeliverableReceived(message: Message<Int, Any?>) {
         internalScope.launch { channel.emit(message) }
     }
 
-    override fun deliverableReceived(message: Message<Int, *>) {
-        messages[message.senderId] = TimedMessage(message, System.now())
-    }
-
-    override fun currentInbound(): NeighborsData<Int> =
-        object : NeighborsData<Int> {
-            // First, remove all messages that are older than the retention time
-            init {
-                val nowInstant = System.now()
-                messages.values.removeIf { it.timestamp < nowInstant - retentionTime }
-            }
-            override val neighbors: Set<Int> get() = messages.keys
-
-            override fun <Value> dataAt(
-                path: Path,
-                dataSharingMethod: DataSharingMethod<Value>
-            ): Map<Int, Value> {
-                require(dataSharingMethod is Serialize<Value>) {
-                    "Serialization has been required for in-memory messages. This is likely a misconfiguration."
-                }
-                return messages
-                    .mapValues { (_, timedMessage) ->
-                        require(timedMessage.message.sharedData.all { it.value is ByteArray }) {
-                            "Message ${timedMessage.message.senderId} is not serialized"
-                        }
-                        timedMessage.message.sharedData.getOrElse(path) { NoValue }
-                    }.filterValues { it != NoValue }
-                    .mapValues { (_, payload) ->
-                        val byteArrayPayload = payload as ByteArray
-                        when (serializer) {
-                            is StringFormat ->
-                                serializer.decodeFromString(
-                                    dataSharingMethod.serializer,
-                                    byteArrayPayload.decodeToString()
-                                )
-                            is BinaryFormat ->
-                                serializer.decodeFromByteArray(
-                                    dataSharingMethod.serializer,
-                                    byteArrayPayload
-                                )
-                            else -> error("Unsupported serializer: ${serializer::class}")
-                        }
-                    }
-            }
-
-        }
-    private object NoValue
-
     companion object {
-        private fun SerialFormat.encode(value: SerializedMessage<Int>): ByteArray =
-            when (this) {
-                is StringFormat -> encodeToString(value).toByteArray()
-                is BinaryFormat -> encodeToByteArray(value)
-                else -> error("Unsupported serializer")
-            }
-        private fun SerialFormat.decode(value: ByteArray): SerializedMessage<Int> =
-            when (this) {
-                is StringFormat -> decodeFromString(value.decodeToString())
-                is BinaryFormat -> decodeFromByteArray(value)
-                else -> error("Unsupported serializer")
-            }
         operator fun invoke(
             deviceId: Int,
             host: String,
