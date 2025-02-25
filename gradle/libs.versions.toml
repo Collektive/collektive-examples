@@ -30,7 +30,7 @@ coroutines = ["kotlinx-coroutines", "kotlinx-coroutines-rx2"]
 hivemq = ["hivemq", "hivemq-reactor"]
 
 [plugins]
-multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:3.2.2"
+multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:3.2.3"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 taskTree = "com.dorongold.task-tree:4.0.0"
