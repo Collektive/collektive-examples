@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
@@ -82,6 +83,7 @@ class MqttMailbox private constructor(
                 .qos(MqttQos.AT_LEAST_ONCE)
                 .applySubscribe()
                 .asFlow()
+                .filter { it.topic.toString().split("/")[1].toInt() != deviceId } // Ignore messages from self
                 .collect { mqtt5Publish ->
                     mqtt5Publish.payload.getOrNull()?.let {
                         val serializedMessage = processMessage(it)
@@ -116,7 +118,6 @@ class MqttMailbox private constructor(
         outboundMessage: OutboundEnvelope<Int>
     ) {
         val message = outboundMessage.prepareMessageFor(id, factory)
-        messages[id] = TimedMessage(message, System.now())
         internalScope.launch { channel.emit(message) }
     }
 
