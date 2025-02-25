@@ -21,7 +21,7 @@ kotlinx-coroutines-rx2 = "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:1.10.1"
 kotlinx-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.6.2"
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization" }
-slf4j = "org.slf4j:slf4j-api:2.0.16"
+slf4j = "org.slf4j:slf4j-api:2.0.17"
 
 [bundles]
 alchemist = ["alchemist", "alchemist-euclidean-geometry", "alchemist-incarnation-protelis", "alchemist-swingui"]
