@@ -30,7 +30,11 @@ abstract class AbstractSerializableMailbox<ID : Any>(
     private val serializer: SerialFormat,
     private val retentionTime: Duration,
 ) : Mailbox<ID> {
-    protected data class TimedMessage<ID : Any>(val message: Message<ID, Any?>, val timestamp: Instant)
+    protected data class TimedMessage<ID : Any>(
+        val message: Message<ID, Any?>,
+        val timestamp: Instant,
+    )
+
     protected val logger: Logger = LoggerFactory.getLogger(javaClass)
     protected val messages = ConcurrentHashMap<ID, TimedMessage<ID>>()
     private val factory = object : SerializedMessageFactory<ID, Any?>(serializer) {}
@@ -55,7 +59,10 @@ abstract class AbstractSerializableMailbox<ID : Any>(
     final override val inMemory: Boolean
         get() = false
 
-    final override fun deliverableFor(id: ID, outboundMessage: OutboundEnvelope<ID>) {
+    final override fun deliverableFor(
+        id: ID,
+        outboundMessage: OutboundEnvelope<ID>,
+    ) {
         logger.debug("Message {} ready to be sent", outboundMessage)
         val message = outboundMessage.prepareMessageFor(id, factory)
         onDeliverableReceived(message)
@@ -74,11 +81,12 @@ abstract class AbstractSerializableMailbox<ID : Any>(
                 val nowInstant = System.now()
                 messages.values.removeIf { it.timestamp < nowInstant - retentionTime }
             }
+
             override val neighbors: Set<ID> get() = messages.keys
 
             override fun <Value> dataAt(
                 path: Path,
-                dataSharingMethod: DataSharingMethod<Value>
+                dataSharingMethod: DataSharingMethod<Value>,
             ): Map<ID, Value> {
                 require(dataSharingMethod is Serialize<Value>) {
                     "Serialization has been required for in-memory messages. This is likely a misconfiguration."
@@ -95,8 +103,8 @@ abstract class AbstractSerializableMailbox<ID : Any>(
                         serializer.decode(dataSharingMethod.serializer, byteArrayPayload)
                     }
             }
-
         }
+
     private object NoValue
 
     /**
@@ -128,7 +136,7 @@ abstract class AbstractSerializableMailbox<ID : Any>(
          */
         private fun <Value> SerialFormat.decode(
             kSerializer: KSerializer<Value>,
-            value: ByteArray
+            value: ByteArray,
         ): Value =
             when (this) {
                 is StringFormat -> decodeFromString(kSerializer, value.decodeToString())

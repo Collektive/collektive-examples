@@ -27,7 +27,11 @@ abstract class AbstractSerializableMailbox<ID : Any>(
     private val serializer: SerialFormat,
     private val retentionTime: Duration,
 ) : Mailbox<ID> {
-    protected data class TimedMessage<ID : Any>(val message: Message<ID, Any?>, val timestamp: Instant)
+    protected data class TimedMessage<ID : Any>(
+        val message: Message<ID, Any?>,
+        val timestamp: Instant,
+    )
+
     protected var messages = mutableMapOf<ID, TimedMessage<ID>>()
     private val factory = object : SerializedMessageFactory<ID, Any?>(serializer) {}
     private val neighborMessageFlow = MutableSharedFlow<Message<ID, Any?>>()
@@ -51,7 +55,10 @@ abstract class AbstractSerializableMailbox<ID : Any>(
     final override val inMemory: Boolean
         get() = false
 
-    final override fun deliverableFor(id: ID, outboundMessage: OutboundEnvelope<ID>) {
+    final override fun deliverableFor(
+        id: ID,
+        outboundMessage: OutboundEnvelope<ID>,
+    ) {
         val message = outboundMessage.prepareMessageFor(id, factory)
         onDeliverableReceived(message)
     }
@@ -66,16 +73,18 @@ abstract class AbstractSerializableMailbox<ID : Any>(
             // First, remove all messages that are older than the retention time
             init {
                 val nowInstant = System.now()
-                val candidates = messages
-                    .values
-                    .filter { it.timestamp < nowInstant - retentionTime }
+                val candidates =
+                    messages
+                        .values
+                        .filter { it.timestamp < nowInstant - retentionTime }
                 messages.values.removeAll(candidates.toSet())
             }
+
             override val neighbors: Set<ID> get() = messages.keys
 
             override fun <Value> dataAt(
                 path: Path,
-                dataSharingMethod: DataSharingMethod<Value>
+                dataSharingMethod: DataSharingMethod<Value>,
             ): Map<ID, Value> {
                 require(dataSharingMethod is Serialize<Value>) {
                     "Serialization has been required for in-memory messages. This is likely a misconfiguration."
@@ -92,8 +101,8 @@ abstract class AbstractSerializableMailbox<ID : Any>(
                         serializer.decode(dataSharingMethod.serializer, byteArrayPayload)
                     }
             }
-
         }
+
     private object NoValue
 
     /**
@@ -125,7 +134,7 @@ abstract class AbstractSerializableMailbox<ID : Any>(
          */
         private fun <Value> SerialFormat.decode(
             kSerializer: KSerializer<Value>,
-            value: ByteArray
+            value: ByteArray,
         ): Value =
             when (this) {
                 is StringFormat -> decodeFromString(kSerializer, value.decodeToString())

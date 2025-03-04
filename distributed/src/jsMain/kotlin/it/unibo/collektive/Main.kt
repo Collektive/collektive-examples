@@ -4,8 +4,8 @@ import kotlinx.coroutines.Dispatchers
 
 suspend fun main() {
     mainEntrypoint(
-        startDeviceId = 10,
-        deviceCount = 10,
-        dispatcher = Dispatchers.Default
+        startDeviceId = 2,
+        deviceCount = 2,
+        dispatcher = Dispatchers.Default,
     )
 }

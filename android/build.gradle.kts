@@ -13,13 +13,22 @@ java {
 }
 
 android {
-    compileSdk = libs.versions.targetSdk.get().toInt()
+    compileSdk =
+        libs.versions.targetSdk
+            .get()
+            .toInt()
     namespace = "it.unibo.collektive"
 
     defaultConfig {
         applicationId = "it.unibo.collektive"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk =
+            libs.versions.minSdk
+                .get()
+                .toInt()
+        targetSdk =
+            libs.versions.targetSdk
+                .get()
+                .toInt()
         versionCode = 1
         versionName = "1.0"
 
@@ -37,7 +46,7 @@ android {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
