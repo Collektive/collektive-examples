@@ -33,28 +33,30 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun AppLauncher(scope: CoroutineScope) {
-    AndroidView({ View(it).apply { keepScreenOn = true }})
+    AndroidView({ View(it).apply { keepScreenOn = true } })
     val startOnClick: () -> Unit = {
         scope.launch { startAggregateProgram() }
     }
     Button(onClick = startOnClick) {
         Text(text = "Hello Collektive!")
     }
-
 }
 
 private suspend fun startAggregateProgram() {
     val network = MqttMailbox(Random.nextInt(), "broker.hivemq.com", dispatcher = Dispatchers.IO)
     var lastState = emptyMap<Path, Any?>()
-    while(true) {
+    while (true) {
         val result = aggregateProgram(Random.nextInt(), network, lastState)
         lastState = result.newState
         delay(5.seconds)
     }
 }
 
-private fun aggregateProgram(id: Int, network: Mailbox<Int>, lastState: Map<Path, Any?>): AggregateResult<Int, Any> {
-    return aggregate(id, network, lastState) {
+private fun aggregateProgram(
+    id: Int,
+    network: Mailbox<Int>,
+    lastState: Map<Path, Any?>,
+): AggregateResult<Int, Any> =
+    aggregate(id, network, lastState) {
         neighboring(localId)
     }
-}

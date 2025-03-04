@@ -21,18 +21,18 @@ import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.encodeToString
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration
 
 abstract class AbstractSerializableMailbox<ID : Any>(
     private val serializer: SerialFormat,
     private val retentionTime: Duration,
 ) : Mailbox<ID> {
-    protected data class TimedMessage<ID : Any>(val message: Message<ID, Any?>, val timestamp: Instant)
-    protected val logger: Logger = LoggerFactory.getLogger(javaClass)
-    protected val messages = ConcurrentHashMap<ID, TimedMessage<ID>>()
+    protected data class TimedMessage<ID : Any>(
+        val message: Message<ID, Any?>,
+        val timestamp: Instant,
+    )
+
+    protected var messages = mutableMapOf<ID, TimedMessage<ID>>()
     private val factory = object : SerializedMessageFactory<ID, Any?>(serializer) {}
     private val neighborMessageFlow = MutableSharedFlow<Message<ID, Any?>>()
 
@@ -55,14 +55,15 @@ abstract class AbstractSerializableMailbox<ID : Any>(
     final override val inMemory: Boolean
         get() = false
 
-    final override fun deliverableFor(id: ID, outboundMessage: OutboundEnvelope<ID>) {
-        logger.debug("Message {} ready to be sent", outboundMessage)
+    final override fun deliverableFor(
+        id: ID,
+        outboundMessage: OutboundEnvelope<ID>,
+    ) {
         val message = outboundMessage.prepareMessageFor(id, factory)
         onDeliverableReceived(message)
     }
 
     final override fun deliverableReceived(message: Message<ID, *>) {
-        logger.debug("Received message from {}", message.senderId)
         messages[message.senderId] = TimedMessage(message, System.now())
         neighborMessageFlow.tryEmit(message)
     }
@@ -72,13 +73,18 @@ abstract class AbstractSerializableMailbox<ID : Any>(
             // First, remove all messages that are older than the retention time
             init {
                 val nowInstant = System.now()
-                messages.values.removeIf { it.timestamp < nowInstant - retentionTime }
+                val candidates =
+                    messages
+                        .values
+                        .filter { it.timestamp < nowInstant - retentionTime }
+                messages.values.removeAll(candidates.toSet())
             }
+
             override val neighbors: Set<ID> get() = messages.keys
 
             override fun <Value> dataAt(
                 path: Path,
-                dataSharingMethod: DataSharingMethod<Value>
+                dataSharingMethod: DataSharingMethod<Value>,
             ): Map<ID, Value> {
                 require(dataSharingMethod is Serialize<Value>) {
                     "Serialization has been required for in-memory messages. This is likely a misconfiguration."
@@ -95,8 +101,8 @@ abstract class AbstractSerializableMailbox<ID : Any>(
                         serializer.decode(dataSharingMethod.serializer, byteArrayPayload)
                     }
             }
-
         }
+
     private object NoValue
 
     /**
@@ -108,7 +114,7 @@ abstract class AbstractSerializableMailbox<ID : Any>(
          */
         fun SerialFormat.encode(value: SerializedMessage<Int>): ByteArray =
             when (this) {
-                is StringFormat -> encodeToString(value).toByteArray()
+                is StringFormat -> encodeToString(value).encodeToByteArray()
                 is BinaryFormat -> encodeToByteArray(value)
                 else -> error("Unsupported serializer")
             }
@@ -128,7 +134,7 @@ abstract class AbstractSerializableMailbox<ID : Any>(
          */
         private fun <Value> SerialFormat.decode(
             kSerializer: KSerializer<Value>,
-            value: ByteArray
+            value: ByteArray,
         ): Value =
             when (this) {
                 is StringFormat -> decodeFromString(kSerializer, value.decodeToString())
