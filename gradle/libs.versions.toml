@@ -34,7 +34,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization" }
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 material3 = { module = "androidx.compose.material3:material3" }
-mktt = { module = "it.nicolasfarabegoli:mktt", version = "1.2.2" }
+mktt = { module = "it.nicolasfarabegoli:mktt", version = "1.2.3" }
 slf4j = "org.slf4j:slf4j-api:2.0.17"
 
 [bundles]
