@@ -114,7 +114,19 @@ abstract class AbstractSerializableMailbox<ID : Any>(
         /**
          * Encodes the [value] into a [ByteArray] according to the [SerialFormat].
          */
+        @JvmName("encodeInt")
         fun SerialFormat.encode(value: SerializedMessage<Int>): ByteArray =
+            when (this) {
+                is StringFormat -> encodeToString(value).toByteArray()
+                is BinaryFormat -> encodeToByteArray(value)
+                else -> error("Unsupported serializer")
+            }
+
+        /**
+         * Encodes the [value] into a [ByteArray] according to the [SerialFormat].
+         */
+        @JvmName("encodeString")
+        fun SerialFormat.encode(value: SerializedMessage<String>): ByteArray =
             when (this) {
                 is StringFormat -> encodeToString(value).toByteArray()
                 is BinaryFormat -> encodeToByteArray(value)
@@ -125,6 +137,16 @@ abstract class AbstractSerializableMailbox<ID : Any>(
          * Decodes the [value] from a [ByteArray] according to the [SerialFormat].
          */
         fun SerialFormat.decode(value: ByteArray): SerializedMessage<Int> =
+            when (this) {
+                is StringFormat -> decodeFromString(value.decodeToString())
+                is BinaryFormat -> decodeFromByteArray(value)
+                else -> error("Unsupported serializer")
+            }
+
+        /**
+         * Decodes the [value] from a [ByteArray] according to the [SerialFormat].
+         */
+        fun SerialFormat.decodeString(value: ByteArray): SerializedMessage<String> =
             when (this) {
                 is StringFormat -> decodeFromString(value.decodeToString())
                 is BinaryFormat -> decodeFromByteArray(value)

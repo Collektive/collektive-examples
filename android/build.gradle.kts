@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.collektive)
     implementation(libs.collektive.stdlib)
     implementation(libs.kotlinx.serialization.protobuf)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.datetime)
     implementation(libs.slf4j)
     implementation(libs.hivemq)
