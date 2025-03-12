@@ -30,13 +30,10 @@ class BluetoothMailbox(
         androidBleService.startGattServer()
         scope.launch(Dispatchers.IO) { androidBleClient.startScanning() }
         scope.launch {
-            while (true) {
-                val messages = androidBleClient.getNeighborsData()
-                messages.forEach { (_, value) ->
-                    val deserialized = serializer.decodeString(value)
-                    deliverableReceived(deserialized)
-                }
-                delay(1.seconds)
+            androidBleClient.getNeighborsData().collect {
+                val deserialized = serializer.decodeString(it)
+                Log.i("BluetoothMailbox", "Received message from: ${deserialized.senderId}")
+                deliverableReceived(deserialized)
             }
         }
     }

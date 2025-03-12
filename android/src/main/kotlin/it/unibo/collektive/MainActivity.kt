@@ -2,12 +2,22 @@ package it.unibo.collektive
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
 import it.unibo.collektive.Collektive.Companion.aggregate
@@ -35,12 +45,16 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun AppLauncher(scope: CoroutineScope, context: Context) {
+    var isEnabled by remember { mutableStateOf(true) }
     AndroidView({ View(it).apply { keepScreenOn = true } })
     val startOnClick: () -> Unit = {
+        isEnabled = false
         scope.launch { startAggregateProgram(context, this) }
     }
-    Button(onClick = startOnClick) {
-        Text(text = "Hello Collektive!")
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Button(onClick = startOnClick, enabled = isEnabled) {
+            Text(text = "Hello Collektive!")
+        }
     }
 }
 
@@ -55,6 +69,7 @@ private suspend fun startAggregateProgram(context: Context, scope: CoroutineScop
     while (true) {
         val result = aggregateProgram(deviceId, network, lastState)
         lastState = result.newState
+        Log.i("Collektive", "Result: ${result.result}")
         delay(5.seconds)
     }
 }

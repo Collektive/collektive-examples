@@ -1,5 +1,6 @@
 package it.unibo.collektive.network.services.ble
 
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
@@ -18,32 +19,40 @@ import it.unibo.collektive.network.services.ble.BleUtils.checkBluetoothPermissio
 import it.unibo.collektive.network.services.ble.BleUtils.serviceUuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.resumeWithException
+import kotlin.time.Duration.Companion.seconds
 
 class AndroidBleClientService(
     deviceId: String,
     private val context: Context,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
 ) {
     private val bluetoothAdapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
     private val bluetoothScanner = bluetoothAdapter.bluetoothLeScanner
-    private val buildScanFilters = listOf<ScanFilter>(
+    private val buildScanFilters = listOf(
         ScanFilter.Builder().apply {
-            setServiceUuid(ParcelUuid(serviceUuid))
+            val mask = "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"
+            val maskUuid = ParcelUuid.fromString(mask)
+            setServiceUuid(ParcelUuid(serviceUuid), maskUuid)
         }.build()
     )
     private val scanSettings: ScanSettings = ScanSettings.Builder().apply {
         setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
     }.build()
+    private val connectedDevices = mutableSetOf<BluetoothGatt>()
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) = context.checkBluetoothPermission {
             super.onScanResult(callbackType, result)
             val device = result.device
+            if (connectedDevices.map { it.device }.contains(device)) {
+                Log.i("CollektiveBleClient", "Device already connected: ${device.name ?: "Unnamed"}")
+                return@checkBluetoothPermission
+            }
             scope.launch {
-                // Try read the device name
                 Log.i("CollektiveBleClient", "Found device: ${device.name ?: "Unnamed"}")
                 device.connectGatt(context, false, gattCallback)
             }
@@ -62,14 +71,36 @@ class AndroidBleClientService(
                 super.onConnectionStateChange(gatt, status, newState)
                 when (newState) {
                     BluetoothProfile.STATE_CONNECTED -> {
-                        Log.i("CollektiveBleClient", "Connected to GATT server")
+                        Log.i("CollektiveBleClient", "Connected to GATT server: ${gatt?.device?.name}")
+                        gatt?.let { connectedDevices.add(it) }
+                        gatt?.discoverServices()
                     }
                     BluetoothProfile.STATE_DISCONNECTED -> {
-                        Log.i("CollektiveBleClient", "Disconnected from GATT server")
-                        lastNeighborData.remove(gatt?.device?.name)
+                        Log.i("CollektiveBleClient", "Disconnected from GATT server: ${gatt?.device?.name}")
+                        gatt?.let { connectedDevices.remove(it) }
+                        gatt?.device?.name?.let {
+                            Log.i("CollektiveBleClient", "Removing data for device: $it")
+                        }
                     }
+                    else -> Log.i("CollektiveBleClient", "Bluetooth state changed: $newState")
                 }
             }
+
+        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+            super.onServicesDiscovered(gatt, status)
+            context.checkBluetoothPermission {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    val characteristic = gatt?.getService(serviceUuid)?.getCharacteristic(characteristicUuid)
+                    if (characteristic != null) {
+                        gatt.readCharacteristic(characteristic)
+                    } else {
+                        Log.e("CollektiveBleClient", "Characteristic not found")
+                    }
+                } else {
+                    Log.e("CollektiveBleClient", "Service discovery failed with status: $status")
+                }
+            }
+        }
 
         override fun onCharacteristicRead(
             gatt: BluetoothGatt,
@@ -79,20 +110,37 @@ class AndroidBleClientService(
         ) {
             super.onCharacteristicRead(gatt, characteristic, value, status)
             context.checkBluetoothPermission {
-                if (characteristic.uuid == characteristicUuid) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
                     Log.i("CollektiveBleClient", "Characteristic read: ${value.decodeToString()}")
-                    gatt.device?.let {
-                        lastNeighborData[it.name] = value
+                    if (characteristic.uuid == characteristicUuid) {
+                        gatt.device?.let {
+                            _messagesFlow.tryEmit(value)
+                        }
                     }
+                } else {
+                    Log.e("CollektiveBleClient", "Characteristic read failed with status: $status")
                 }
             }
         }
     }
-    private val lastNeighborData = mutableMapOf<String, ByteArray>()
+    private val _messagesFlow = MutableSharedFlow<ByteArray>(1)
 
     init {
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
             Toast.makeText(context, "Bluetooth not supported or disabled", Toast.LENGTH_SHORT).show()
+        }
+        scope.launch {
+            while (true) {
+                context.checkBluetoothPermission {
+                    connectedDevices.forEach {
+                        val characteristic = it.getService(serviceUuid)?.getCharacteristic(characteristicUuid)
+                        characteristic?.let { charact ->
+                            it.readCharacteristic(charact)
+                        }
+                    }
+                }
+                delay(1.seconds)
+            }
         }
     }
 
@@ -103,5 +151,5 @@ class AndroidBleClientService(
         }
     }
 
-    fun getNeighborsData(): Map<String, ByteArray> = lastNeighborData
+    fun getNeighborsData(): Flow<ByteArray> = _messagesFlow
 }
