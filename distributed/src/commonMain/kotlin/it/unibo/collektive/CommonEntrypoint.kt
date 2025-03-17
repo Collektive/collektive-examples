@@ -19,13 +19,9 @@ private const val DEFAULT_DEVICE_COUNT = 50
 private val DEFAULT_ROUND_TIME = 1.seconds
 private val DEFAULT_EXECUTE_FOR = 60.seconds
 
-fun aggregateProgram(
-    id: Int,
-    network: Mailbox<Int>,
-    previousState: Map<Path, Any?>,
-): AggregateResult<Int, Int> =
-    aggregate(id, network, previousState) {
-        neighboring(id).neighbors.size
+fun aggregateProgram(id: Int, network: Mailbox<Int>): Collektive<Int, Collection<Int>> =
+    Collektive(id, network) {
+        neighboring(id).neighbors
     }
 
 suspend fun mainEntrypoint(
@@ -41,24 +37,23 @@ suspend fun mainEntrypoint(
     val jobRefs = mutableSetOf<Job>()
     val networks = mutableSetOf<MqttMailbox>()
     // Create a network of devices
-    for (id in startDeviceId..(startDeviceId + deviceCount)) {
+    for (id in startDeviceId until (startDeviceId + deviceCount)) {
         val job =
             launch {
-                val network = MqttMailbox(id, "broker.hivemq.com", dispatcher = dispatcher)
+                val network = MqttMailbox(id, "test.mosquitto.org", dispatcher = dispatcher)
+                logger.info { "Fdfdfdfdf" }
                 networks.add(network)
-                var previousState = emptyMap<Path, Any?>()
+                val program = aggregateProgram(id, network)
                 when (asyncNetwork) {
                     true ->
                         network.neighborsMessageFlow().collect {
-                            val result = aggregateProgram(id, network, previousState)
-                            logger.info { result.result.toString() }
-                            previousState = result.newState
+                            val result = program.cycle()
+                            logger.info { "For device $id: $result" }
                         }
                     false -> {
                         while (true) {
-                            val result = aggregateProgram(id, network, previousState)
-                            logger.info { result.result.toString() }
-                            previousState = result.newState
+                            val result = program.cycle()
+                            logger.info { "For device $id: $result" }
                             delay(roundTime)
                         }
                     }

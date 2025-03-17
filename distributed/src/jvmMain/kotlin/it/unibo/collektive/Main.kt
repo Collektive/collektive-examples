@@ -7,7 +7,7 @@ fun main() =
     runBlocking {
         mainEntrypoint(
             startDeviceId = 0,
-            deviceCount = 2,
+            deviceCount = 3,
             dispatcher = Dispatchers.IO,
         )
     }

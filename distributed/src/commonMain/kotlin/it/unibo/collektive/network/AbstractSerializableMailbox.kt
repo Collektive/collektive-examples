@@ -24,6 +24,7 @@ import kotlinx.serialization.encodeToString
 import kotlin.time.Duration
 
 abstract class AbstractSerializableMailbox<ID : Any>(
+    private val deviceId: ID,
     private val serializer: SerialFormat,
     private val retentionTime: Duration,
 ) : Mailbox<ID> {
@@ -35,6 +36,7 @@ abstract class AbstractSerializableMailbox<ID : Any>(
     protected var messages = mutableMapOf<ID, TimedMessage<ID>>()
     private val factory = object : SerializedMessageFactory<ID, Any?>(serializer) {}
     private val neighborMessageFlow = MutableSharedFlow<Message<ID, Any?>>()
+    private val neighbors = mutableSetOf<ID>()
 
     /**
      * Typically, a network-based mailbox provides a way to gracefully close the connection.
@@ -45,7 +47,22 @@ abstract class AbstractSerializableMailbox<ID : Any>(
     /**
      * This method is called when a message is ready to be sent to the network.
      */
-    abstract fun onDeliverableReceived(message: Message<ID, Any?>)
+    abstract fun onDeliverableReceived(receiverId: ID, message: Message<ID, Any?>)
+
+    /**
+     * Add the [deviceId] to the list of neighbors.
+     */
+    fun addNeighbor(deviceId: ID) = neighbors.add(deviceId)
+
+    /**
+     * Remove the [deviceId] from the list of neighbors.
+     */
+    fun removeNeighbor(deviceId: ID) = neighbors.remove(deviceId)
+
+    /**
+     * Returns the list of neighbors.
+     */
+    fun neighbors(): Set<ID> = neighbors
 
     /**
      * Returns an asynchronous flow of messages received from neighbors.
@@ -55,12 +72,11 @@ abstract class AbstractSerializableMailbox<ID : Any>(
     final override val inMemory: Boolean
         get() = false
 
-    final override fun deliverableFor(
-        id: ID,
-        outboundMessage: OutboundEnvelope<ID>,
-    ) {
-        val message = outboundMessage.prepareMessageFor(id, factory)
-        onDeliverableReceived(message)
+    final override fun deliverableFor(outboundMessage: OutboundEnvelope<ID>) {
+        for (neighbor in neighbors - deviceId) {
+            val message = outboundMessage.prepareMessageFor(neighbor, factory)
+            onDeliverableReceived(neighbor, message)
+        }
     }
 
     final override fun deliverableReceived(message: Message<ID, *>) {
