@@ -63,7 +63,7 @@ fun String.capitalizeString(): String =
         }
     }
 
-File(rootProject.rootDir.path + "/src/main/yaml")
+File(rootProject.rootDir.path + "/simulation/src/main/yaml")
     .listFiles()
     ?.filter { it.extension == "yml" }
     ?.sortedBy { it.nameWithoutExtension }
@@ -93,7 +93,7 @@ File(rootProject.rootDir.path + "/src/main/yaml")
             jvmArgs("-Dsun.java2d.opengl=false")
             args(
                 "--override",
-                "monitors: { type: SwingGUI, parameters: { graphics: effects/${it.nameWithoutExtension}.json } }",
+                "monitors: { type: SwingGUI, parameters: { graphics: ../effects/${it.nameWithoutExtension}.json } }",
                 "--override",
                 "launcher: { parameters: { batch: [], autoStart: false } }",
                 "--verbosity",
