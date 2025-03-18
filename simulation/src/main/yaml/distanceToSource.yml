@@ -10,6 +10,8 @@ _pool: &program
     actions:
       - type: RunCollektiveProgram
         parameters: [it.unibo.collektive.examples.exercises.DistanceToSourceKt.distanceToSource]
+      - type: RunCollektiveProgram
+        parameters: [it.unibo.collektive.examples.exercises.GetLocalIdKt.getLocalId]
 
 deployments:
   - type: GraphStreamDeployment
@@ -19,8 +21,6 @@ deployments:
     contents:
       - molecule: source
         concentration: true
-      - molecule: localMinID
-        concentration: 0
       - molecule: distanceToSource
         concentration: 0
       

@@ -94,7 +94,7 @@
         "val": 10
       },
       "molFilter": true,
-      "molString": "it.unibo.collektive.examples.exercises.DistanceToSourceKt.distanceToSource",
+      "molString": "it.unibo.collektive.examples.exercises.GetLocalIdKt.getLocalId",
       "molPropertyFilter": true,
       "property": "",
       "writingPropertyValue": true,
