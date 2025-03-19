@@ -1,7 +1,7 @@
 package it.unibo.collektive.examples.branching
 
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.aggregate.api.operators.neighboringViaExchange
+import it.unibo.collektive.aggregate.api.Aggregate.Companion.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.field.Field.Companion.hood
 
@@ -11,5 +11,5 @@ import it.unibo.collektive.field.Field.Companion.hood
 fun Aggregate<Int>.branching(environment: EnvironmentVariables) =
     when (environment.get<Boolean>("source")) {
         true -> 0
-        false -> neighboringViaExchange(1).hood(0) { acc, _ -> acc + 1 }
+        false -> neighboring(1).hood(0) { acc, _ -> acc + 1 }
     }
