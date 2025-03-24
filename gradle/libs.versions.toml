@@ -44,7 +44,7 @@ coroutines = ["kotlinx-coroutines", "kotlinx-coroutines-rx2"]
 hivemq = ["hivemq", "hivemq-reactor"]
 
 [plugins]
-android-application = { id = "com.android.application", version = "8.9.0" }
+android-application = { id = "com.android.application", version = "8.9.1" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:3.2.4"
