@@ -1,0 +1,36 @@
+incarnation: collektive
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [2]
+
+_pool: &program
+  - time-distribution: 1
+    type: Event
+    actions:
+      - type: RunCollektiveProgram
+        parameters: [it.unibo.collektive.examples.diameter.NetworkDiameterKt.subnetDiameter]
+
+deployments:
+  - type: GraphStreamDeployment
+    parameters: [20, 2, 0, PreferentialAttachment]
+    programs:
+      - *program
+    contents:
+      - molecule: diameter
+        concentration: 0
+      - molecule: isPeripheral
+        concentration: true
+
+export:
+  - type: CSVExporter
+    parameters:
+      fileNameRoot: "networkDiameter-example"
+      interval: 1.0
+      exportPath: "data"
+    data:
+      - time
+      - molecule: diameter
+        aggregators: [ mean ]
+        value-filter: onlyfinite
+        precision: 1
