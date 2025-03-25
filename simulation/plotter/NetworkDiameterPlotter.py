@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 def plot_csv(inputFile):
-    data = pd.read_csv(inputFile, delimiter=r'\s+', comment='#', header=None, names=['time', 'subnetDiameterDistance'])
+    data = pd.read_csv(inputFile, delimiter=r'\s+', comment='#', header=None, names=['time', 'diameter'])
     
     if not os.path.exists('simulation/plot'):
         os.makedirs('simulation/plot')
@@ -11,13 +11,13 @@ def plot_csv(inputFile):
     filtered_data = data[data['time'] <= 50]
 
     plt.figure(figsize=(10, 6))
-    plt.plot(filtered_data['time'], filtered_data['subnetDiameterDistance'], label='Subnet Diameter', color='blue')
+    plt.plot(filtered_data['time'], filtered_data['diameter'], label='Subnet Diameter', color='blue')
     
     plt.title('Plot of Subnet Diameter Over Time')
     plt.xlabel('Time')
     plt.ylabel('Subnet Diameter (hop distance to source)')
     
-    output_file = os.path.join('simulation/plot', 'maxId-example.png')
+    output_file = os.path.join('simulation/plot', 'networkDiameter-example.png')
     plt.savefig(output_file)
     
 inputFile = 'simulation/data/networkDiameter-example.csv'
