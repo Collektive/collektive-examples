@@ -3,6 +3,7 @@ package it.unibo.collektive.examples.spreading
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.Aggregate.Companion.neighboring
 import it.unibo.collektive.field.operations.max
+import it.unibo.collektive.aggregate.api.operators.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 
 /**
@@ -22,7 +23,9 @@ fun Aggregate<Int>.maxNetworkID(environment: EnvironmentVariables): Int {
 
     environment["isMaxLocalID"] = localId == maxLocalValue
 
-    val maxValue = neighboring(maxLocalValue).max(base = maxLocalValue)
+    val maxValue = share(maxLocalValue){ previous ->
+        previous.max(maxLocalValue)
+    }
 
     environment["isMaxID"] = localId == maxValue
     
