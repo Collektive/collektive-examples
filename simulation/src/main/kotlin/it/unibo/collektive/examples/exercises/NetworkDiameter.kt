@@ -5,9 +5,9 @@ import it.unibo.collektive.aggregate.api.Aggregate.Companion.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.alchemist.collektive.device.DistanceSensor
 import it.unibo.collektive.examples.exercises.distanceToSource
-import it.unibo.collektive.examples.hopDistanceTo.hopDistanceTo
 import it.unibo.collektive.examples.channel.broadcast
 import it.unibo.collektive.field.operations.max
+import it.unibo.collektive.stdlib.spreading.hopDistanceTo
 
 /**
  * Calculate in the [source] an estimate of the true [diameter] of the network (the maximum distance of a device in the network).
@@ -15,47 +15,34 @@ import it.unibo.collektive.field.operations.max
 */ 
 
 fun Aggregate<Int>.networkDiameter(environment: EnvironmentVariables, distanceSensor: DistanceSensor): Int {
-    // Individuate source and calculate distance to source from the previous exercises
-    distanceToSource(environment)
+    val distanceToSource = distanceToSource(environment)
 
-    // Calculate the distance of the local minimum for each neighborhood field
-    val distance: Int = environment["distanceToSource"]
+    val distance: Int = distanceToSource
 
-    // Identifies the node with the maximum number of hops to the source
     val maxHopToSource = neighboring(distance).max(distance)
 
-    // Identifies the node furthest from the source, i.e. the most peripheral node
-    environment["furthest"] = isMaxValue(maxHopToSource, environment["distanceToSource"])
+    val isFurthest = isMaxValue(maxHopToSource, distanceToSource)
 
-    // Calculate distance to furthest node from the source in the network
-    val distanceToFurthest = hopDistanceTo(environment["furthest"])
+    val distanceToFurthest = hopDistanceTo(isFurthest)
 
-    // Identifies the node with the maximum number of hops corresponding to the diameter of the entire network
-    val flagNodeWithMaxHopToFurthest = isMaxValue(environment["distanceToFurthest"])
+    val flagNodeWithMaxHopToFurthest = isMaxValue(distanceToFurthest)
 
-    environment["distanceToFurthest"] = distanceToFurthest
+    val broadcastMessage = broadcast(distanceSensor, from = flagNodeWithMaxHopToFurthest, payload = distanceToFurthest.toDouble()).toInt()
 
-    // Only the identified node will broadcast its maximum number of hops to the entire network.
-    var broadcastMessage = broadcast(distanceSensor, from = flagNodeWithMaxHopToFurthest, payload = environment["distanceToFurthest"]).toInt()
-
+    var networkDiameter = distanceToFurthest
     if(distanceToFurthest <= broadcastMessage){
-        environment["networkDiameter"] = broadcastMessage
-    }else{
-        environment["networkDiameter"] = distanceToFurthest
+        networkDiameter = broadcastMessage
     }
 
-    return environment["networkDiameter"]
+    return networkDiameter
 }
 
 fun Aggregate<Int>.isMaxValue(value: Int, localValue: Int? = Int.MIN_VALUE): Boolean {
-    // Find the maximum value in the neighborhood field
     val maxValue = neighboring(value).max(value)
 
-    // localValue is an optional parameter to evaluate (during maximum identification) an additional local value of the node
     if(localValue != Int.MIN_VALUE){
         return maxValue == value && localValue == value
     }else{
         return maxValue == value
     }
 }
-

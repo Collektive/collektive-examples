@@ -4,6 +4,7 @@ import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.Aggregate.Companion.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.stdlib.spreading.hopDistanceTo
+import it.unibo.collektive.stdlib.spreading.distanceTo
 import it.unibo.collektive.examples.exercises.searchSource
 
 /**
@@ -11,10 +12,7 @@ import it.unibo.collektive.examples.exercises.searchSource
 */
 
 fun Aggregate<Int>.distanceToSource(environment: EnvironmentVariables): Int {
-    // Individuate source from the previous exercise 
-    searchSource(environment)
+    val sourceID = searchSource(environment)
 
-    // Calculate the hop distance to the source
-    environment["distanceToSource"] = hopDistanceTo(environment["source"])
-    return environment["distanceToSource"]
+    return hopDistanceTo(sourceID == localId)
 }

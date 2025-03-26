@@ -19,8 +19,6 @@ deployments:
     programs:
       - *program
     contents:
-      - molecule: source
+      - molecule: isSource
         concentration: true
-      - molecule: distanceToSource
-        concentration: 0
       

@@ -19,13 +19,5 @@ deployments:
     programs:
       - *program
     contents:
-      - molecule: source
+      - molecule: isSource
         concentration: true
-      - molecule: distanceToSource
-        concentration: 0
-      - molecule: furthest
-        concentration: true
-      - molecule: distanceToFurthest
-        concentration: 0
-      - molecule: networkDiameter
-        concentration: 0

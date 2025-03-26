@@ -3,6 +3,7 @@ package it.unibo.collektive.examples.exercises
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.Aggregate.Companion.neighboring
 import it.unibo.collektive.field.operations.min
+import it.unibo.collektive.aggregate.api.operators.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 
 /**
@@ -10,28 +11,16 @@ import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
  * in the network, assuming that the diameter of the network is no more than 10 hops.
 */
 
-fun Aggregate<Int>.minNeighborId(): Int {
-    // Exchange the localId with neighbors and obtain a field of values
-    val neighborValues = neighboring(localId)
-
-    // Find the minimum value among neighbors (including self)
-    val maxValue = neighborValues.min(localId)
-
-    return maxValue
-}
+fun Aggregate<Int>.minNeighborId(): Int = neighboring(localId).min(localId)
 
 fun Aggregate<Int>.searchSource(environment: EnvironmentVariables): Int {
     val minLocalValue = minNeighborId()
 
-    // Exchange the minLocalValue with neighbors and obtain a field of values
-    val neighborValues = neighboring(minLocalValue)
+    val minValue = share(minLocalValue){ previous ->
+        previous.min(minLocalValue)
+    }
 
-    // Find the maximum value among neighbors (including self)
-    val minValue = neighborValues.min(minLocalValue)
+    environment["isSource"] = localId == minValue
 
-    // Assign the result to a molecule
-    environment["source"] = localId == minValue
-
-    // The program return localId assigned at nodes label in simulation
     return minValue
 }
