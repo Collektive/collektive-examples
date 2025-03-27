@@ -9,7 +9,7 @@ _pool: &program
     type: Event
     actions:
       - type: RunCollektiveProgram
-        parameters: [it.unibo.collektive.examples.spreading.MaxIdKt.maxNetworkID]
+        parameters: [it.unibo.collektive.examples.spreading.MaxLocalIdKt.maxNeighborID]
 
 deployments:
   - type: GraphStreamDeployment

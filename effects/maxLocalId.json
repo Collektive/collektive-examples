@@ -6,7 +6,7 @@
     "red": {
       "max": 255,
       "min": 0,
-      "val": 0
+      "val": 255
     },
     "blue": {
       "max": 255,
@@ -16,7 +16,7 @@
     "green": {
       "max": 255,
       "min": 0,
-      "val": 255
+      "val": 0
     },
     "alpha": {
       "max": 255,
@@ -94,7 +94,7 @@
       "val": 5
     },
     "molFilter": true,
-    "molString": "it.unibo.collektive.examples.spreading.MaxIdKt.maxNetworkID",
+    "molString": "it.unibo.collektive.examples.spreading.MaxLocalIdKt.maxNeighborID",
     "molPropertyFilter": true,
     "property": "",
     "writingPropertyValue": true,
