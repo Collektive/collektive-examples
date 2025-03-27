@@ -10,7 +10,6 @@ import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
  * 
  * Assign a distinct color to the nodes with the identified maximum ID values in the network.
 */
-
 fun Aggregate<Int>.maxNetworkID(environment: EnvironmentVariables): Int =
     share(localId){ field ->
         field.max(localId)
