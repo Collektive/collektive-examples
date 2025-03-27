@@ -7,21 +7,16 @@ import it.unibo.alchemist.collektive.device.DistanceSensor
 import it.unibo.collektive.examples.exercises.distanceToSource
 import it.unibo.collektive.examples.channel.broadcast
 import it.unibo.collektive.field.operations.max
-import it.unibo.collektive.stdlib.spreading.hopDistanceTo
+import it.unibo.collektive.aggregate.api.operators.share
+import it.unibo.collektive.examples.spreading.hopDistanceTo
 
 /**
  * Calculate in the [source] an estimate of the true [diameter] of the network (the maximum distance of a device in the network).
+ * 
  * Broadcast the diameter to every node in the network.
 */ 
-
 fun Aggregate<Int>.networkDiameter(environment: EnvironmentVariables, distanceSensor: DistanceSensor): Int {
-    val distanceToSource = distanceToSource(environment)
-
-    val distance: Int = distanceToSource
-
-    val maxHopToSource = neighboring(distance).max(distance)
-
-    val isFurthest = isMaxValue(maxHopToSource, distanceToSource)
+    val isFurthest = isMaxValue(distanceToSource(environment))
 
     val distanceToFurthest = hopDistanceTo(isFurthest)
 
@@ -37,12 +32,12 @@ fun Aggregate<Int>.networkDiameter(environment: EnvironmentVariables, distanceSe
     return networkDiameter
 }
 
-fun Aggregate<Int>.isMaxValue(value: Int, localValue: Int? = Int.MIN_VALUE): Boolean {
-    val maxValue = neighboring(value).max(value)
-
-    if(localValue != Int.MIN_VALUE){
-        return maxValue == value && localValue == value
-    }else{
-        return maxValue == value
+/**
+ * Function that identifies the maximum value and returns true if the passed value is the maximum.
+ */
+fun Aggregate<Int>.isMaxValue(value: Int): Boolean {
+    val maxValue = share(value){ field ->
+        field.max(value)
     }
+    return maxValue == value
 }
