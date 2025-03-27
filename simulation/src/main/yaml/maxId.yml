@@ -19,5 +19,3 @@ deployments:
     contents:
       - molecule: isMaxID
         concentration: true
-      - molecule: isMaxLocalID
-        concentration: true

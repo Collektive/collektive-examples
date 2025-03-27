@@ -30,9 +30,9 @@ fun Aggregate<Int>.shortestPathToSource(environment: EnvironmentVariables): Int 
         previous.maxBy(distanceToSource) { 
             if(sourceID == it.sourceID) it.distance else Int.MIN_VALUE  
         }
+    }.also { 
+        environment["isFurthest"] = it.distance == distanceToSource.distance 
     }
-
-    environment["isFurthest"] = furthestToSource.distance == distanceToSource.distance
 
     return furthestToSource.distance
 }

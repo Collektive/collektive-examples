@@ -16,18 +16,9 @@ import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
  * Assign a distinct color to the nodes with the identified maximum ID values in the network.
 */
 
-fun Aggregate<Int>.maxNeighborID(): Int = neighboring(localId).max(localId)
-
-fun Aggregate<Int>.maxNetworkID(environment: EnvironmentVariables): Int {
-    val maxLocalValue = maxNeighborID()
-
-    environment["isMaxLocalID"] = localId == maxLocalValue
-
-    val maxValue = share(maxLocalValue){ previous ->
-        previous.max(maxLocalValue)
+fun Aggregate<Int>.maxNetworkID(environment: EnvironmentVariables): Int =
+    share(localId){ field ->
+        field.max(localId)
+    }.also { maxValue ->
+        environment["isMaxID"] = localId == maxValue
     }
-
-    environment["isMaxID"] = localId == maxValue
-    
-    return maxValue
-}
