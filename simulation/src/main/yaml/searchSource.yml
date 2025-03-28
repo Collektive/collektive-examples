@@ -1,0 +1,24 @@
+incarnation: collektive
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [2]
+
+_pool: &program
+  - time-distribution: 1
+    type: Event
+    actions:
+      - type: RunCollektiveProgram
+        parameters: [it.unibo.collektive.examples.exercises.SearchSourceKt.searchSource]
+      - type: RunCollektiveProgram
+        parameters: [it.unibo.collektive.examples.exercises.GetLocalIdKt.getLocalId]
+
+deployments:
+  - type: GraphStreamDeployment
+    parameters: [15, 2, 0, PreferentialAttachment]
+    programs:
+      - *program
+    contents:
+      - molecule: isSource
+        concentration: true
+      
