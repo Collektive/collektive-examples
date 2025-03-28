@@ -51,7 +51,7 @@ multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:3.2.4"
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlin-qa = "org.danilopianini.gradle-kotlin-qa:0.84.1"
+kotlin-qa = "org.danilopianini.gradle-kotlin-qa:0.85.0"
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 taskTree = "com.dorongold.task-tree:4.0.1"
 collektive = { id = "it.unibo.collektive.collektive-plugin", version.ref = "collektive" }
