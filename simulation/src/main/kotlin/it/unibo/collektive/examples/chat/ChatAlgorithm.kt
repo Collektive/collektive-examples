@@ -20,16 +20,12 @@ public const val THRESHOLD: Double = 10.0
 /**
  * Computes a proximity-based message propagation using aggregate computing.
  *
- * The message is emitted by a source node and propagates to neighbors,
- * with the perceived message degrading linearly as distance increases.
- * - Nodes within [REACHABLE] hear the full message.
- * - Nodes within [THRESHOLD] hear a faint version (with percentage).
- * - Nodes beyond [THRESHOLD] report the message as "Unreachable".
+ * The message is emitted by a node marked as a [source] and propagates through neighbors,
+ * with the perceived message degrading linearly based on distance.
+ * Nodes within [REACHABLE] hear the full [message], nodes within [THRESHOLD] receive a faint version,
+ * and nodes beyond [THRESHOLD] report the message as "Unreachable".
  *
- * @param distanceSensor used to get distances to neighbors
- * @param source whether this node is the source of the message
- * @param message the message to be propagated from the source
- * @return the received/degraded version of the message
+ * The [distanceSensor] is used to measure neighbor distances.
  */
 fun Aggregate<Int>.chatAlgorithm(distanceSensor: DistanceSensor, source: Boolean, message: String = "Hello"): String {
     val state = share(POSITIVE_INFINITY){
@@ -46,15 +42,12 @@ fun Aggregate<Int>.chatAlgorithm(distanceSensor: DistanceSensor, source: Boolean
     }
 }
 
+
 /**
  * Entry point for the proximity chat simulation.
  *
- * Extracts the `source` flag from the environment and delegates
- * to [chatAlgorithm] to compute the node's message output.
- *
- * @param environment environment variables (used to check if node is a source)
- * @param distanceSensor used to get neighbor distances
- * @return the message seen by this node
+ * Extracts whether the current node is a source using the [environment] variable,
+ * and delegates to [chatAlgorithm] using the provided [distanceSensor].
  */
 fun Aggregate<Int>.chatAlgorithmEntrypoint(
     environment: EnvironmentVariables,
@@ -66,9 +59,6 @@ fun Aggregate<Int>.chatAlgorithmEntrypoint(
  *
  * The result is a percentage from 100 (fully clear) to 0 (barely understandable).
  * Intended to be used when distance is between [REACHABLE] and [THRESHOLD].
- *
- * @param distance the computed gradient distance from the source
- * @return a percentage value representing the message strength (0–100)
  */
 fun calculateFaint(distance: Double):Double{
     return (1.0 - (distance - REACHABLE)/ REACHABLE)*100
