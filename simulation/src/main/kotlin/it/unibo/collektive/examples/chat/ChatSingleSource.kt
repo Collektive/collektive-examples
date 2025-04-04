@@ -8,14 +8,6 @@ import it.unibo.collektive.field.operations.min
 import it.unibo.collektive.stdlib.doubles.FieldedDoubles.plus
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
-/**
- * Maximum distance at which the message is clearly received.
- */
-public const val REACHABLE: Double = 5.0
-/**
- * Maximum distance at which the message can still be faintly perceived.
- */
-public const val THRESHOLD: Double = 10.0
 
 /**
  * Computes a proximity-based message propagation using aggregate computing.
@@ -27,7 +19,7 @@ public const val THRESHOLD: Double = 10.0
  *
  * The [distanceSensor] is used to measure neighbor distances.
  */
-fun Aggregate<Int>.chatAlgorithm(distanceSensor: DistanceSensor, source: Boolean, message: String = "Hello"): String {
+fun Aggregate<Int>.chatSingleSource(distanceSensor: DistanceSensor, source: Boolean, message: String = "Hello"): Message {
     val state = share(POSITIVE_INFINITY){
         val dist = with(distanceSensor) {distances()}
         when{
@@ -35,24 +27,24 @@ fun Aggregate<Int>.chatAlgorithm(distanceSensor: DistanceSensor, source: Boolean
             else -> (it + dist).min(POSITIVE_INFINITY)
         }
     }
-    return when{
+    val content =  when{
         state <= REACHABLE -> message
         state < THRESHOLD -> "$message ${"%.0f".format(calculateFaint(state))}%"
         else -> "Unreachable"
     }
+    return Message(content, state)
 }
-
 
 /**
  * Entry point for the proximity chat simulation.
  *
  * Extracts whether the current node is a source using the [environment] variable,
- * and delegates to [chatAlgorithm] using the provided [distanceSensor].
+ * and delegates to [chatSingleSource] using the provided [distanceSensor].
  */
-fun Aggregate<Int>.chatAlgorithmEntrypoint(
+fun Aggregate<Int>.chatSingleEntrypoint(
     environment: EnvironmentVariables,
     distanceSensor: DistanceSensor,
-): String = chatAlgorithm(distanceSensor, environment["source"])
+): String = chatSingleSource(distanceSensor, environment["source"]).toString()
 
 /**
  * Computes the perceived intensity (faintness) of a message based on distance.
