@@ -14,6 +14,6 @@ import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 fun Aggregate<Int>.searchSource(environment: EnvironmentVariables): Int =
     share(localId){ field ->
         field.min(localId)
-    }.also { maxValue ->
-        environment["isSource"] = localId == maxValue
+    }.also { minValue ->
+        environment["isSource"] = localId == minValue
     }
