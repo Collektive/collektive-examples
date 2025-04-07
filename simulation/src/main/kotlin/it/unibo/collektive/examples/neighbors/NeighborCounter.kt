@@ -2,9 +2,9 @@ package it.unibo.collektive.examples.neighbors
 
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.Aggregate.Companion.neighboring
-import it.unibo.collektive.field.operations.count
+import it.unibo.collektive.field.Field.Companion.hood
 
 /**
- * Function to evaluate the number of neighbors of a node in an [Aggregate] context.
+ * Extension function to evaluate the number of neighbors of a node in an [Aggregate] context.
  */
-fun Aggregate<Int>.neighborCounter(): Int = neighboring(1).count()
+fun Aggregate<Int>.neighborCounter(): Int = neighboring(1).hood(0) { acc, _ -> acc + 1 }
