@@ -1,7 +1,7 @@
 package it.unibo.collektive.examples.branching
 
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.aggregate.api.Aggregate.Companion.neighboring
+import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.field.Field.Companion.hood
 
