@@ -21,4 +21,4 @@ develocity {
     }
 }
 
-include("distributed", "android", "simulation")
+include("distributed", "simulation")
