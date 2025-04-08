@@ -8,6 +8,9 @@ import it.unibo.collektive.field.Field.Companion.fold
 import it.unibo.collektive.stdlib.spreading.multiGradientCast
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
+/**
+Computes the distance from the current node to all sources in the network using the [multiGradientCast] algorithm.
+ */
 fun Aggregate<Int>.multiGradient(
     distanceSensor: DistanceSensor,
     environment: EnvironmentVariables,
@@ -31,7 +34,14 @@ fun Aggregate<Int>.multiGradient(
     )
 }
 
-
+/**
+ * Entry point for the multi-source gradient computation, delegates to [multiGradient].
+ *
+ * The [environment] provides environmental variables for the simulation.
+ * The [distanceSensor] measures distances to neighboring nodes.
+ *
+ * Returns a map where each key is the node ID of a source and the corresponding value is the distance to that source.
+ */
 fun Aggregate<Int>.multiGradientEntryPoint(
     environment: EnvironmentVariables,
     distanceSensor: DistanceSensor,
