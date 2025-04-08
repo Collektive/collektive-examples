@@ -1,0 +1,35 @@
+network-model:
+  type: ConnectWithinDistance
+  parameters: [5]
+
+incarnation: collektive
+
+_pool: &program
+  - time-distribution: 1
+    type: Event
+    actions:
+      - type: RunCollektiveProgram
+        parameters: [it.unibo.collektive.examples.multiGradient.MultiGradientKt.multiGradientEntryPoint]
+
+deployments:
+  - type: Rectangle
+    parameters: [198, 0, 0, 20, 20]
+    programs:
+      - *program
+    contents:
+      - molecule: source
+        concentration: false
+  - type: Point
+    parameters: [10, 10]
+    programs:
+      - *program
+    contents:
+      - molecule: source
+        concentration: true
+  - type: Point
+    parameters: [ 15, 15 ]
+    programs:
+      - *program
+    contents:
+      - molecule: source
+        concentration: true
