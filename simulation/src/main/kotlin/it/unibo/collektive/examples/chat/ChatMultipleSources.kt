@@ -8,13 +8,20 @@ import it.unibo.collektive.field.Field.Companion.fold
 import it.unibo.collektive.stdlib.spreading.multiGradientCast
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
-
+/**
+ * Runs a multi-source proximity chat using [multiGradientCast].
+ *
+ * Each node computes its distance to all sources, identified via the [environment].
+ * Nodes within [REACHABLE] hear the full [message], nodes within [THRESHOLD] receive a faint version,
+ * and nodes beyond [THRESHOLD] report the message as "Unreachable".
+ *
+ * Returns a map from source name to the received [Message] with content and distance.
+ */
 fun Aggregate<Int>.chatMultipleSources(
     distanceSensor: DistanceSensor,
     environment: EnvironmentVariables,
     message: String = "Hello"
 ): Map<String, Message>{
-
     val isSource = environment.get<Boolean>("source")
     val sourceName = environment.getOrDefault("sourceName", "node")
 
@@ -24,6 +31,7 @@ fun Aggregate<Int>.chatMultipleSources(
             if (isSource) collected + (localId to sourceName) else collected
             }
         }
+
     val sources = idToName.keys
     val multiState : Map<Int, Double> =  multiGradientCast(
         sources = sources,
@@ -39,19 +47,20 @@ fun Aggregate<Int>.chatMultipleSources(
         .toMap()
 
     val content : MutableMap<String, Message> = mutableMapOf()
-
-    transformedState.forEach{ entry ->
-        when{
-            entry.value <= REACHABLE -> content[entry.key] = Message(message, entry.value)
-            entry.value < THRESHOLD -> content[entry.key] = Message("$message ${"%.0f".format(calculateFaint(entry.value))}%", entry.value)
-            else -> content[entry.key] = Message("Unreachable", entry.value)
-        }
+    transformedState.forEach{ (name, dist) ->
+        content[name] = fadingMessage(message, dist)
     }
 
     return content.toMap()
 }
 
-
+/**
+ * Entrypoint for the multi-source chat simulation.
+ *
+ * Uses the [environment] to determine source status and name,
+ * and the [distanceSensor] to compute distances between nodes.
+ * Returns a printable string representation of the received messages.
+ */
 fun Aggregate<Int>.chatMultipleEntryPoint(
     environment: EnvironmentVariables,
     distanceSensor: DistanceSensor,

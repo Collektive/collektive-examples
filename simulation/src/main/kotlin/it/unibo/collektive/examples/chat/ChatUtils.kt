@@ -9,3 +9,15 @@ package it.unibo.collektive.examples.chat
 fun calculateFaint(distance: Double):Double{
     return (1.0 - (distance - REACHABLE)/ REACHABLE)*100
 }
+
+fun fadingMessage(base: String, distance: Double): Message = when {
+    distance <= REACHABLE -> Message(base, distance)
+    distance < THRESHOLD -> Message(fadeMessage(base, distance), distance)
+    else -> Message("Unreachable", distance)
+}
+
+fun fadeMessage(message: String, distance: Double): String {
+    val faintness = calculateFaint(distance)
+    val percentage = "%.0f".format(faintness)
+    return "$message $percentage%"
+}

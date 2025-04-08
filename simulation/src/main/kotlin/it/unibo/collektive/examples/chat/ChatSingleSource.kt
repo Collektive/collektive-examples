@@ -27,12 +27,7 @@ fun Aggregate<Int>.chatSingleSource(distanceSensor: DistanceSensor, source: Bool
             else -> (it + dist).min(POSITIVE_INFINITY)
         }
     }
-    val content =  when{
-        state <= REACHABLE -> message
-        state < THRESHOLD -> "$message ${"%.0f".format(calculateFaint(state))}%"
-        else -> "Unreachable"
-    }
-    return Message(content, state)
+    return fadingMessage(message, state)
 }
 
 /**
