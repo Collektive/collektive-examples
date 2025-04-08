@@ -1,6 +1,6 @@
 network-model:
   type: ConnectWithinDistance
-  parameters: [4]
+  parameters: [5]
 
 incarnation: collektive
 
@@ -9,7 +9,7 @@ _pool: &program
     type: Event
     actions:
       - type: RunCollektiveProgram
-        parameters: [it.unibo.collektive.examples.chat.ChatAlgorithmKt.chatAlgorithmEntrypoint]
+        parameters: [it.unibo.collektive.examples.chat.ChatMultipleSourcesKt.chatMultipleEntryPoint]
 
 deployments:
   - type: Rectangle
@@ -18,13 +18,15 @@ deployments:
       - *program
     contents:
       - molecule: source
-        concentration: null
+        concentration: false
   - type: Point
     parameters: [10, 10]
     programs:
       - *program
     contents:
       - molecule: source
+        concentration: true
+      - molecule: sourceName
         concentration: "A"
   - type: Point
     parameters: [ 15, 15 ]
@@ -32,4 +34,6 @@ deployments:
       - *program
     contents:
       - molecule: source
+        concentration: true
+      - molecule: sourceName
         concentration: "B"
