@@ -2,7 +2,7 @@ package it.unibo.collektive.examples.chat
 
 import it.unibo.alchemist.collektive.device.DistanceSensor
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.aggregate.api.operators.share
+import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.field.Field.Companion.fold
 import it.unibo.collektive.stdlib.spreading.multiGradientCast
@@ -33,14 +33,11 @@ fun Aggregate<Int>.chatMultipleSources(
         }
 
     val sources = idToName.keys
-    val multiState : Map<Int, Double> =  multiGradientCast(
+    val multiState : Map<Int, Double> = multiGradientCast(
         sources = sources,
         local = if (localId in sources) 0.0 else POSITIVE_INFINITY,
-        bottom = 0.0,
-        top = POSITIVE_INFINITY,
+        metric = with(distanceSensor) { distances() },
         accumulateData = {fromSource, toNeighbor, _ -> fromSource + toNeighbor },
-        accumulateDistance = { fromSource, toNeighbor -> fromSource + toNeighbor },
-        metric = { with(distanceSensor){distances()} }
     )
     val transformedState : Map<String, Double> =  multiState
         .map {(key, value) -> idToName[key]!! to value}
