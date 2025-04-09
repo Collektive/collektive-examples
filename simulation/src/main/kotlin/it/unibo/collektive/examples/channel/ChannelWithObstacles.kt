@@ -11,10 +11,7 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 /**
  * Compute the channel between the source and the target with obstacles.
  */
-fun Aggregate<Int>.channelWithObstacles(
-    environment: EnvironmentVariables,
-    distanceSensor: DistanceSensor,
-): Boolean =
+fun Aggregate<Int>.channelWithObstacles(environment: EnvironmentVariables, distanceSensor: DistanceSensor): Boolean =
     when (environment.get<Boolean>("obstacle")) {
         true -> false
         false ->
@@ -46,11 +43,8 @@ fun Aggregate<Int>.channel(
 /**
  * Computes the [gradientCast] from the [source] with the [value] that is the distance from the [source] to the target.
  */
-fun Aggregate<Int>.broadcast(
-    distanceSensor: DistanceSensor,
-    from: Boolean,
-    payload: Double,
-): Double = gradientCast(distanceSensor, from, payload) { it }
+fun Aggregate<Int>.broadcast(distanceSensor: DistanceSensor, from: Boolean, payload: Double): Double =
+    gradientCast(distanceSensor, from, payload) { it }
 
 /**
  * Compute the gradient of the aggregate from the [source] to the [target].
@@ -61,19 +55,18 @@ fun Aggregate<Int>.gradientCast(
     source: Boolean,
     initial: Double,
     accumulate: (Double) -> Double,
-): Double =
-    share(POSITIVE_INFINITY to initial) { field ->
-        val dist = with(distanceSensor) { distances() }
-        when {
-            source -> 0.0 to initial
-            else -> {
-                val resultField =
-                    dist.alignedMap(field) { distField, (currentDist, value) ->
-                        distField + currentDist to accumulate(value)
-                    }
-                resultField.fold(POSITIVE_INFINITY to POSITIVE_INFINITY) { acc, value ->
-                    if (value.first < acc.first) value else acc
+): Double = share(POSITIVE_INFINITY to initial) { field ->
+    val dist = with(distanceSensor) { distances() }
+    when {
+        source -> 0.0 to initial
+        else -> {
+            val resultField =
+                dist.alignedMap(field) { distField, (currentDist, value) ->
+                    distField + currentDist to accumulate(value)
                 }
+            resultField.fold(POSITIVE_INFINITY to POSITIVE_INFINITY) { acc, value ->
+                if (value.first < acc.first) value else acc
             }
         }
-    }.second
+    }
+}.second
