@@ -33,7 +33,7 @@ allprojects {
         val detektTasks = tasks.withType<Detekt>()
             .matching { task ->
                 task.name.let { it.endsWith("Main") || it.endsWith("Test") } &&
-                        !task.name.contains("Baseline")
+                    !task.name.contains("Baseline")
             }
         val check by tasks.getting
         val detektAll by tasks.registering {
@@ -47,7 +47,7 @@ allprojects {
     configurations.matching { it.name != "detekt" }.all {
         resolutionStrategy.eachDependency {
             if (requested.group == "org.jetbrains.kotlin") {
-                useVersion(rootProject.libs.versions.kotlin.get())
+                useVersion(rootProject.libs.versions.kotlin.asProvider().get())
             }
         }
     }
