@@ -45,7 +45,7 @@ fun Aggregate<Int>.chatMultipleSources(
 
     val content : MutableMap<String, Message> = mutableMapOf()
     transformedState.forEach{ (name, dist) ->
-        content[name] = fadingMessage(message, dist)
+        content[name] = FadedMessage(message, dist)
     }
 
     return content.toMap()

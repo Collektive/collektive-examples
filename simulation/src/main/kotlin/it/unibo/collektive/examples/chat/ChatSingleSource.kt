@@ -27,7 +27,7 @@ fun Aggregate<Int>.chatSingleSource(distanceSensor: DistanceSensor, source: Bool
             else -> (it + dist).min(POSITIVE_INFINITY)
         }
     }
-    return fadingMessage(message, state)
+    return FadedMessage(message, state)
 }
 
 /**
