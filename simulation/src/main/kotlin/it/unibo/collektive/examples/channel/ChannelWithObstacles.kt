@@ -1,6 +1,6 @@
 package it.unibo.collektive.examples.channel
 
-import it.unibo.alchemist.collektive.device.DistanceSensor
+import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
@@ -11,23 +11,25 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 /**
  * Compute the channel between the source and the target with obstacles.
  */
-fun Aggregate<Int>.channelWithObstacles(environment: EnvironmentVariables, distanceSensor: DistanceSensor): Boolean =
-    when (environment.get<Boolean>("obstacle")) {
-        true -> false
-        false ->
-            channel(
-                distanceSensor,
-                environment["source"],
-                environment["target"],
-                channelWidth = 0.5,
-            )
-    }
+fun Aggregate<Int>.channelWithObstacles(
+    environment: EnvironmentVariables,
+    distanceSensor: CollektiveDevice<*>,
+): Boolean = when (environment.get<Boolean>("obstacle")) {
+    true -> false
+    false ->
+        channel(
+            distanceSensor,
+            environment["source"],
+            environment["target"],
+            channelWidth = 0.5,
+        )
+}
 
 /**
  * Compute the channel between the [source] and the [target] with a specific [channelWidth].
  */
 fun Aggregate<Int>.channel(
-    distanceSensor: DistanceSensor,
+    distanceSensor: CollektiveDevice<*>,
     source: Boolean,
     destination: Boolean,
     channelWidth: Double,
@@ -43,7 +45,7 @@ fun Aggregate<Int>.channel(
 /**
  * Computes the [gradientCast] from the [source] with the [value] that is the distance from the [source] to the target.
  */
-fun Aggregate<Int>.broadcast(distanceSensor: DistanceSensor, from: Boolean, payload: Double): Double =
+fun Aggregate<Int>.broadcast(distanceSensor: CollektiveDevice<*>, from: Boolean, payload: Double): Double =
     gradientCast(distanceSensor, from, payload) { it }
 
 /**
@@ -51,7 +53,7 @@ fun Aggregate<Int>.broadcast(distanceSensor: DistanceSensor, from: Boolean, payl
  * The [accumulate] function is used to accumulate the value of the aggregate.
  */
 fun Aggregate<Int>.gradientCast(
-    distanceSensor: DistanceSensor,
+    distanceSensor: CollektiveDevice<*>,
     source: Boolean,
     initial: Double,
     accumulate: (Double) -> Double,
