@@ -10,7 +10,7 @@ interface Message {
 }
 
 /**
- * Builds a [Message] with appropriate content based on [distance].
+ * Builds a [Message] with appropriate [content] based on [distance].
  *
  * - If [distance] ≤ [REACHABLE], the full [content] message is returned.
  * - If [distance] < [THRESHOLD], a faded version is returned using [fadeMessage].
