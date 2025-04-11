@@ -1,0 +1,21 @@
+incarnation: collektive
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [2]
+
+_pool: &program
+  - time-distribution: 1
+    type: Event
+    actions:
+      - type: RunCollektiveProgram
+        parameters: [it.unibo.collektive.examples.spreading.MaxLocalIdKt.maxNeighborID]
+
+deployments:
+  - type: GraphStreamDeployment
+    parameters: [20, 2, 0, PreferentialAttachment]
+    programs:
+      - *program
+    contents:
+      - molecule: isMaxID
+        concentration: true
