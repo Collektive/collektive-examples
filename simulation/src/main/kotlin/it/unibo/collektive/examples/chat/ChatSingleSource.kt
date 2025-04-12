@@ -1,13 +1,12 @@
 package it.unibo.collektive.examples.chat
 
-import it.unibo.alchemist.collektive.device.DistanceSensor
+import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.field.operations.min
 import it.unibo.collektive.stdlib.doubles.FieldedDoubles.plus
 import kotlin.Double.Companion.POSITIVE_INFINITY
-
 
 /**
  * Computes a proximity-based message propagation using aggregate computing.
@@ -19,10 +18,14 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
  *
  * The [distanceSensor] is used to measure neighbor distances.
  */
-fun Aggregate<Int>.chatSingleSource(distanceSensor: DistanceSensor, source: Boolean, message: String = "Hello"): Message {
-    val state = share(POSITIVE_INFINITY){
-        val dist = with(distanceSensor) {distances()}
-        when{
+fun Aggregate<Int>.chatSingleSource(
+    distanceSensor: CollektiveDevice<*>,
+    source: Boolean,
+    message: String = "Hello",
+): Message {
+    val state = share(POSITIVE_INFINITY) {
+        val dist = with(distanceSensor) { distances() }
+        when {
             source -> 0.0
             else -> (it + dist).min(POSITIVE_INFINITY)
         }
@@ -38,6 +41,5 @@ fun Aggregate<Int>.chatSingleSource(distanceSensor: DistanceSensor, source: Bool
  */
 fun Aggregate<Int>.chatSingleEntrypoint(
     environment: EnvironmentVariables,
-    distanceSensor: DistanceSensor,
+    distanceSensor: CollektiveDevice<*>,
 ): String = chatSingleSource(distanceSensor, environment["source"]).toString()
-

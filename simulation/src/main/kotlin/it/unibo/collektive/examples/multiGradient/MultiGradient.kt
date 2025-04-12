@@ -1,6 +1,6 @@
 package it.unibo.collektive.examples.multiGradient
 
-import it.unibo.alchemist.collektive.device.DistanceSensor
+import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
@@ -12,13 +12,14 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 Computes the distance from the current node to all sources in the network using the [multiGradientCast] algorithm.
  */
 fun Aggregate<Int>.multiGradient(
-    distanceSensor: DistanceSensor,
+    distanceSensor: CollektiveDevice<*>,
     environment: EnvironmentVariables,
 ): Map<Int, Double> {
-
     val isSource = environment.get<Boolean>("source")
     val sources = share(emptySet<Int>()) { neighborSources ->
-        neighborSources.fold(emptySet<Int>()) { accumulated, neighborSet -> accumulated union neighborSet }.let { collected ->
+        neighborSources.fold(emptySet<Int>()) { accumulated, neighborSet ->
+            accumulated union neighborSet
+        }.let { collected ->
             if (isSource) collected + localId else collected
         }
     }
@@ -27,7 +28,7 @@ fun Aggregate<Int>.multiGradient(
         sources = sources,
         local = if (localId in sources) 0.0 else POSITIVE_INFINITY,
         metric = with(distanceSensor) { distances() },
-        accumulateData = {fromSource, toNeighbor, _ -> fromSource + toNeighbor },
+        accumulateData = { fromSource, toNeighbor, _ -> fromSource + toNeighbor },
     )
 }
 
@@ -41,5 +42,5 @@ fun Aggregate<Int>.multiGradient(
  */
 fun Aggregate<Int>.multiGradientEntryPoint(
     environment: EnvironmentVariables,
-    distanceSensor: DistanceSensor,
+    distanceSensor: CollektiveDevice<*>,
 ): Map<Int, Double> = multiGradient(distanceSensor, environment)

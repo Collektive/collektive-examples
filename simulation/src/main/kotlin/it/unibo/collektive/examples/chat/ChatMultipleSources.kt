@@ -1,6 +1,6 @@
 package it.unibo.collektive.examples.chat
 
-import it.unibo.alchemist.collektive.device.DistanceSensor
+import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
@@ -18,37 +18,37 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
  * Returns a map from source name to the received [Message] with content and distance.
  */
 fun Aggregate<Int>.chatMultipleSources(
-    distanceSensor: DistanceSensor,
+    distanceSensor: CollektiveDevice<*>,
     environment: EnvironmentVariables,
-    message: String = "Hello"
-): Map<String, Message>{
+    message: String = "Hello",
+): Map<String, Message> {
     val isSource = environment.get<Boolean>("source")
     val sourceName = environment.getOrDefault("sourceName", "node")
 
-    val idToName : Map<Int, String> = share(emptyMap<Int, String>()) { neighborSources ->
+    val idToName: Map<Int, String> = share(emptyMap<Int, String>()) { neighborSources ->
         neighborSources.fold(emptyMap<Int, String>()) { accumulator, neighborMap ->
-            accumulator + neighborMap}.let { collected ->
+            accumulator + neighborMap
+        }.let { collected ->
             if (isSource) collected + (localId to sourceName) else collected
-            }
         }
+    }
 
     val sources = idToName.keys
-    val multiState : Map<Int, Double> = multiGradientCast(
+    val multiState: Map<Int, Double> = multiGradientCast(
         sources = sources,
         local = if (localId in sources) 0.0 else POSITIVE_INFINITY,
         metric = with(distanceSensor) { distances() },
-        accumulateData = {fromSource, toNeighbor, _ -> fromSource + toNeighbor },
+        accumulateData = { fromSource, toNeighbor, _ -> fromSource + toNeighbor },
     )
-    val transformedState : Map<String, Double> =  multiState
-        .map {(key, value) -> idToName[key]!! to value}
+    val transformedState: Map<String, Double> = multiState
+        .map { (key, value) -> idToName.getValue(key) to value }
         .toMap()
 
-    val content : MutableMap<String, Message> = mutableMapOf()
-    transformedState.forEach{ (name, dist) ->
+    val content: MutableMap<String, Message> = mutableMapOf()
+    transformedState.forEach { (name, dist) ->
         content[name] = FadedMessage(message, dist)
     }
-
-    return content.toMap()
+    return content
 }
 
 /**
@@ -60,5 +60,5 @@ fun Aggregate<Int>.chatMultipleSources(
  */
 fun Aggregate<Int>.chatMultipleEntryPoint(
     environment: EnvironmentVariables,
-    distanceSensor: DistanceSensor,
+    distanceSensor: CollektiveDevice<*>,
 ): String = chatMultipleSources(distanceSensor, environment).toString()

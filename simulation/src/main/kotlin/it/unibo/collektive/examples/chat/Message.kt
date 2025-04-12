@@ -1,8 +1,8 @@
 package it.unibo.collektive.examples.chat
 
 /**
- * Represents a message propagating in space,
- * along with its distance from the original source.
+ * Represents a message with [content] propagating in space,
+ * along with its [distance] from the original source.
  */
 interface Message {
     val content: String
@@ -16,10 +16,16 @@ interface Message {
  * - If [distance] < [THRESHOLD], a faded version is returned using [fadeMessage].
  * - If [distance] ≥ [THRESHOLD], the message is considered unreachable.
  */
-data class FadedMessage(override val content: String, override val distance: Double) : Message{
-    companion object{
-        operator fun invoke(base : String, distance: Double):FadedMessage{
-            val message = when{
+data class FadedMessage(override val content: String, override val distance: Double) : Message {
+    /**
+     * Companion object for factory methods.
+     */
+    companion object {
+        /**
+         * Returns a [FadedMessage] starting from a [base] content and its [distance] from source.
+         */
+        operator fun invoke(base: String, distance: Double): FadedMessage {
+            val message = when {
                 distance <= THRESHOLD -> base
                 distance > THRESHOLD -> fadeMessage(base, distance)
                 else -> "Unreachable"
@@ -48,6 +54,4 @@ private fun fadeMessage(message: String, distance: Double): String {
  * The result is a percentage from 100 (fully clear) to 0 (barely understandable).
  * Intended to be used when distance is between [REACHABLE] and [THRESHOLD].
  */
-private fun calculateFaint(distance: Double):Double{
-    return (1.0 - (distance - REACHABLE)/ REACHABLE)*100
-}
+private fun calculateFaint(distance: Double): Double = (1.0 - (distance - REACHABLE) / REACHABLE) * 100

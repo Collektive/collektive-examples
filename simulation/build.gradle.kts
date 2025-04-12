@@ -9,7 +9,7 @@ plugins {
 }
 
 multiJvm {
-    jvmVersionForCompilation.set(latestJava)
+    jvmVersionForCompilation.set(21)
 }
 
 dependencies {
@@ -52,26 +52,22 @@ val runAllBatch by tasks.register<DefaultTask>("runAllBatch") {
     description = "Launches all experiments"
 }
 
-fun String.capitalizeString(): String =
-    this.replaceFirstChar {
-        if (it.isLowerCase()) {
-            it.titlecase(
-                Locale.getDefault(),
-            )
-        } else {
-            it.toString()
-        }
+fun String.capitalizeString(): String = this.replaceFirstChar {
+    if (it.isLowerCase()) {
+        it.titlecase(
+            Locale.getDefault(),
+        )
+    } else {
+        it.toString()
     }
+}
 
 File(rootProject.rootDir.path + "/simulation/src/main/yaml")
     .listFiles()
     ?.filter { it.extension == "yml" }
     ?.sortedBy { it.nameWithoutExtension }
     ?.forEach {
-        fun basetask(
-            name: String,
-            additionalConfiguration: JavaExec.() -> Unit = {},
-        ) = tasks.register<JavaExec>(name) {
+        fun basetask(name: String, additionalConfiguration: JavaExec.() -> Unit = {}) = tasks.register<JavaExec>(name) {
             description = "Launches graphic simulation ${it.nameWithoutExtension}"
             mainClass.set("it.unibo.alchemist.Alchemist")
             classpath = sourceSets["main"].runtimeClasspath
