@@ -1,12 +1,11 @@
 package it.unibo.collektive.examples.path
 
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.aggregate.api.Aggregate.Companion.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.field.operations.maxBy
 import it.unibo.collektive.examples.spreading.maxNetworkID
-import it.unibo.collektive.examples.spreading.hopDistanceTo
-import it.unibo.collektive.aggregate.api.operators.share
+import it.unibo.collektive.stdlib.spreading.hopDistanceTo
+import it.unibo.collektive.aggregate.api.share
 
 /**
  * Defined a data class to represent the association between a source node and its distance.

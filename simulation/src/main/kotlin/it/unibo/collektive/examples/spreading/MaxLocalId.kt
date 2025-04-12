@@ -1,7 +1,7 @@
 package it.unibo.collektive.examples.spreading
 
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.aggregate.api.Aggregate.Companion.neighboring
+import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.field.operations.max
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 
