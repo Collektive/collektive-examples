@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerialFormat
 import kotlinx.serialization.SerializationException
@@ -19,6 +18,9 @@ import kotlinx.serialization.json.Json
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * TODO add documentation.
+ */
 class MqttMailbox private constructor(
     private val deviceId: Int,
     host: String,
@@ -87,7 +89,13 @@ class MqttMailbox private constructor(
         }
     }
 
+    /**
+     * TODO add documentation.
+     */
     companion object {
+        /**
+         * TODO add documentation.
+         */
         suspend operator fun invoke(
             deviceId: Int,
             host: String,
