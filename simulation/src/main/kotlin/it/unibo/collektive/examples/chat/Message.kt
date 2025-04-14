@@ -16,7 +16,7 @@ interface Message {
  * - If [distance] < [THRESHOLD], a faded version is returned using [fadeMessage].
  * - If [distance] ≥ [THRESHOLD], the message is considered unreachable.
  */
-data class FadedMessage(override val content: String, override val distance: Double) : Message {
+class FadedMessage private constructor(override val content: String, override val distance: Double) : Message {
     /**
      * Companion object for factory methods.
      */
@@ -26,13 +26,15 @@ data class FadedMessage(override val content: String, override val distance: Dou
          */
         operator fun invoke(base: String, distance: Double): FadedMessage {
             val message = when {
-                distance <= THRESHOLD -> base
-                distance > THRESHOLD -> fadeMessage(base, distance)
+                distance <= REACHABLE -> base
+                distance < THRESHOLD -> fadeMessage(base, distance)
                 else -> "Unreachable"
             }
             return FadedMessage(message, distance)
         }
     }
+
+    override fun toString(): String = "FadedMessage(content='$content', distance=$distance)"
 }
 
 /**
@@ -54,4 +56,4 @@ private fun fadeMessage(message: String, distance: Double): String {
  * The result is a percentage from 100 (fully clear) to 0 (barely understandable).
  * Intended to be used when distance is between [REACHABLE] and [THRESHOLD].
  */
-private fun calculateFaint(distance: Double): Double = (1.0 - (distance - REACHABLE) / REACHABLE) * 100
+private fun calculateFaint(distance: Double): Double = (1.0 - ((distance - REACHABLE) / REACHABLE)) * 100
