@@ -4,6 +4,7 @@ import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
+import it.unibo.collektive.field.Field
 import it.unibo.collektive.field.Field.Companion.fold
 import it.unibo.collektive.stdlib.spreading.multiGradientCast
 import kotlin.Double.Companion.POSITIVE_INFINITY
@@ -18,7 +19,7 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
  * Returns a map from source name to the received [Message] with content and distance.
  */
 fun Aggregate<Int>.chatMultipleSources(
-    distanceSensor: CollektiveDevice<*>,
+    distances: Field<Int, Double>,
     environment: EnvironmentVariables,
     message: String = "Hello",
 ): Map<String, Message> {
@@ -37,7 +38,7 @@ fun Aggregate<Int>.chatMultipleSources(
     val multiState: Map<Int, Double> = multiGradientCast(
         sources = sources,
         local = if (localId in sources) 0.0 else POSITIVE_INFINITY,
-        metric = with(distanceSensor) { distances() },
+        metric = distances,
         accumulateData = { fromSource, toNeighbor, _ -> fromSource + toNeighbor },
     )
     val transformedState: Map<String, Double> = multiState
@@ -55,10 +56,13 @@ fun Aggregate<Int>.chatMultipleSources(
  * Entrypoint for the multi-source chat simulation.
  *
  * Uses the [environment] to determine source status and name,
- * and the [distanceSensor] to compute distances between nodes.
+ * and the [distanceSensor] to compute [distances] between nodes.
  * Returns a printable string representation of the received messages.
  */
 fun Aggregate<Int>.chatMultipleEntryPoint(
     environment: EnvironmentVariables,
     distanceSensor: CollektiveDevice<*>,
-): String = chatMultipleSources(distanceSensor, environment).toString()
+): String {
+    val distances = with(distanceSensor) { distances() }
+    return chatMultipleSources(distances, environment).toString()
+}
