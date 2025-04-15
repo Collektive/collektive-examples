@@ -2,7 +2,7 @@ package it.unibo.collektive.examples.path
 
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.field.operations.maxBy
+import it.unibo.collektive.field.operations.minBy
 import it.unibo.collektive.examples.spreading.maxNetworkID
 import it.unibo.collektive.stdlib.spreading.hopDistanceTo
 import it.unibo.collektive.aggregate.api.share
@@ -24,13 +24,13 @@ fun Aggregate<Int>.shortestPathToSource(environment: EnvironmentVariables): Int 
 
     environment["distanceToSource"] = distanceToSource
 
-    val furthestToSource = share(distanceToSource){ previous ->
-        previous.maxBy(distanceToSource) { 
-            if(sourceID == it.sourceID) it.distance else Int.MIN_VALUE  
+    val closerToSource = share(distanceToSource){ previous ->
+        previous.minBy(distanceToSource) { 
+            if(sourceID == it.sourceID && sourceID != localId) it.distance else Int.MAX_VALUE  
         }
     }.also { 
-        environment["isFurthest"] = it.distance == distanceToSource.distance 
+        environment["isCloser"] = it.distance == distanceToSource.distance 
     }
 
-    return furthestToSource.distance
+    return closerToSource.distance
 }

@@ -10,7 +10,7 @@ _pool: &program
     actions:
       - type: RunCollektiveProgram
         parameters: [it.unibo.collektive.examples.path.ShortestPathKt.shortestPathToSource]
-
+    
 deployments:
   - type: GraphStreamDeployment
     parameters: [20, 2, 0, PreferentialAttachment]
@@ -19,6 +19,6 @@ deployments:
     contents:
       - molecule: distanceToSource
         concentration: null
-      - molecule: isFurthest
+      - molecule: isCloser
         concentration: true
   
