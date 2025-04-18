@@ -10,6 +10,5 @@ import it.unibo.collektive.examples.exercises.searchSource
 */
 fun Aggregate<Int>.distanceToSource(environment: EnvironmentVariables): Int {
     val sourceID = searchSource(environment)
-
     return hopDistanceTo(sourceID == localId)
 }

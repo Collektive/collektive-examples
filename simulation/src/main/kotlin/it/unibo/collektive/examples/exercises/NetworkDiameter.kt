@@ -16,27 +16,21 @@ import it.unibo.collektive.stdlib.spreading.hopDistanceTo
 */ 
 fun Aggregate<Int>.networkDiameter(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>): Int {
     val isFurthest = isMaxValue(distanceToSource(environment))
-
     val distanceToFurthest = hopDistanceTo(isFurthest)
-
     val flagNodeWithMaxHopToFurthest = isMaxValue(distanceToFurthest)
-
     val broadcastMessage = broadcast(distanceSensor, from = flagNodeWithMaxHopToFurthest, payload = distanceToFurthest.toDouble()).toInt()
-
-    var networkDiameter = distanceToFurthest
     if(distanceToFurthest <= broadcastMessage){
-        networkDiameter = broadcastMessage
+        return broadcastMessage
+    }else{
+        return distanceToFurthest
     }
-    
-    return networkDiameter
 }
 
 /**
  * Function that identifies the [maximum value] and returns true if the passed value is the maximum.
  */
-fun Aggregate<Int>.isMaxValue(value: Int): Boolean {
-    val maxValue = share(value){ field ->
-        field.max(value)
+fun Aggregate<Int>.isMaxValue(localValue: Int): Boolean = share(localValue){ field ->
+        field.max(localValue)
+    }.let { value ->
+        localValue == value
     }
-    return maxValue == value
-}
