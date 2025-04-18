@@ -14,8 +14,6 @@ data class SourceDistance(val sourceID: Int, val distance: Int)
 
 /**
  * Determine the shortest paths (the minimum number of hops) between the source and other nodes in the network.
- * 
- * The nodes that are the farthest from the source must be colored differently.
 */
 fun Aggregate<Int>.shortestPathToSource(environment: EnvironmentVariables): Int {
     val sourceID = maxNetworkID(environment)
