@@ -4,7 +4,7 @@ import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.field.operations.maxBy
 import it.unibo.collektive.examples.spreading.maxNetworkID
-import it.unibo.collektive.stdlib.spreading.hopDistanceTo
+import it.unibo.collektive.stdlib.spreading.hopGradientCast
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.examples.path.SourceDistance
 
@@ -14,7 +14,14 @@ import it.unibo.collektive.examples.path.SourceDistance
 fun Aggregate<Int>.furthestPathToSource(environment: EnvironmentVariables): Int {
     val sourceID = maxNetworkID(environment)
 
-    val distanceToSource =  SourceDistance(sourceID, hopDistanceTo(sourceID == localId))
+    val distanceToSource =  SourceDistance(sourceID, hopGradientCast(
+        source  = sourceID == localId,
+        local = 0,
+        accumulateData = { _, _, value -> 
+            value + 1 
+        }
+        )
+    )
 
     environment["distanceToSource"] = distanceToSource
 
