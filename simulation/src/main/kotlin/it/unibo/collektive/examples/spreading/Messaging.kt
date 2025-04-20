@@ -2,15 +2,29 @@ package it.unibo.collektive.examples.spreading
 
 import kotlin.random.Random
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.alchemist.collektive.device.DistanceSensor
+import it.unibo.alchemist.collektive.device.CollektiveDevice
+import it.unibo.collektive.stdlib.consensus.globalElection
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.examples.spreading.neighborhoodForDistance
+import kotlin.Double.Companion.POSITIVE_INFINITY
+import it.unibo.collektive.aggregate.api.share
+import it.unibo.collektive.stdlib.spreading.gradientCast
+import it.unibo.collektive.field.operations.minBy
 
-fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: DistanceSensor) {
-    //environment["source"] = Random.nextInt(from = 0, until = 99) == localId
-    environment["source"] = localId == 0
+data class SourceDistances(val sourceID: Int, var distanceForComunicate: Double, val distanceToSource: Double)
 
-    if(localId == 0){
-        environment["inDistance"] = neighborhoodForDistance(distanceSensor)
-    }
+fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>) {
+    val sourceID = globalElection()
+    environment["source"] = sourceID == localId
+    val sourceDistances = SourceDistances(
+        sourceID, 
+        Random.nextDouble(from = 1.0, until = 10.0), 
+        with(distanceSensor) { distances().get(sourceID) }
+    )
+    sourceDistances.distanceForComunicate = share(sourceDistances){ field ->
+        field.minBy(sourceDistances){
+            if(sourceID == it.sourceID) it.distanceToSource else POSITIVE_INFINITY  
+        }
+    }.distanceForComunicate
+    environment["distancesValue"] = sourceDistances
+    environment["inDistance"] = sourceDistances.distanceToSource <= sourceDistances.distanceForComunicate && sourceDistances.sourceID != localId
 }
