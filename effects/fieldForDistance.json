@@ -31,7 +31,7 @@
       "size": {
         "max": 100,
         "min": 0,
-        "val": 10
+        "val": 12
       },
       "molFilter": true,
       "molString": "source",
@@ -151,7 +151,7 @@
       "size": {
         "max": 100,
         "min": 0,
-        "val": 10
+        "val": 8
       },
       "molFilter": true,
       "molString": "inDistance",

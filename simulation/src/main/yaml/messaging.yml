@@ -23,6 +23,6 @@ deployments:
         concentration: false
       - molecule: inDistance
         concentration: false
-      - molecule: receiversList
+      - molecule: distances
         concentration: null
       
