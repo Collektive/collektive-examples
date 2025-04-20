@@ -1,4 +1,4 @@
-package it.unibo.collektive.examples.spreading
+package it.unibo.collektive.examples.fieldComputation
 
 import kotlin.random.Random
 import it.unibo.collektive.aggregate.api.Aggregate
@@ -12,7 +12,7 @@ import it.unibo.collektive.field.operations.minBy
 
 data class SourceDistances(val sourceID: Int, var distanceForComunicate: Double, val distanceToSource: Double)
 
-fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>) {
+fun Aggregate<Int>.computeFieldForDistance(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>) {
     val sourceID = globalElection()
     environment["source"] = sourceID == localId
     val sourceDistances = SourceDistances(

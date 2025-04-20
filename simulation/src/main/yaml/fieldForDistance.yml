@@ -11,7 +11,7 @@ _pool: &program
     - type: LevyWalk
       parameters: [1]
     - type: RunCollektiveProgram
-      parameters: [it.unibo.collektive.examples.spreading.MessagingKt.messaging]
+      parameters: [it.unibo.collektive.examples.fieldComputation.FieldForDistanceKt.computeFieldForDistance]
 
 deployments:
   - type: Rectangle
