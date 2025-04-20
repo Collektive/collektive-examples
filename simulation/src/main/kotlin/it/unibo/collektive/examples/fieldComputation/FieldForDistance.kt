@@ -12,12 +12,12 @@ import it.unibo.collektive.field.operations.minBy
 
 data class SourceDistances(val sourceID: Int, var distanceForComunicate: Double, val distanceToSource: Double)
 
-fun Aggregate<Int>.computeFieldForDistance(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>) {
+fun Aggregate<Int>.computeFieldForDistance(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>): SourceDistances {
     val sourceID = globalElection()
     environment["source"] = sourceID == localId
     val sourceDistances = SourceDistances(
         sourceID, 
-        Random.nextDouble(from = 1.0, until = 10.0), 
+        Random.nextDouble(from = 5.0, until = 20.0), 
         with(distanceSensor) { distances().get(sourceID) }
     )
     sourceDistances.distanceForComunicate = share(sourceDistances){ field ->
@@ -25,6 +25,6 @@ fun Aggregate<Int>.computeFieldForDistance(environment: EnvironmentVariables, di
             if(sourceID == it.sourceID) it.distanceToSource else POSITIVE_INFINITY  
         }
     }.distanceForComunicate
-    environment["distancesValue"] = sourceDistances
     environment["inDistance"] = sourceDistances.distanceToSource <= sourceDistances.distanceForComunicate && sourceDistances.sourceID != localId
+    return sourceDistances
 }
