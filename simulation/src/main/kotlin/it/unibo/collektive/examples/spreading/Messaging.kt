@@ -7,11 +7,10 @@ import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import kotlin.collections.filter
-import it.unibo.collektive.networking.OutboundEnvelope
 
 data class MessagesSendedTo(val sender: Int, var receivers: Set<Int>, val payload: String)
 
-fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>/*, outboundEnvelope: OutboundEnvelope<Int>*/): MessagesSendedTo {
+fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>): MessagesSendedTo {
     val sender = computeFieldForDistance(environment, distanceSensor).sourceID
     val messageToSend = MessagesSendedTo(
         sender,
@@ -20,9 +19,9 @@ fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: 
         }.keys,
         "Hello i'm device with ID $sender"
     )
-    /*messageToSend.receivers.forEach{ receiverID ->
-        outboundEnvelope.prepareMessageFor(receiverID)
-    }*/
+    messageToSend.receivers.forEach{ receiverID ->
+        // TODO: send message to receiverID
+    }
     return messageToSend
 }
 
