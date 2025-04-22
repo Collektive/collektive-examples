@@ -26,8 +26,6 @@ deployments:
     contents:
       - molecule: source
         concentration: true
-      - molecule: sourceName
-        concentration: "A"
   - type: Point
     parameters: [ 15, 15 ]
     programs:
@@ -35,5 +33,3 @@ deployments:
     contents:
       - molecule: source
         concentration: true
-      - molecule: sourceName
-        concentration: "B"

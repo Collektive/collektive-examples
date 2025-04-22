@@ -12,7 +12,7 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 /**
  * Runs a multi-source proximity chat using [multiGradientCast].
  *
- * Each node computes its distance to all sources, identified via the [environment].
+ * Each node computes its distance to all sources, identified with [isSource].
  * Nodes within [REACHABLE] hear the full [message], nodes within [THRESHOLD] receive a faint version,
  * and nodes beyond [THRESHOLD] report the message as "Unreachable".
  *
@@ -20,33 +20,26 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
  */
 fun Aggregate<Int>.chatMultipleSources(
     distances: Field<Int, Double>,
-    environment: EnvironmentVariables,
+    isSource: Boolean,
     message: String = "Hello",
-): Map<String, Message> {
-    val isSource = environment.get<Boolean>("source")
-    val sourceName = environment.getOrDefault("sourceName", "node")
-
-    val idToName: Map<Int, String> = share(emptyMap<Int, String>()) { neighborSources ->
-        neighborSources.fold(emptyMap<Int, String>()) { accumulator, neighborMap ->
+): Map<Int, Message> {
+    val sources: Set<Int> = share(emptySet<Int>()) { neighborSources ->
+        neighborSources.fold(emptySet<Int>()) { accumulator, neighborMap ->
             accumulator + neighborMap
         }.let { collected ->
-            if (isSource) collected + (localId to sourceName) else collected
+            if (isSource) collected + localId else collected
         }
     }
 
-    val sources = idToName.keys
     val multiState: Map<Int, Double> = multiGradientCast(
         sources = sources,
         local = if (localId in sources) 0.0 else POSITIVE_INFINITY,
         metric = distances,
         accumulateData = { fromSource, toNeighbor, _ -> fromSource + toNeighbor },
     )
-    val transformedState: Map<String, Double> = multiState
-        .map { (key, value) -> idToName.getValue(key) to value }
-        .toMap()
 
-    val content: MutableMap<String, Message> = mutableMapOf()
-    transformedState.forEach { (name, dist) ->
+    val content: MutableMap<Int, Message> = mutableMapOf()
+    multiState.forEach { (name, dist) ->
         content[name] = FadedMessage(message, dist)
     }
     return content
@@ -55,7 +48,7 @@ fun Aggregate<Int>.chatMultipleSources(
 /**
  * Entrypoint for the multi-source chat simulation.
  *
- * Uses the [environment] to determine source status and name,
+ * Uses the [environment] to determine source status,
  * and the [distanceSensor] to compute [distances] between nodes.
  * Returns a printable string representation of the received messages.
  */
@@ -64,5 +57,6 @@ fun Aggregate<Int>.chatMultipleEntryPoint(
     distanceSensor: CollektiveDevice<*>,
 ): String {
     val distances = with(distanceSensor) { distances() }
-    return chatMultipleSources(distances, environment).toString()
+    val isSource = environment.get<Boolean>("source")
+    return chatMultipleSources(distances, isSource).toString()
 }
