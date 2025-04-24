@@ -1,7 +1,6 @@
 package it.unibo.collektive.examples.exercises
 
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.stdlib.spreading.gossipMin
 
 /**
