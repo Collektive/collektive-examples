@@ -29,7 +29,7 @@ slf4j = "org.slf4j:slf4j-api:2.0.17"
 
 [bundles]
 alchemist = ["alchemist", "alchemist-euclidean-geometry", "alchemist-incarnation-protelis", "alchemist-swingui"]
-collektive = ["collektive", "collektive-incarnation", "collektive-plugin", "collektive-stdlib"]
+collektive = ["collektive", "collektive-incarnation", "collektive-stdlib"]
 coroutines = ["kotlinx-coroutines", "kotlinx-coroutines-rx2"]
 hivemq = ["hivemq", "hivemq-reactor"]
 
