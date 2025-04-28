@@ -55,12 +55,12 @@ fun Aggregate<Int>.broadcast(distanceSensor: CollektiveDevice<*>, from: Boolean,
  * Compute the gradient of the aggregate from the [source] to the [target].
  * The [accumulate] function is used to accumulate the value of the aggregate.
  */
-//fun Aggregate<Int>.gradientCast(
+// fun Aggregate<Int>.gradientCast(
 //    distanceSensor: CollektiveDevice<*>,
 //    source: Boolean,
 //    initial: Double,
 //    accumulate: (Double) -> Double,
-//): Double = share(POSITIVE_INFINITY to initial) { field ->
+// ): Double = share(POSITIVE_INFINITY to initial) { field ->
 //    val dist = with(distanceSensor) { distances() }
 //    when {
 //        source -> 0.0 to initial
@@ -74,4 +74,4 @@ fun Aggregate<Int>.broadcast(distanceSensor: CollektiveDevice<*>, from: Boolean,
 //            }
 //        }
 //    }
-//}.second
+// }.second
