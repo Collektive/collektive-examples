@@ -9,7 +9,7 @@ _pool: &program
     type: Event
     actions:
       - type: RunCollektiveProgram
-        parameters: [it.unibo.collektive.examples.channel.ChannelWithObstaclesKt.channelWithObstacles]
+        parameters: [it.unibo.collektive.examples.channel.ChannelWithObstaclesKt.channelWithObstaclesEntrypoint]
 
 deployments:
   - type: Grid
