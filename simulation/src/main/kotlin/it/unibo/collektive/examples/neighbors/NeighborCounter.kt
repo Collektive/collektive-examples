@@ -6,5 +6,4 @@ import it.unibo.collektive.aggregate.api.neighborhood
 /**
  * Extension function to evaluate the number of neighbors of a node in an [Aggregate] context.
  */
-fun Aggregate<Int>.neighborCounter(): Int =
-    neighborhood().neighborsCount
+fun Aggregate<Int>.neighborCounter(): Int = neighborhood().neighborsCount
