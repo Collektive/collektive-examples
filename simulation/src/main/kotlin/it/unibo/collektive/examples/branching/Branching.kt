@@ -1,14 +1,20 @@
 package it.unibo.collektive.examples.branching
 
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.aggregate.api.neighboring
-import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.field.Field.Companion.hood
+import it.unibo.collektive.examples.neighbors.neighborCounter
 
 /**
- * A simple example of branching.
+ * If the node is the source, it returns 0, otherwise it returns the number of neighbors.
  */
-fun Aggregate<Int>.branching(environment: EnvironmentVariables) = when (environment.get<Boolean>("source")) {
-    true -> 0
-    false -> neighboring(1).hood(0) { acc, _ -> acc + 1 }
+fun Aggregate<Int>.branching(isSource: Boolean): Int {
+    val count = neighborCounter()
+    return when {
+        isSource -> 0
+        else -> count
+    }
 }
+
+/**
+ * The entrypoint of the simulation running a branching program.
+ */
+fun Aggregate<Int>.branchingEntrypoint(): Int = branching(localId == 0)
