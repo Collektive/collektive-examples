@@ -8,14 +8,14 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 import it.unibo.collektive.examples.spreading.getSources
 import it.unibo.collektive.aggregate.api.neighboring
 
-data class SourceDistances(val to: Int, val from: Int, val distanceForComunicate: Double, val distance: Double, val distanceWithSource: Boolean)
+data class SourceDistances(val to: Int, val from: Int, val distanceForComunicate: Double, val distance: Double, val comunicateWithSource: Boolean)
 
 fun Aggregate<Int>.computeFieldForDistance(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>) : Map<Int, List<SourceDistances>> {
-    val sources: Map<Int, Double> = environment["sources"]
-    val distancesForComunicate = getSources(sources)
+    val sources: Map<Int, Double> = environment["comunicationDistanceToSources"]
+    val devicesValues = getSources(sources)
     environment["source"] = sources.containsKey(localId)
-    return neighboring(distancesForComunicate).alignedMap(with(distanceSensor) { distances() }) { sourceValues, distance ->
-        sourceValues.entries.map { (to, distanceForComunicate) ->
+    return neighboring(devicesValues).alignedMap(with(distanceSensor) { distances() }) { deviceValues, distance ->
+        deviceValues.entries.map { (to, distanceForComunicate) ->
             SourceDistances(
                 to, 
                 localId,
@@ -27,6 +27,6 @@ fun Aggregate<Int>.computeFieldForDistance(environment: EnvironmentVariables, di
     }.toMap()
     .filterKeys { sources.containsKey(it) && it != localId }
     .mapValues { (key, list) ->
-        list.filter { it.distanceWithSource && it.to == key}
+        list.filter { it.comunicateWithSource && it.to == key}
     }
 }

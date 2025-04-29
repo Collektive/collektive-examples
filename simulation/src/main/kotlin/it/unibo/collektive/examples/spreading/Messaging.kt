@@ -8,14 +8,13 @@ import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.aggregate.api.mapNeighborhood
 import it.unibo.collektive.examples.fieldComputation.SourceDistances
 
-data class MessagesSendedTo(val sender: Int, val receivers: Set<Int>, val text: String)
-
-/**
- * TODO: build complete list in source devices
- */
-fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>): Map<Int, List<Pair<Int, Boolean>>>{
+fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>): Map<Int, String>{
+    val sources: Map<Int, String> = environment["messageFromSources"]
     val senders = computeFieldForDistance(environment, distanceSensor)
-    return toReceiveList(senders)
+    val receiverList = toReceiveList(senders)
+    return sources.filterKeys { 
+        receiverList.values.flatten().contains(it to true)
+    } 
 }
 
 fun Aggregate<Int>.toReceiveList(senders: Map<Int, List<SourceDistances>>): Map<Int, List<Pair<Int, Boolean>>> = mapNeighborhood{ _ ->

@@ -21,10 +21,12 @@ deployments:
     contents:
       - molecule: source
         concentration: false
-      - molecule: sources
+      - molecule: comunicationDistanceToSources
         concentration: 
           0 : 10.5 
-          9: 5.7
-      - molecule: toReceive
-        concentration: null
+          9 : 5.7
+      - molecule: messageFromSources
+        concentration: 
+          0 : "Hello! I'm device 0" 
+          9 : "Hello! I'm device 9" 
       

@@ -19,7 +19,7 @@ deployments:
     programs:
       - *program
     contents:
-      - molecule: sources
+      - molecule: comunicationDistanceToSources
         concentration: 
           0 : 10.5 
           9: 5.7
