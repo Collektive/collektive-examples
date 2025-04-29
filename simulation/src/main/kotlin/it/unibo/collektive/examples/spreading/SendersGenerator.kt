@@ -6,7 +6,7 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.mapNeighborhood
 
-fun Aggregate<Int>.getSources(sources: Map<Int, Double>) : Map<Int, Double>{
+fun Aggregate<Int>.getListOfDevicesValues(sources: Map<Int, Double>) : Map<Int, Double>{
     return mapNeighborhood { id -> 
         if (isSource(sources, id)) { sources.get(id)!! } else { POSITIVE_INFINITY }
     }.toMap()
