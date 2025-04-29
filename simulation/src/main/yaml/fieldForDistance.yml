@@ -11,7 +11,7 @@ _pool: &program
     - type: LevyWalk
       parameters: [1]
     - type: RunCollektiveProgram
-      parameters: [it.unibo.collektive.examples.fieldComputation.FieldForDistanceKt.sourceIDsChoice]
+      parameters: [it.unibo.collektive.examples.fieldComputation.FieldForDistanceKt.computeFieldForDistance]
 
 deployments:
   - type: Rectangle
@@ -19,8 +19,10 @@ deployments:
     programs:
       - *program
     contents:
+      - molecule: sources
+        concentration: 
+          0 : 10.5 
+          9: 5.7
       - molecule: source
-        concentration: false
-      - molecule: inDistance
         concentration: false
       

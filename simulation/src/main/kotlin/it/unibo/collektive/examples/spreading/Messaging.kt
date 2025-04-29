@@ -1,6 +1,6 @@
 package it.unibo.collektive.examples.spreading
 
-import it.unibo.collektive.examples.fieldComputation.sourceIDsChoice
+import it.unibo.collektive.examples.fieldComputation.computeFieldForDistance
 import it.unibo.collektive.examples.spreading.MessagesSendedTo
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.alchemist.collektive.device.CollektiveDevice
@@ -8,32 +8,39 @@ import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import kotlin.collections.filter
+import it.unibo.collektive.aggregate.api.mapNeighborhood
+import it.unibo.collektive.examples.fieldComputation.SourceDistances
 
-data class MessagesSendedTo(val sender: Int, var receivers: Set<Int>)
+data class MessagesSendedTo(val sender: Int, val receivers: Set<Int>, val text: String)
 
-fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>): List<String> {
-    val senders = sourceIDsChoice(environment, distanceSensor)
+fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>): Map<Int, MessagesSendedTo> {
+    val senders = computeFieldForDistance(environment, distanceSensor)
     environment["distances"] = senders
-    return listOf(
-        messagingWith(senders[0].distanceForComunicate >= senders[0].distanceToSource, senders[0].sourceID),
-        messagingWith(senders[1].distanceForComunicate >= senders[1].distanceToSource, senders[1].sourceID)
-    )
-}
-
-fun Aggregate<Int>.messagingWith(inDistance: Boolean, sender: Int): String {
-    val messageToSend = MessagesSendedTo(
-        sender,
-        receiversList(inDistance).filter { (_, value) ->
-            value == true 
-        }.keys
-    )
-    return share("") { 
-        if (messageToSend.receivers.contains(it.localId)) {
-            "Hello i'm device with ID $sender"
+    val receivers = receiversList(senders)
+    return mapNeighborhood{ id ->
+        if(senders.containsKey(id)){
+            MessagesSendedTo(
+                id,
+                receivers.filter { (key, value) ->
+                    value && key == id
+                }.keys,
+                "Hello i'm device with ID ${id}"
+            )
         }else{
-            ""
+            MessagesSendedTo(
+                -1,
+                emptySet(),
+                ""
+            )
         }
-    }
+    }.toMap()
 }
 
-fun Aggregate<Int>.receiversList(inDistance: Boolean): Map<Int, Boolean> = neighboring(inDistance).toMap()
+fun Aggregate<Int>.receiversList(senders: Map<Int, List<SourceDistances>>): Map<Int, Boolean> = mapNeighborhood{ id ->
+    if(senders.containsKey(id)){
+        val value = senders.get(id)!![0]
+        value.distanceForComunicate <= value.distance
+    }else{
+        false
+    }
+}.toMap()

@@ -21,6 +21,10 @@ deployments:
     contents:
       - molecule: source
         concentration: false
+      - molecule: sources
+        concentration: 
+          0 : 10.5 
+          9: 5.7
       - molecule: inDistance
         concentration: false
       - molecule: distances
