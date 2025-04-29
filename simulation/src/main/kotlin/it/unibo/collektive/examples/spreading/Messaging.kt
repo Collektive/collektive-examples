@@ -1,46 +1,28 @@
 package it.unibo.collektive.examples.spreading
 
 import it.unibo.collektive.examples.fieldComputation.computeFieldForDistance
-import it.unibo.collektive.examples.spreading.MessagesSendedTo
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.alchemist.collektive.device.CollektiveDevice
-import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import kotlin.collections.filter
 import it.unibo.collektive.aggregate.api.mapNeighborhood
 import it.unibo.collektive.examples.fieldComputation.SourceDistances
 
 data class MessagesSendedTo(val sender: Int, val receivers: Set<Int>, val text: String)
 
-fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>): Map<Int, MessagesSendedTo> {
+/**
+ * TODO: build complete list in source devices
+ */
+fun Aggregate<Int>.messaging(environment: EnvironmentVariables, distanceSensor: CollektiveDevice<*>): Map<Int, List<Pair<Int, Boolean>>>{
     val senders = computeFieldForDistance(environment, distanceSensor)
-    environment["distances"] = senders
-    val receivers = receiversList(senders)
-    return mapNeighborhood{ id ->
-        if(senders.containsKey(id)){
-            MessagesSendedTo(
-                id,
-                receivers.filter { (key, value) ->
-                    value && key == id
-                }.keys,
-                "Hello i'm device with ID ${id}"
-            )
-        }else{
-            MessagesSendedTo(
-                -1,
-                emptySet(),
-                ""
-            )
-        }
-    }.toMap()
+    return toReceiveList(senders)
 }
 
-fun Aggregate<Int>.receiversList(senders: Map<Int, List<SourceDistances>>): Map<Int, Boolean> = mapNeighborhood{ id ->
-    if(senders.containsKey(id)){
-        val value = senders.get(id)!![0]
-        value.distanceForComunicate <= value.distance
-    }else{
-        false
+fun Aggregate<Int>.toReceiveList(senders: Map<Int, List<SourceDistances>>): Map<Int, List<Pair<Int, Boolean>>> = mapNeighborhood{ _ ->
+    senders.entries.map { (id, distance) ->
+        val entry = distance.find { it.to == id && it.from == localId}
+        id to (entry!!.distanceForComunicate >= entry.distance)
     }
-}.toMap()
+}
+.toMap()
+.filterKeys { it == localId }
