@@ -16,6 +16,3 @@ deployments:
     parameters: [50, 0, 0, 20, 20]
     programs:
       - *program
-    contents:
-      - molecule: source
-        concentration: false
