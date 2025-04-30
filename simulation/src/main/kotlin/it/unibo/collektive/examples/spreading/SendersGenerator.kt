@@ -6,6 +6,10 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.mapNeighborhood
 
+/**
+ * Function in which a map is built in which each device (identified with its ID) is associated with the distance 
+ * at which it wants to send messages.
+ */
 fun Aggregate<Int>.getListOfDevicesValues(sources: Map<Int, Double>) : Map<Int, Double>{
     return mapNeighborhood { id -> 
         if (isSource(sources, id)) { sources.get(id)!! } else { POSITIVE_INFINITY }
