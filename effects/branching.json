@@ -34,9 +34,9 @@
       "val": 30
     },
     "molFilter": true,
-    "molString": "source",
+    "molString": "it.unibo.collektive.examples.branching.BranchingKt.branchingEntrypoint",
     "molPropertyFilter": true,
-    "property": "if (it \u003d\u003d true) 1 else 0",
+    "property": "if (localId \u003d\u003d 0) 1 else 0",
     "writingPropertyValue": false,
     "c": "ALPHA",
     "reverse": false,
@@ -91,10 +91,10 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 30
+      "val": 16
     },
     "molFilter": true,
-    "molString": "it.unibo.collektive.examples.branching.BranchingKt.branching",
+    "molString": "it.unibo.collektive.examples.branching.BranchingKt.branchingEntrypoint",
     "molPropertyFilter": true,
     "property": "",
     "writingPropertyValue": true,
