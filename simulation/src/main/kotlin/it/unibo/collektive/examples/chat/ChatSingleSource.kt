@@ -1,12 +1,12 @@
 package it.unibo.collektive.examples.chat
 
 import it.unibo.alchemist.collektive.device.CollektiveDevice
+import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.field.Field
-import it.unibo.collektive.field.operations.min
 import it.unibo.collektive.stdlib.doubles.FieldedDoubles.plus
+import it.unibo.collektive.stdlib.fields.minValue
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
 /**
@@ -26,7 +26,7 @@ fun Aggregate<Int>.chatSingleSource(
     val state = share(POSITIVE_INFINITY) {
         when {
             source -> 0.0
-            else -> (it + distances).min(POSITIVE_INFINITY)
+            else -> (it + distances).minValue(POSITIVE_INFINITY)
         }
     }
     return FadedMessage(message, state)

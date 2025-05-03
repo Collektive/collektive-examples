@@ -1,11 +1,11 @@
 package it.unibo.collektive.examples.chat
 
 import it.unibo.alchemist.collektive.device.CollektiveDevice
+import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.field.Field
-import it.unibo.collektive.field.Field.Companion.fold
+import it.unibo.collektive.stdlib.fields.fold
 import it.unibo.collektive.stdlib.spreading.multiGradientCast
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
@@ -24,8 +24,8 @@ fun Aggregate<Int>.chatMultipleSources(
     message: String = "Hello",
 ): Map<Int, Message> {
     val sources: Set<Int> = share(emptySet<Int>()) { neighborSources ->
-        neighborSources.fold(emptySet<Int>()) { accumulator, neighborMap ->
-            accumulator + neighborMap
+        neighborSources.fold(emptySet<Int>()) { accumulator, neighborEntry ->
+            accumulator + neighborEntry.value
         }.let { collected ->
             if (isSource) collected + localId else collected
         }

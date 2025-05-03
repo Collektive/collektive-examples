@@ -4,7 +4,7 @@ import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.field.Field.Companion.fold
+import it.unibo.collektive.stdlib.fields.fold
 import it.unibo.collektive.stdlib.spreading.multiGradientCast
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
@@ -18,7 +18,7 @@ fun Aggregate<Int>.multiGradient(
     val isSource = environment.get<Boolean>("source")
     val sources = share(emptySet<Int>()) { neighborSources ->
         neighborSources.fold(emptySet<Int>()) { accumulated, neighborSet ->
-            accumulated union neighborSet
+            accumulated union neighborSet.value
         }.let { collected ->
             if (isSource) collected + localId else collected
         }
