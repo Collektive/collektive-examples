@@ -28,7 +28,7 @@ fun Aggregate<Int>.computeDistances(environment: EnvironmentVariables, distanceS
     val sources: Map<Int, Double> = environment["comunicationDistanceToSources"]
     val devicesValues = getListOfDevicesValues(sources)
     environment["source"] = sources.containsKey(localId)
-    return neighboring(devicesValues).alignedMap(with(distanceSensor) { distances() }) { deviceValues, distance ->
+    return neighboring(devicesValues).alignedMap(with(distanceSensor) { distances() }) { _: Int, deviceValues: Map<Int, Double>, distance: Double ->
         deviceValues.entries.map { (to, distanceForMessaging) ->
             SourceDistances(
                 to, 
