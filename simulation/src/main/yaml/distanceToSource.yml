@@ -16,7 +16,4 @@ deployments:
     parameters: [15, 2, 0, PreferentialAttachment]
     programs:
       - *program
-    contents:
-      - molecule: isSource
-        concentration: true
       
