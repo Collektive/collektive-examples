@@ -25,11 +25,11 @@ fun Aggregate<Int>.broadcastSourcesNeighbors(
 /**
  * Computes the hops from the source to the target.
  */
-fun Aggregate<Int>.hopsFromSource(distanceMetric: Field<Int, Double>, isSource: Boolean, payload: Double): Double =
+fun Aggregate<Int>.hopsFromSource(distances: Field<Int, Double>, isSource: Boolean, payload: Double): Double =
     gradientCast(
         source = isSource,
         local = payload,
-        metric = distanceMetric,
+        metric = distances,
         accumulateData = { fromSource, toNeighbor, data ->
             data + 1 // hops from source to me
         },
@@ -38,27 +38,27 @@ fun Aggregate<Int>.hopsFromSource(distanceMetric: Field<Int, Double>, isSource: 
 /**
  *
  */
-fun Aggregate<Int>.broadcastNeighbors(distanceMetric: Field<Int, Double>, isSource: Boolean, payload: Double): Double =
+fun Aggregate<Int>.broadcastNeighbors(distances: Field<Int, Double>, isSource: Boolean, payload: Double): Double =
     gradientCast(
         source = isSource,
         local = payload,
-        metric = distanceMetric,
+        metric = distances,
         accumulateData = { fromSource, toNeighbor, data ->
             payload
         },
     )
 
-fun Aggregate<Int>.findAname(collektiveDevice: CollektiveDevice<*>): Double = broadcastNeighbors(
-    distanceMetric = with(collektiveDevice) { distances() },
+fun Aggregate<Int>.findAname(distances: Field<Int, Double>): Double = broadcastNeighbors(
+    distances = distances,
     isSource = localId == 0,
     payload = neighborCounter().toDouble(),
 )
 
-fun Aggregate<Int>.broadcastDistance(distanceMetric: Field<Int, Double>, isSource: Boolean, payload: Double): Double =
+fun Aggregate<Int>.broadcastDistance(distances: Field<Int, Double>, isSource: Boolean, payload: Double): Double =
     gradientCast(
         source = isSource,
         local = payload,
-        metric = distanceMetric,
+        metric = distances,
         accumulateData = { fromSource, toNeighbor, data ->
             toNeighbor
         },
@@ -68,11 +68,11 @@ fun Aggregate<Int>.broadcastDistance(distanceMetric: Field<Int, Double>, isSourc
  * Evaluates the number of neighbors of each device,
  * if the device is the source, it returns 0.
  */
-fun Aggregate<Int>.broadcastNeighborsSourceZero(distanceMetric: Field<Int, Double>, isSource: Boolean): Double =
+fun Aggregate<Int>.broadcastNeighborsSourceZero(distances: Field<Int, Double>, isSource: Boolean): Double =
     gradientCast(
         source = isSource,
         local = 0.0,
-        metric = distanceMetric,
+        metric = distances,
         accumulateData = { fromSource, toNeighbor, data ->
             neighborCounter().toDouble()
         },
@@ -90,20 +90,24 @@ fun Aggregate<Int>.broadcast(distances: Field<Int, Double>, isSource: Boolean, p
 // ===================================
 
 /**
- * Broadcast the number of devices connected in the network.
+ * Broadcast from the [source] the number of devices connected in the network.
+ * Need a [distances] field used as metric to compute the distance from the source to the target.
  */
-fun Aggregate<Int>.broadcastDevices(distances: Field<Int, Double>, isSource: Boolean): Int = broadcast(
-    distances = distances,
-    isSource = isSource,
-    payload = countDevices(isSource),
+fun Aggregate<Int>.broadcastDevices(distances: Field<Int, Double>, source: Boolean): Int = gradientCast(
+    metric = distances,
+    source = source,
+    local = countDevices(sink = source),
 )
 
 /**
- * The entrypoint of the simulation running a broadcast with the source set as the device with id 0.
+ * [collektiveDevice] is a representation of the device that runs a Collektive program.
+ * It is used to access the device's properties and methods,
+ * such as the [distances] method, which returns a field of distances from the source.
+ * In this case, the source is the device with [localId] 0.
  */
 fun Aggregate<Int>.broadcastDevicesEntrypoint(collektiveDevice: CollektiveDevice<*>): Int = broadcastDevices(
     distances = with(collektiveDevice) { distances() },
-    isSource = localId == 0,
+    source = localId == 0,
 )
 
 // how to fix the number update when the source is no more available?
@@ -124,9 +128,9 @@ fun Aggregate<Int>.broadcastDevicesWithLeaderElectionEntrypoint(
     collektiveDevice: CollektiveDevice<*>,
     env: EnvironmentVariables,
 ): Int {
-    val leader = findLeader(env)
+    val leaderId = findLeader(env)
     return broadcastDevices(
         distances = with(collektiveDevice) { distances() },
-        isSource = localId == leader,
+        source = localId == leaderId,
     )
 }
