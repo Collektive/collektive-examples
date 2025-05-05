@@ -1,0 +1,18 @@
+incarnation: collektive
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [5]
+
+_pool: &program
+  - time-distribution: 1
+    type: Event
+    actions:
+      - type: RunCollektiveProgram
+        parameters: [it.unibo.collektive.examples.counter.HopsFromSourceKt.hopsFromSourceEntrypoint]
+
+deployments:
+  - type: Rectangle
+    parameters: [50, 0, 0, 20, 20]
+    programs:
+      - *program
