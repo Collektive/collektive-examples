@@ -42,6 +42,10 @@ fun Aggregate<Int>.chatSingleEntrypoint(
     environment: EnvironmentVariables,
     distanceSensor: CollektiveDevice<*>,
 ): String {
-    val distances = with(distanceSensor) { distances() }
-    return chatSingleSource(distances, environment["source"]).toString()
+    val distances: Field<Int, Double> = with(distanceSensor) { distances() }
+    return when (val isSource: Any = environment["source"]) {
+        is String -> chatSingleSource(distances, isSource.toBoolean()).toString()
+        is Boolean -> chatSingleSource(distances, isSource).toString()
+        else -> "Unknown type"
+    }
 }

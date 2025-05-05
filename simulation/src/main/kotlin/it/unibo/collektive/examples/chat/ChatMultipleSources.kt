@@ -57,6 +57,9 @@ fun Aggregate<Int>.chatMultipleEntryPoint(
     distanceSensor: CollektiveDevice<*>,
 ): String {
     val distances = with(distanceSensor) { distances() }
-    val isSource = environment.get<Boolean>("source")
-    return chatMultipleSources(distances, isSource).toString()
+    return when (val isSource: Any = environment["source"]) {
+        is String -> chatMultipleSources(distances, isSource.toBoolean()).toString()
+        is Boolean -> chatMultipleSources(distances, isSource).toString()
+        else -> "Unknown type"
+    }
 }
