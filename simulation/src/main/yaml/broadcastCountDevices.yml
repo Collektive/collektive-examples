@@ -9,7 +9,7 @@ _pool: &program
     type: Event
     actions:
       - type: RunCollektiveProgram
-        parameters: [it.unibo.collektive.examples.broadcast.BroadcastKt.broadcastDevicesEntrypoint]
+        parameters: [it.unibo.collektive.examples.counter.CounterKt.broadcastCountDevicesEntrypoint]
 
 deployments:
   - type: Rectangle
