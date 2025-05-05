@@ -30,4 +30,4 @@ gitHooks {
     createHooks(overwriteExisting = true)
 }
 
-include("distributed", "simulation")
+include("simulation")
