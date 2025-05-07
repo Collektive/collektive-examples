@@ -10,12 +10,20 @@ import it.unibo.collektive.aggregate.api.mapNeighborhood
  * Function in which a map is built in which each device (identified with its ID) is associated with the distance 
  * at which it wants to send messages.
  */
-fun Aggregate<Int>.getListOfDevicesValues(sources: Map<Int, Double>) : Map<Int, Double>{
+fun Aggregate<Int>.getListOfDevicesValues(
+    sources: Map<Int, Double>
+) : Map<Int, Double>{
     return mapNeighborhood { id -> 
         if (isSource(sources, id)) { sources.get(id)!! } else { POSITIVE_INFINITY }
     }.toMap()
 }
 
-fun Aggregate<Int>.isSource(sources: Map<Int, Double>, id: Int): Boolean{
+/**
+ * It is identified whether the passed node is a source or not.
+ */
+fun Aggregate<Int>.isSource(
+    sources: Map<Int, Double>, 
+    id: Int
+): Boolean{
     return sources.containsKey(id)
 }
