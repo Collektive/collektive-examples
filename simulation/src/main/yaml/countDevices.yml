@@ -1,18 +1,18 @@
+incarnation: collektive
+
 network-model:
   type: ConnectWithinDistance
   parameters: [5]
-
-incarnation: collektive
 
 _pool: &program
   - time-distribution: 1
     type: Event
     actions:
       - type: RunCollektiveProgram
-        parameters: [it.unibo.collektive.examples.gradient.GradientKt.gradientEntrypoint]
+        parameters: [it.unibo.collektive.examples.counter.CounterKt.countDevicesEntrypoint]
 
 deployments:
   - type: Rectangle
-    parameters: [199, 0, 0, 20, 20]
+    parameters: [50, 0, 0, 20, 20]
     programs:
       - *program
