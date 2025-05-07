@@ -1,10 +1,18 @@
 package it.unibo.collektive.examples.exercises
 
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.stdlib.spreading.hopDistanceTo
+import it.unibo.collektive.stdlib.spreading.bellmanFordGradientCast
 import it.unibo.collektive.examples.exercises.searchSource
+import it.unibo.alchemist.collektive.device.CollektiveDevice
 
 /**
  * Compute the [distances] between any node and the [source] using the adaptive bellman-ford algorithm.
 */
-fun Aggregate<Int>.distanceToSource() = hopDistanceTo(searchSource())
+fun Aggregate<Int>.distanceToSource(distanceSensor: CollektiveDevice<*>) = bellmanFordGradientCast(
+    source = searchSource(),
+    local = 0,
+    accumulateData = { _, _, dist ->
+        dist + 1
+    },
+    metric = with(distanceSensor) { distances() }
+)
