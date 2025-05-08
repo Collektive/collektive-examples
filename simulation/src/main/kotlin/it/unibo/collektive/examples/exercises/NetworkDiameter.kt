@@ -35,4 +35,4 @@ fun Aggregate<Int>.isMaxValue(localValue: Int): Boolean =
     gossipMax(localValue).let { maxValue ->
         localValue == maxValue
     }
-    
+   
