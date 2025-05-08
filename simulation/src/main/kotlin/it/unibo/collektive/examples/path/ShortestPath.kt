@@ -8,19 +8,16 @@ import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.examples.spreading.distanceToSource
 import it.unibo.collektive.stdlib.fields.minValue
 
-/**
- * Determine the shortest paths (the minimum number of hops) between the source and 
- * other nodes in the network.
-*/
+/** Determine the shortest paths (the minimum number of hops) between the source and
+ * other nodes in the network. */
 fun Aggregate<Int>.shortestPathToSource(environment: EnvironmentVariables): Int {
     val sourceID = maxNetworkID(environment)
     val distanceToSource =  distanceToSource(sourceID)
     environment["distanceToSource"] = distanceToSource
-    val minDistance: Int = when {
-        distanceToSource.sourceID == localId ->
-            share(distanceToSource.distance) {
-                it.minValue(distanceToSource.distance)
-            }
+    val minDistance: Int = when { distanceToSource.sourceID != localId ->
+        share(distanceToSource.distance) {
+            it.minValue(distanceToSource.distance)
+        }
         else -> Int.MAX_VALUE
     }
     return neighboring(minDistance).minValue(minDistance).also {
