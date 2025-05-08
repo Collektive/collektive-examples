@@ -31,8 +31,6 @@ fun Aggregate<Int>.networkDiameter(distanceSensor: CollektiveDevice<*>): Int {
  * Function that identifies the [maximum value] and returns true if the passed value 
  * is the maximum.
  */
-fun Aggregate<Int>.isMaxValue(localValue: Int): Boolean = 
-    gossipMax(localValue).let { maxValue ->
-        localValue == maxValue
-    }
-   
+fun Aggregate<Int>.isMaxValue(localValue: Int): Boolean = gossipMax(localValue).let { maxValue ->
+    localValue == maxValue
+}
