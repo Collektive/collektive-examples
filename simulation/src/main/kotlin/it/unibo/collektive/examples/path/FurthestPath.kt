@@ -1,11 +1,13 @@
 package it.unibo.collektive.examples.path
 
 import it.unibo.collektive.aggregate.api.Aggregate
+import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.examples.spreading.maxNetworkID
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.examples.spreading.distanceToSource
-import it.unibo.collektive.stdlib.fields.maxValueBy
+import it.unibo.collektive.stdlib.fields.maxValue
+import it.unibo.collektive.stdlib.fields.minValue
 
 /**
  * Determine the furthest paths (the maximum number of hops) between the source and 
@@ -15,13 +17,14 @@ fun Aggregate<Int>.furthestPathToSource(environment: EnvironmentVariables): Int 
     val sourceID = maxNetworkID(environment)
     val distanceToSource = distanceToSource(sourceID)
     environment["distanceToSource"] = distanceToSource
-    val res = share(distanceToSource){ field ->
-        val maxValue = field.maxValueBy {
-            if(localId == it.value.sourceID) Int.MIN_VALUE 
-            else it.value.distance
-        }
-        maxValue ?: field.local.value
+    val maxDistance: Int = when {
+        distanceToSource.sourceID == localId ->
+            share(distanceToSource.distance) {
+                it.maxValue(distanceToSource.distance)
+            }
+        else -> Int.MAX_VALUE
     }
-    environment["isFurthest"] = res.distance == distanceToSource.distance 
-    return res.distance
+    return neighboring(maxDistance).maxValue(maxDistance).also {
+        environment["isFurthest"] = it == distanceToSource.distance
+    }
 }
