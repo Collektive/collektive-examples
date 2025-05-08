@@ -13,24 +13,24 @@ import it.unibo.collektive.aggregate.api.neighboring
  */
 data class SourceDistances(
     /**
-     * Contains the id of the source node being considered
+     * Contains the id of the source node being considered.
     */
     val to: Int, 
     /**
-     * Contains the id of the non-source node being considered
+     * Contains the id of the non-source node being considered.
     */
     val from: Int, 
     /**
-     * Contains the distance set by the source to be able to receive its messages
+     * Contains the distance set by the source to be able to receive its messages.
     */
     val distanceForMessaging: Double,
     /**
-     * Contains the distance between node in [to] value and node in [from] value
+     * Contains the distance between node in [to] value and node in [from] value.
     */
     val distance: Double, 
     /**
-     * Is a boolean value indicating whether the identified messaging distance has been 
-     * communicated by a source node
+     * Is a boolean value indicating whether the identified messaging distance has been
+     * communicated by a source node.
     */
     val isSourceValues: Boolean 
 )
