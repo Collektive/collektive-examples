@@ -7,7 +7,8 @@ import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 /**
  * Identify the maximum ID values in the network.
 */
-fun Aggregate<Int>.maxNetworkID(environment: EnvironmentVariables): Int =
-    gossipMax(localId).also { maxValue ->
-        environment["isMaxID"] = localId == maxValue
-    }
+fun Aggregate<Int>.maxNetworkID(
+    environment: EnvironmentVariables
+): Int = gossipMax(localId).also { maxValue ->
+    environment["isMaxID"] = localId == maxValue
+}

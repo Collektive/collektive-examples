@@ -8,7 +8,8 @@ import it.unibo.collektive.stdlib.fields.maxValue
 /**
  * Identify the maximum ID values among the neighboring nodes.
 */
-fun Aggregate<Int>.maxNeighborID(environment: EnvironmentVariables): Int = 
-    mapNeighborhood { it }.maxValue(localId).also { 
-        environment["isMaxID"] = it == localId 
-    }
+fun Aggregate<Int>.maxNeighborID(
+    environment: EnvironmentVariables
+): Int = mapNeighborhood { it }.maxValue(localId).also { 
+    environment["isMaxID"] = it == localId 
+}
