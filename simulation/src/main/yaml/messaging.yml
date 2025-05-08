@@ -1,0 +1,34 @@
+network-model:
+  type: ConnectWithinDistance
+  parameters: [50]
+
+incarnation: collektive
+
+_pool: &program
+  - time-distribution: 5000
+    type: Event
+    actions:
+    - type: LevyWalk
+      parameters: [1]
+    - type: RunCollektiveProgram
+      parameters: [it.unibo.collektive.examples.spreading.MessagingKt.messaging]
+
+deployments:
+  - type: Rectangle
+    parameters: [10, 0, 0, 20, 20]
+    programs:
+      - *program
+    contents:
+      - molecule: source
+        concentration: false
+      - molecule: comunicationDistanceToSources
+        concentration: 
+          0 : 15.5 
+          9 : 5.7
+          3 : 8.0
+      - molecule: messageFromSources
+        concentration: 
+          0 : "Hello! I'm device 0" 
+          9 : "Hello! I'm device 9" 
+          3 : "Hello! I'm device 3"
+      

@@ -1,0 +1,29 @@
+network-model:
+  type: ConnectWithinDistance
+  parameters: [50]
+
+incarnation: collektive
+
+_pool: &program
+  - time-distribution: 5000
+    type: Event
+    actions:
+    - type: LevyWalk
+      parameters: [1]
+    - type: RunCollektiveProgram
+      parameters: [it.unibo.collektive.examples.fieldComputation.FieldForDistanceKt.computeDistances]
+
+deployments:
+  - type: Rectangle
+    parameters: [10, 0, 0, 20, 20]
+    programs:
+      - *program
+    contents:
+      - molecule: source
+        concentration: false
+      - molecule: comunicationDistanceToSources
+        concentration: 
+          0 : 15.5 
+          9: 5.7
+          3 : 8.0
+      
