@@ -14,7 +14,7 @@ import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
  * [localDistance] is the initial local distance of the nodes, and [distance]
  * represents the current estimated distance for the [path].
  */
-data class GradientGossip<ID : Comparable<ID>>(
+data class GossipGradient<ID : Comparable<ID>>(
     val distance: Double,
     val localDistance: Double,
     val path: List<ID> = emptyList(),
@@ -22,13 +22,13 @@ data class GradientGossip<ID : Comparable<ID>>(
     /**
      * Reset gossip to start from the local value of the specified node [id].
      */
-    fun base(id: ID) = GradientGossip(localDistance, localDistance, listOf(id))
+    fun base(id: ID) = GossipGradient(localDistance, localDistance, listOf(id))
 
     /**
      * Add a new hop [id] to the path, update the distance with [newBest] and the
-     * localDistance with [localDistance]
+     * localDistance with [localDistance].
      */
-    fun addHop(newBest: Double, localDistance: Double, id: ID) = GradientGossip(
+    fun addHop(newBest: Double, localDistance: Double, id: ID) = GossipGradient(
         distance = newBest,
         localDistance = localDistance,
         path = path + id,
@@ -38,17 +38,18 @@ data class GradientGossip<ID : Comparable<ID>>(
 /**
  * Computes the minimum gradient distance from a [source] node to all other nodes in a distributed system
  * using gossip-based communication. The function iteratively propagates [distances] information across
- * neighbors while avoiding loops in the paths. It stabilizes to the minimal distance once information has been fully shared.
+ * neighbors while avoiding loops in the paths.
+ * It stabilizes to the minimal distance once information has been fully shared.
  */
 fun Aggregate<Int>.gossipGradient(distances: Field<Int, Double>, source: Boolean): Double {
     val localDistance = if (source) 0.0 else Double.POSITIVE_INFINITY
-    val localGossip = GradientGossip<Int>(
+    val localGossip = GossipGradient<Int>(
         distance = localDistance,
         localDistance = localDistance,
         path = listOf(localId),
     )
 
-    val result = share(localGossip) { neighborsGossip: Field<Int, GradientGossip<Int>> ->
+    val result = share(localGossip) { neighborsGossip: Field<Int, GossipGradient<Int>> ->
         var bestGossip = localGossip
         val neighbors = neighborsGossip.neighbors.toSet()
 
