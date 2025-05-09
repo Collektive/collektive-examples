@@ -34,9 +34,9 @@
       "val": 30
     },
     "molFilter": true,
-    "molString": "it.unibo.collektive.examples.broadcast.BroadcastKt.broadcastEntrypoint",
+    "molString": "source",
     "molPropertyFilter": true,
-    "property": "if (localId \u003d\u003d 0) 1 else 0",
+    "property": "if (it \u003d\u003d true) 1 else 0",
     "writingPropertyValue": false,
     "c": "ALPHA",
     "reverse": false,
@@ -94,7 +94,7 @@
       "val": 16
     },
     "molFilter": true,
-    "molString": "it.unibo.collektive.examples.broadcast.BroadcastKt.broadcastEntrypoint",
+    "molString": "it.unibo.collektive.examples.counter.HopsFromSourceKt.hopsFromSourceEntrypoint",
     "molPropertyFilter": true,
     "property": "",
     "writingPropertyValue": true,
