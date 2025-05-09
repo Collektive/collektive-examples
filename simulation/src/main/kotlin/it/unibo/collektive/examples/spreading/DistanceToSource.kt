@@ -9,17 +9,17 @@ data class DistanceToSource(
     /** ID of the identified source node. */
     val sourceID: Int,
     /** Distance from identified source node. */
-    val distance: Int
+    val distance: Int,
 )
 
 /** Calculating the distance from a node to a given source. */
 fun Aggregate<Int>.distanceToSource(sourceID: Int) = DistanceToSource(
     sourceID,
     hopGradientCast(
-        source  = sourceID == localId,
+        source = sourceID == localId,
         local = 0,
         accumulateData = { _, _, value ->
             value + 1
         },
-    )
+    ),
 )
