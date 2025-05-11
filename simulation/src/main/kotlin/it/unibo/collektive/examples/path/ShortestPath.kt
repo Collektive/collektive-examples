@@ -14,7 +14,7 @@ fun Aggregate<Int>.shortestPathToSource(environment: EnvironmentVariables): Int 
     val sourceID = maxNetworkID(environment)
     val distanceToSource = distanceToSource(sourceID)
     environment["distanceToSource"] = distanceToSource
-    val minDistance: Int = when { 
+    val minDistance: Int = when {
         distanceToSource.sourceID != localId ->
             share(distanceToSource.distance) {
                 it.minValue(distanceToSource.distance)

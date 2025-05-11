@@ -14,7 +14,7 @@ fun Aggregate<Int>.furthestPathToSource(environment: EnvironmentVariables): Int 
     val sourceID = maxNetworkID(environment)
     val distanceToSource = distanceToSource(sourceID)
     environment["distanceToSource"] = distanceToSource
-    val maxDistance: Int = when { 
+    val maxDistance: Int = when {
         distanceToSource.sourceID != localId ->
             share(distanceToSource.distance) {
                 it.maxValue(distanceToSource.distance)
