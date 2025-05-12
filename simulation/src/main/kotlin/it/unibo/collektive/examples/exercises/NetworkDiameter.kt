@@ -15,8 +15,8 @@ fun Aggregate<Int>.networkDiameter(distanceSensor: CollektiveDevice<*>): Int {
     val distanceToFurthest = hopDistanceTo(isFurthest)
     val flagNodeWithMaxHopToFurthest = gossipMax(distanceToFurthest) == distanceToFurthest
     val broadcastMessage = broadcast(
-        distances = with(distanceSensor) { distances() }, 
-        from = flagNodeWithMaxHopToFurthest, 
+        distances = with(distanceSensor) { distances() },
+        from = flagNodeWithMaxHopToFurthest,
         payload = distanceToFurthest.toDouble(),
     ).toInt()
     return when {
@@ -24,4 +24,3 @@ fun Aggregate<Int>.networkDiameter(distanceSensor: CollektiveDevice<*>): Int {
         else -> distanceToFurthest
     }
 }
-
