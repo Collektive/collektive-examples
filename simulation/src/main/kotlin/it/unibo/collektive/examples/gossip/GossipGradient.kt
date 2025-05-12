@@ -81,9 +81,6 @@ fun Aggregate<Int>.gossipGradientEntrypoint(
     distanceSensor: CollektiveDevice<*>,
 ): Double {
     val distances: Field<Int, Double> = with(distanceSensor) { distances() }
-    return when (val isSource: Any = environment["source"]) {
-        is String -> gossipGradient(distances, isSource.toBoolean())
-        is Boolean -> gossipGradient(distances, isSource)
-        else -> 0.0
-    }
+    val source = environment.get<Boolean>("source")
+    return gossipGradient(distances, source)
 }
