@@ -3,8 +3,8 @@ package it.unibo.collektive.examples.spreading
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.stdlib.spreading.hopGradientCast
 
-/** Defined a data class to represent the association between a source
- * node and its distance. */
+/** Defined a data class to represent the distance to
+ * a determined source. */
 data class DistanceToSource(
     /** ID of the identified source node. */
     val sourceID: Int,
