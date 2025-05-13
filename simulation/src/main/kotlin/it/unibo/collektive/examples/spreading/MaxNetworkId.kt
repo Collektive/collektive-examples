@@ -6,4 +6,4 @@ import it.unibo.collektive.stdlib.spreading.gossipMax
 
 /** Identify the maximum ID values in the network. */
 fun Aggregate<Int>.maxNetworkID(environment: EnvironmentVariables): Int =
-    gossipMax(localId).also { maxValue -> environment["isMaxID"] = localId == maxValue }
+    gossipMax(localId).also { environment["isMaxID"] = localId == it }
