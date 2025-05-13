@@ -8,7 +8,7 @@ import it.unibo.collektive.examples.spreading.distanceToSource
 import it.unibo.collektive.examples.spreading.maxNetworkID
 import it.unibo.collektive.stdlib.fields.minValue
 
-/** Determine the shortest paths (the minimum number of hops) between the source and
+/** Determine the shortest paths (the minimum number of hops) between the node with the maximum ID, and
  * other nodes in the network. */
 fun Aggregate<Int>.shortestPathToSource(environment: EnvironmentVariables): Int {
     val sourceID = maxNetworkID(environment)
