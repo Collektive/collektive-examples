@@ -12,9 +12,9 @@ interface Message {
 /**
  * Builds a [Message] with appropriate [content] based on [distance].
  *
- * - If [distance] ≤ [REACHABLE], the full [content] message is returned.
- * - If [distance] < [THRESHOLD], a faded version is returned using [fadeMessage].
- * - If [distance] ≥ [THRESHOLD], the message is considered unreachable.
+ * - If [distance] ≤ [PERFECTLY_REACHABLE], the full [content] message is returned.
+ * - If [distance] < [ALMOST_UNREACHABLE], a faded version is returned using [fadeMessage].
+ * - If [distance] ≥ [ALMOST_UNREACHABLE], the message is considered unreachable.
  */
 class FadedMessage private constructor(override val content: String, override val distance: Double) : Message {
     /**
@@ -26,8 +26,8 @@ class FadedMessage private constructor(override val content: String, override va
          */
         operator fun invoke(base: String, distance: Double): FadedMessage {
             val message = when {
-                distance <= REACHABLE -> base
-                distance < THRESHOLD -> fadeMessage(base, distance)
+                distance <= PERFECTLY_REACHABLE -> base
+                distance < ALMOST_UNREACHABLE -> fadeMessage(base, distance)
                 else -> "Unreachable"
             }
             return FadedMessage(message, distance)
@@ -41,7 +41,7 @@ class FadedMessage private constructor(override val content: String, override va
  * Formats a faded version of a [message] based on [distance].
  *
  * The message is suffixed with a percentage representing how strongly it is perceived
- * (100% when distance equals [REACHABLE], 0% when it reaches [THRESHOLD]).
+ * (100% when distance equals [PERFECTLY_REACHABLE], 0% when it reaches [ALMOST_UNREACHABLE]).
  * Used to simulate signal degradation in proximity-based messaging.
  */
 private fun fadeMessage(message: String, distance: Double): String {
@@ -54,6 +54,7 @@ private fun fadeMessage(message: String, distance: Double): String {
  * Computes the perceived intensity (faintness) of a message based on distance.
  *
  * The result is a percentage from 100 (fully clear) to 0 (barely understandable).
- * Intended to be used when distance is between [REACHABLE] and [THRESHOLD].
+ * Intended to be used when distance is between [PERFECTLY_REACHABLE] and [ALMOST_UNREACHABLE].
  */
-private fun calculateFaint(distance: Double): Double = (1.0 - ((distance - REACHABLE) / REACHABLE)) * 100
+private fun calculateFaint(distance: Double): Double =
+    (1.0 - ((distance - PERFECTLY_REACHABLE) / PERFECTLY_REACHABLE)) * 100
