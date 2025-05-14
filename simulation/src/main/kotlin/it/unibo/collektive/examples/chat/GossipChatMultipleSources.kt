@@ -5,14 +5,14 @@ import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.stdlib.fields.fold
 
 /**
  * Runs a multi-source proximity chat using [gossipGradient].
  *
  * Each node computes its distance to all sources, identified with [isSource].
- * Nodes within [REACHABLE] hear the full [message], nodes within [THRESHOLD] receive a faint version,
- * and nodes beyond [THRESHOLD] are excluded.
+ * Nodes within [PERFECTLY_REACHABLE] hear the full [message],
+ * nodes within [ALMOST_UNREACHABLE] receive a faint version,
+ * and nodes beyond [ALMOST_UNREACHABLE] are excluded.
  *
  * Returns a map from source name to the received [Message] with content and distance.
  */
@@ -22,13 +22,12 @@ fun Aggregate<Int>.chatMultipleSources(
     message: String = "Hello",
 ): Map<Int, Message> {
     /*
-    Get the sources of the network
+    Gossip‐share self‐stabilizing of the sources
      */
-    val sources: Set<Int> = share(emptySet()) { neighborSources ->
-        neighborSources.fold(emptySet<Int>()) { accumulator, neighborEntry ->
-            accumulator + neighborEntry.value
-        }.let { collected ->
-            if (isSource) collected + localId else collected
+    val localSources: Set<Int> = if (isSource) setOf(localId) else emptySet()
+    val sources: Set<Int> = share(localSources) { neighborSets: Field<Int, Set<Int>> ->
+        neighborSets.neighborsValues.fold(localSources) { accumulator, neighborSet ->
+            accumulator + neighborSet
         }
     }
     /*
@@ -42,7 +41,7 @@ fun Aggregate<Int>.chatMultipleSources(
         }
     }
     val content: MutableMap<Int, Message> = mutableMapOf()
-    distancesToEachSource.filter { it.value < THRESHOLD }.forEach { (source, distance) ->
+    distancesToEachSource.filter { it.value < ALMOST_UNREACHABLE }.forEach { (source, distance) ->
         content[source] = FadedMessage(message, distance)
     }
     return content
