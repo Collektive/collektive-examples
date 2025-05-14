@@ -3,19 +3,17 @@ package it.unibo.collektive.examples.chat
 import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.stdlib.doubles.FieldedDoubles.plus
-import it.unibo.collektive.stdlib.fields.minValue
-import kotlin.Double.Companion.POSITIVE_INFINITY
+import it.unibo.collektive.examples.gradient.gradient
 
 /**
  * Computes a proximity-based message propagation using aggregate computing.
  *
  * The message is emitted by a node marked as a [source] and propagates through neighbors,
  * with the perceived message degrading linearly based on [distances].
- * Nodes within [REACHABLE] hear the full [message], nodes within [THRESHOLD] receive a faint version,
- * and nodes beyond [THRESHOLD] report the message as "Unreachable".
+ * Nodes within [PERFECTLY_REACHABLE] hear the full [message],
+ * nodes within [ALMOST_UNREACHABLE] receive a faint version,
+ * and nodes beyond [ALMOST_UNREACHABLE] report the message as "Unreachable".
  *
  */
 fun Aggregate<Int>.chatSingleSource(
@@ -23,12 +21,7 @@ fun Aggregate<Int>.chatSingleSource(
     source: Boolean,
     message: String = "Hello",
 ): Message {
-    val state = share(POSITIVE_INFINITY) {
-        when {
-            source -> 0.0
-            else -> (it + distances).minValue(POSITIVE_INFINITY)
-        }
-    }
+    val state = gradient(distances, source)
     return FadedMessage(message, state)
 }
 
@@ -43,9 +36,6 @@ fun Aggregate<Int>.chatSingleEntrypoint(
     distanceSensor: CollektiveDevice<*>,
 ): String {
     val distances: Field<Int, Double> = with(distanceSensor) { distances() }
-    return when (val isSource: Any = environment["source"]) {
-        is String -> chatSingleSource(distances, isSource.toBoolean()).toString()
-        is Boolean -> chatSingleSource(distances, isSource).toString()
-        else -> "Unknown type"
-    }
+    val isSource = environment.get<Boolean>("source")
+    return chatSingleSource(distances, isSource).toString()
 }
