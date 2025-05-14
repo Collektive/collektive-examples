@@ -23,16 +23,7 @@ fun Aggregate<Int>.channelWithObstacles(
     source: Boolean,
     target: Boolean,
     obstacle: Boolean,
-): Boolean = when {
-    obstacle -> false
-    else ->
-        channel(
-            collektiveDevice,
-            source,
-            target,
-            channelWidth = 0.5,
-        )
-}
+): Boolean = !obstacle && channel(collektiveDevice, source, target, channelWidth = 0.5)
 
 /**
  * Compute the channel between the [source] and the [destination] with a specific [channelWidth].
