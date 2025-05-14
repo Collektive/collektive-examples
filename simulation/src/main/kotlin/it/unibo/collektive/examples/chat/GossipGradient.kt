@@ -1,10 +1,8 @@
-package it.unibo.collektive.examples.gossip
+package it.unibo.collektive.examples.chat
 
-import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
-import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 
 /**
  * Data structure representing a state in a gossip-based gradient algorithm.
@@ -41,9 +39,10 @@ data class GossipGradient<ID : Comparable<ID>>(
  * neighbors while avoiding loops in the paths.
  * It stabilizes to the minimal distance once information has been fully shared.
  */
-fun Aggregate<Int>.gossipGradient(distances: Field<Int, Double>, source: Boolean): Double {
-    val localDistance = if (source) 0.0 else Double.POSITIVE_INFINITY
-    val localGossip = GossipGradient<Int>(
+fun Aggregate<Int>.gossipGradient(distances: Field<Int, Double>, target: Int): Double {
+    val isSource = localId == target
+    val localDistance = if (isSource) 0.0 else Double.POSITIVE_INFINITY
+    val localGossip = GossipGradient(
         distance = localDistance,
         localDistance = localDistance,
         path = listOf(localId),
@@ -51,14 +50,14 @@ fun Aggregate<Int>.gossipGradient(distances: Field<Int, Double>, source: Boolean
 
     val result = share(localGossip) { neighborsGossip: Field<Int, GossipGradient<Int>> ->
         var bestGossip = localGossip
-        val neighbors = neighborsGossip.neighbors.toSet()
+        val neighbors = neighborsGossip.toMap().keys
 
-        for ((id, neighborGossip) in neighborsGossip.toMap()) {
+        for ((neighborId, neighborGossip) in neighborsGossip.toMap()) {
             val recentPath = neighborGossip.path.asReversed().drop(1)
             val pathIsValid = recentPath.none { it == localId || it in neighbors }
-            val nextGossip = if (pathIsValid) neighborGossip else neighborGossip.base(id)
+            val nextGossip = if (pathIsValid) neighborGossip else neighborGossip.base(neighborId)
 
-            val neighborDistance = distances[id]
+            val neighborDistance = distances[neighborId]
             val totalDistance = nextGossip.distance + neighborDistance
 
             if (totalDistance < bestGossip.distance) {
@@ -68,19 +67,4 @@ fun Aggregate<Int>.gossipGradient(distances: Field<Int, Double>, source: Boolean
         bestGossip
     }
     return result.distance
-}
-
-/**
- * Uses the [environment] to determine source status,
- * and the [distanceSensor] to compute [distances] between nodes.
- * Returns the distance of the node from the [source].
- *
- */
-fun Aggregate<Int>.gossipGradientEntrypoint(
-    environment: EnvironmentVariables,
-    distanceSensor: CollektiveDevice<*>,
-): Double {
-    val distances: Field<Int, Double> = with(distanceSensor) { distances() }
-    val source = environment.get<Boolean>("source")
-    return gossipGradient(distances, source)
 }

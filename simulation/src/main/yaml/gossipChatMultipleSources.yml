@@ -1,6 +1,6 @@
 network-model:
   type: ConnectWithinDistance
-  parameters: [4]
+  parameters: [5]
 
 incarnation: collektive
 
@@ -9,11 +9,11 @@ _pool: &program
     type: Event
     actions:
       - type: RunCollektiveProgram
-        parameters: [it.unibo.collektive.examples.gossip.GossipGradientKt.gossipGradientEntrypoint]
+        parameters: [it.unibo.collektive.examples.chat.GossipChatMultipleSourcesKt.gossipChatMultipleSourcesEntrypoint]
 
 deployments:
   - type: Rectangle
-    parameters: [199, 0, 0, 20, 20]
+    parameters: [198, 0, 0, 20, 20]
     programs:
       - *program
     contents:
@@ -21,6 +21,13 @@ deployments:
         concentration: false
   - type: Point
     parameters: [10, 10]
+    programs:
+      - *program
+    contents:
+      - molecule: source
+        concentration: true
+  - type: Point
+    parameters: [ 11, 10 ]
     programs:
       - *program
     contents:
