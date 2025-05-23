@@ -1,9 +1,8 @@
 package it.unibo.collektive.examples.bullsEye
 
 import it.unibo.alchemist.collektive.device.CollektiveDevice
-import it.unibo.collektive.aggregate.api.Aggregate
-import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.aggregate.Field
+import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.stdlib.spreading.distanceTo
 import it.unibo.collektive.stdlib.spreading.gossipMax
 import it.unibo.collektive.stdlib.spreading.gossipMin
@@ -25,16 +24,16 @@ private const val DISTANCE_OUTER_RING = 10.0
 
 /** Draws a bullseye pattern based on network distances and node positions.
  * This function identifies two distant nodes (extremes) in the network to define a main axis,
- * then computes an approximate center point (intersection of two diagonals), 
- * and finally assigns a value based on the distance from this central node, creating 
+ * then computes an approximate center point (intersection of two diagonals),
+ * and finally assigns a value based on the distance from this central node, creating
  * concentric zones.
  * The returned value is intended for visualization (e.g., as a color gradient from 0 to 100),
  * allowing the rendering of a bullseye pattern across the network.*/
 fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
-    // Creates a gradient from a randomly chosen node (using gossipMin), measuring 
+    // Creates a gradient from a randomly chosen node (using gossipMin), measuring
     // distances based on the provided metric.
     val distToRandom = distanceTo(gossipMin(localId) == localId, metric = metric)
-    // Finds the node that is farthest from the random starting node. This will serve 
+    // Finds the node that is farthest from the random starting node. This will serve
     // as the first “extreme” of the network.
     val firstExtreme = gossipMax(distToRandom to localId, compareBy { it.first }).second
     // Builds a distance gradient starting from the first extreme node.
@@ -45,9 +44,9 @@ fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
         gossipMax(distanceToExtreme to localId, compareBy { it.first })
     // Builds a distance gradient from the second extreme.
     val distanceToOtherExtreme = distanceTo(otherExtreme == localId, metric = metric)
-    // Approximates the center of the network by computing the intersection of 
+    // Approximates the center of the network by computing the intersection of
     // diagonals between the two extremes, and finds the closest node to that point.
-    val distanceFromMainDiameter = 
+    val distanceFromMainDiameter =
         abs(distanceBetweenExtremes - distanceToExtreme - distanceToOtherExtreme)
     val distanceFromOpposedDiagonal = abs(distanceToExtreme - distanceToOtherExtreme)
     val approximateDistance = hypot(distanceFromOpposedDiagonal, distanceFromMainDiameter)
@@ -64,6 +63,4 @@ fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
 }
 
 /** Executes the bullsEye and prepares its result for visualization. */
-fun Aggregate<Int>.bullsEyeEntrypoint(simulatedDevice: CollektiveDevice<*>): Int {
-    return bullsEye(with(simulatedDevice) { distances() })
-}
+fun Aggregate<Int>.bullsEyeEntrypoint(simulatedDevice: CollektiveDevice<*>) = bullsEye(with(simulatedDevice) { distances() }
