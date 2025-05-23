@@ -10,6 +10,19 @@ import it.unibo.collektive.stdlib.spreading.gossipMin
 import kotlin.math.abs
 import kotlin.math.hypot
 
+// Constants for colors
+private const val COLOR_CENTER = 25
+private const val COLOR_INNER_RING = 75
+private const val COLOR_MID_RING = 50
+private const val COLOR_OUTER_RING = 0
+private const val COLOR_BEYOND = 85
+
+// Distance thresholds
+private const val DISTANCE_CENTER = 1.0
+private const val DISTANCE_INNER_RING = 4.0
+private const val DISTANCE_MID_RING = 7.0
+private const val DISTANCE_OUTER_RING = 10.0
+
 /** Draws a bullseye pattern based on network distances and node positions.
  * This function identifies two distant nodes (extremes) in the network to define a main axis,
  * then computes an approximate center point (intersection of two diagonals), 
@@ -18,7 +31,6 @@ import kotlin.math.hypot
  * The returned value is intended for visualization (e.g., as a color gradient from 0 to 100),
  * allowing the rendering of a bullseye pattern across the network.*/
 fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
-    val colors = listOf(25, 75, 50, 0, 85)
     // Creates a gradient from a randomly chosen node (using gossipMin), measuring 
     // distances based on the provided metric.
     val distToRandom = distanceTo(gossipMin(localId) == localId, metric = metric)
@@ -43,11 +55,11 @@ fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
     // Measures how far each node is from the computed center.
     val distanceFromCenter = distanceTo(centralNode == localId)
     return when (distanceFromCenter) {
-        in 0.0..1.0 -> colors[0]
-        in 1.0..4.0 -> colors[1]
-        in 4.0..7.0 -> colors[2]
-        in 7.0..10.0 -> colors[3]
-        else -> colors[4]
+        in 0.0..DISTANCE_CENTER -> COLOR_CENTER
+        in DISTANCE_CENTER..DISTANCE_INNER_RING -> COLOR_INNER_RING
+        in DISTANCE_INNER_RING..DISTANCE_MID_RING -> COLOR_MID_RING
+        in DISTANCE_MID_RING..DISTANCE_OUTER_RING -> COLOR_OUTER_RING
+        else -> COLOR_BEYOND
     }
 }
 
