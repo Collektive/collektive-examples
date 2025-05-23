@@ -18,6 +18,7 @@ import kotlin.math.hypot
  * The returned value is intended for visualization (e.g., as a color gradient from 0 to 100),
  * allowing the rendering of a bullseye pattern across the network.*/
 fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
+    val colors = listOf(25, 75, 50, 0, 85)
     // Creates a gradient from a randomly chosen node (using gossipMin), measuring 
     // distances based on the provided metric.
     val distToRandom = distanceTo(gossipMin(localId) == localId, metric = metric)
@@ -42,11 +43,11 @@ fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
     // Measures how far each node is from the computed center.
     val distanceFromCenter = distanceTo(centralNode == localId)
     return when (distanceFromCenter) {
-        in 0.0..1.0 ->25
-        in 1.0..4.0 -> 75
-        in 4.0..7.0 -> 50
-        in 7.0..10.0 -> 0
-        else -> 85
+        in 0.0..1.0 -> colors[0]
+        in 1.0..4.0 -> colors[1]
+        in 4.0..7.0 -> colors[2]
+        in 7.0..10.0 -> colors[3]
+        else -> colors[4]
     }
 }
 
