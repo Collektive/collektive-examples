@@ -63,4 +63,5 @@ fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
 }
 
 /** Executes the bullsEye and prepares its result for visualization. */
-fun Aggregate<Int>.bullsEyeEntrypoint(simulatedDevice: CollektiveDevice<*>) = bullsEye(with(simulatedDevice) { distances() }
+fun Aggregate<Int>.bullsEyeEntrypoint(simulatedDevice: CollektiveDevice<*>) = 
+    bullsEye(with(simulatedDevice) { distances() }
