@@ -1,10 +1,8 @@
 package it.unibo.collektive.examples.counter
 
-import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.stdlib.spreading.gossipMax
-import it.unibo.collektive.stdlib.spreading.gradientCast
 import it.unibo.collektive.stdlib.spreading.hopDistanceTo
 
 /**
@@ -23,16 +21,3 @@ fun Aggregate<Int>.hopsFromSourceEntrypoint(env: EnvironmentVariables): Int {
     val isLeader = isMaxId().also { env["source"] = it }
     return hopDistanceTo(source = isLeader)
 }
-
-/**
- * Computes the hops from the source to the target.
- * If the device is the source, it returns 0 (the local value).
- */
-fun Aggregate<Int>.hopsFromSource(distances: Field<Int, Double>, source: Boolean): Double = gradientCast(
-    source = source,
-    local = 0.0,
-    metric = distances,
-    accumulateData = { _, _, data ->
-        data + 1 // hops from source to me
-    },
-)

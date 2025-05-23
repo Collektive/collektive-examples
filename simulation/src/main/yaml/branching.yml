@@ -13,6 +13,6 @@ _pool: &program
 
 deployments:
   - type: Rectangle
-    parameters: [50, 0, 0, 20, 20]
+    parameters: [100, 0, 0, 20, 20]
     programs:
       - *program
