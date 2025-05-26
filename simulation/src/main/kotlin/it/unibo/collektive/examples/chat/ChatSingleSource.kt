@@ -4,7 +4,7 @@ import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.examples.gradient.gradient
+import it.unibo.collektive.stdlib.spreading.distanceTo
 
 /**
  * Computes a proximity-based message propagation using aggregate computing.
@@ -21,7 +21,7 @@ fun Aggregate<Int>.chatSingleSource(
     source: Boolean,
     message: String = "Hello",
 ): Message {
-    val state = gradient(distances, source)
+    val state = distanceTo(source, distances)
     return FadedMessage(message, state)
 }
 

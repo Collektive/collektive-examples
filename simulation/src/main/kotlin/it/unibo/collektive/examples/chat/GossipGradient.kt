@@ -53,15 +53,17 @@ fun Aggregate<Int>.gossipGradient(distances: Field<Int, Double>, target: Int): D
         val neighbors = neighborsGossip.toMap().keys
 
         for ((neighborId, neighborGossip) in neighborsGossip.toMap()) {
-            val recentPath = neighborGossip.path.asReversed().drop(1)
-            val pathIsValid = recentPath.none { it == localId || it in neighbors }
-            val nextGossip = if (pathIsValid) neighborGossip else neighborGossip.base(neighborId)
+            alignedOn(neighborId) {
+                val recentPath = neighborGossip.path.asReversed().drop(1)
+                val pathIsValid = recentPath.none { it == localId || it in neighbors }
+                val nextGossip = if (pathIsValid) neighborGossip else neighborGossip.base(neighborId)
 
-            val neighborDistance = distances[neighborId]
-            val totalDistance = nextGossip.distance + neighborDistance
+                val neighborDistance = distances[neighborId]
+                val totalDistance = nextGossip.distance + neighborDistance
 
-            if (totalDistance < bestGossip.distance) {
-                bestGossip = nextGossip.addHop(totalDistance, localGossip.localDistance, localId)
+                if (totalDistance < bestGossip.distance) {
+                    bestGossip = nextGossip.addHop(totalDistance, localGossip.localDistance, localId)
+                }
             }
         }
         bestGossip
