@@ -10,16 +10,18 @@ import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
  * Runs a multi-source proximity chat using [gossipGradient].
  *
  * Each node computes its distance to all sources, identified with [isSource].
- * Nodes within [PERFECTLY_REACHABLE] hear the full [message],
- * nodes within [ALMOST_UNREACHABLE] receive a faint version,
- * and nodes beyond [ALMOST_UNREACHABLE] are excluded.
- *
+ * Nodes within [maxDistance] hear the [content],
+ * and nodes beyond [maxDistance] are excluded.
+ * The messages have a lifetime equal to [lifeTime].
  * Returns a map from source name to the received [Message] with content and distance.
  */
 fun Aggregate<Int>.chatMultipleSources(
     distances: Field<Int, Double>,
     isSource: Boolean,
-    message: String = "Hello",
+    currentTime: Double,
+    content: String,
+    lifeTime: Double,
+    maxDistance: Double,
 ): Map<Int, Message> {
     /*
     Gossip‐share self‐stabilizing of the sources
@@ -37,14 +39,15 @@ fun Aggregate<Int>.chatMultipleSources(
     for (sourceId in sources) {
         alignedOn(sourceId) {
             val distance = gossipGradient(distances, sourceId)
-            distancesToEachSource[sourceId] = distance
+            distancesToEachSource[sourceId] = if (currentTime <= lifeTime) distance else Double.POSITIVE_INFINITY
         }
     }
-    val content: MutableMap<Int, Message> = mutableMapOf()
-    distancesToEachSource.filter { it.value < ALMOST_UNREACHABLE }.forEach { (source, distance) ->
-        content[source] = FadedMessage(message, distance)
+
+    val message: MutableMap<Int, Message> = mutableMapOf()
+    distancesToEachSource.filter { it.value < maxDistance }.forEach { (source, distanceFromSource) ->
+        message[source] = Message(content, distanceFromSource)
     }
-    return content
+    return message
 }
 
 /**
@@ -60,7 +63,18 @@ fun Aggregate<Int>.gossipChatMultipleSourcesEntrypoint(
 ): String {
     val distances: Field<Int, Double> = with(distanceSensor) { distances() }
     val isSource = environment.get<Boolean>("source")
+    val currentTime = distanceSensor.currentTime.toDouble()
+    val lifeTime = 100.0
+    val content = "Hello"
+    val maxDistance = 10.0
 
-    val message = chatMultipleSources(distances, isSource)
+    val message = chatMultipleSources(
+        distances,
+        isSource,
+        currentTime,
+        content,
+        lifeTime,
+        maxDistance,
+    )
     return message.toString()
 }
