@@ -64,17 +64,17 @@ fun Aggregate<Int>.gossipChatMultipleSourcesEntrypoint(
     val distances: Field<Int, Double> = with(distanceSensor) { distances() }
     val isSource = environment.get<Boolean>("source")
     val currentTime = distanceSensor.currentTime.toDouble()
-    val lifeTime = 100.0
+    val lifeTime = Double.POSITIVE_INFINITY
     val content = "Hello"
-    val maxDistance = 10.0
+    val maxDistance = 3000.0
 
-    val message = chatMultipleSources(
+    return chatMultipleSources(
         distances,
         isSource,
         currentTime,
         content,
         lifeTime,
         maxDistance,
-    )
-    return message.toString()
+    ).map { "${it.key}: ${it.value}" }
+        .joinToString("\n")
 }
