@@ -7,6 +7,21 @@ import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 
 /**
+ * Duration in seconds within which sources will send messages.
+ */
+const val LIFE_TIME = 100.0
+
+/**
+ * Maximum distance in meters within which messages will be sent from sources.
+ */
+const val MAX_DISTANCE = 3000.0
+
+/**
+ * Content of the message.
+ */
+const val MESSAGE = "Echo"
+
+/**
  * Runs a multi-source proximity chat using [gossipGradient].
  *
  * Each node computes its distance to all sources, identified with [isSource].
@@ -44,7 +59,9 @@ fun Aggregate<Int>.chatMultipleSources(
     }
 
     val message: MutableMap<Int, Message> = mutableMapOf()
-    distancesToEachSource.filter { it.value < maxDistance }.forEach { (source, distanceFromSource) ->
+    distancesToEachSource.filter {
+        it.value < maxDistance && it.key != localId
+    }.forEach { (source, distanceFromSource) ->
         message[source] = Message(content, distanceFromSource)
     }
     return message
@@ -64,9 +81,9 @@ fun Aggregate<Int>.gossipChatMultipleSourcesEntrypoint(
     val distances: Field<Int, Double> = with(distanceSensor) { distances() }
     val isSource = environment.get<Boolean>("source")
     val currentTime = distanceSensor.currentTime.toDouble()
-    val lifeTime = Double.POSITIVE_INFINITY
-    val content = "Hello"
-    val maxDistance = 3000.0
+    val lifeTime = LIFE_TIME
+    val content = MESSAGE
+    val maxDistance = MAX_DISTANCE
 
     return chatMultipleSources(
         distances,
