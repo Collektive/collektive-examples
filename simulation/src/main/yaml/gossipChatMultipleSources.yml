@@ -1,0 +1,35 @@
+incarnation: collektive
+
+environment:
+  type: OSMEnvironment
+  parameters: ["vcm.pbf", false]
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [3000]
+
+_polls:
+  _pool: &gossipProgram
+    - time-distribution: 1
+      type: Event
+      actions:
+        - type: RunCollektiveProgram
+          parameters: [it.unibo.collektive.examples.chat.GossipChatMultipleSourcesKt.gossipChatMultipleSourcesEntrypoint]
+    - pool: &move
+        - time-distribution: 1
+          type: Event
+          actions:
+            - type: ReproduceGPSTrace
+              parameters: [ "vcmuser.gpx", true, "AlignToSimulationTime" ]
+
+deployments:
+  - type: FromGPSTrace
+    parameters: [50, "vcmuser.gpx", true, "AlignToSimulationTime"]
+    contents:
+      - molecule: source
+        concentration: true
+    programs:
+      - *gossipProgram
+      - *move
+
+
