@@ -7,21 +7,6 @@ import it.unibo.collektive.aggregate.api.share
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 
 /**
- * Duration in seconds within which sources will send messages.
- */
-const val LIFE_TIME = 100.0
-
-/**
- * Maximum distance in meters within which messages will be sent from sources.
- */
-const val MAX_DISTANCE = 3000.0
-
-/**
- * Content of the message.
- */
-const val MESSAGE = "Echo"
-
-/**
  * Runs a multi-source proximity chat using [gossipGradient].
  *
  * Each node computes its distance to all sources, identified with [isSource].
@@ -34,12 +19,12 @@ fun Aggregate<Int>.chatMultipleSources(
     distances: Field<Int, Double>,
     isSource: Boolean,
     currentTime: Double,
-    content: String,
-    lifeTime: Double,
-    maxDistance: Double,
+    content: String = "echo from node $localId",
+    lifeTime: Double = 100.0,
+    maxDistance: Double = 3000.0,
 ): Map<Int, Message> {
     /*
-    Gossip‐share self‐stabilizing of the sources
+    Gossip‐share self‐stabilizing of the sources.
      */
     val localSources: Set<Int> = if (isSource) setOf(localId) else emptySet()
     val sources: Set<Int> = share(localSources) { neighborSets: Field<Int, Set<Int>> ->
@@ -48,23 +33,26 @@ fun Aggregate<Int>.chatMultipleSources(
         }
     }
     /*
-    Compute [gossipGradient] for each source
+    Compute [gossipGradient] for each source.
      */
-    val distancesToEachSource = mutableMapOf<Int, Double>()
+    val messages = mutableMapOf<Int, Message>()
     for (sourceId in sources) {
         alignedOn(sourceId) {
-            val distance = gossipGradient(distances, sourceId)
-            distancesToEachSource[sourceId] = if (currentTime <= lifeTime) distance else Double.POSITIVE_INFINITY
+            val result = gossipGradient(
+                distances = distances,
+                target = sourceId,
+                isSource = localId == sourceId && isSource,
+                currentTime = currentTime,
+                content = content,
+                lifeTime = lifeTime,
+                maxDistance = maxDistance,
+            )
+
+            result?.let { messages[sourceId] = result }
         }
     }
 
-    val message: MutableMap<Int, Message> = mutableMapOf()
-    distancesToEachSource.filter {
-        it.value < maxDistance && it.key != localId
-    }.forEach { (source, distanceFromSource) ->
-        message[source] = Message(content, distanceFromSource)
-    }
-    return message
+    return messages
 }
 
 /**
@@ -81,17 +69,11 @@ fun Aggregate<Int>.gossipChatMultipleSourcesEntrypoint(
     val distances: Field<Int, Double> = with(distanceSensor) { distances() }
     val isSource = environment.get<Boolean>("source")
     val currentTime = distanceSensor.currentTime.toDouble()
-    val lifeTime = LIFE_TIME
-    val content = MESSAGE
-    val maxDistance = MAX_DISTANCE
 
     return chatMultipleSources(
         distances,
         isSource,
         currentTime,
-        content,
-        lifeTime,
-        maxDistance,
-    ).map { "${it.key}: ${it.value}" }
+    ).map { "${it.key}: ${it.value.content}" }
         .joinToString("\n")
 }
