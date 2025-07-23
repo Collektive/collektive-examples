@@ -74,26 +74,23 @@ fun Aggregate<Int>.gossipGradient(
         path = listOf(localId),
     )
 
+    val distanceMap = distances.toMap()
     val result = share(localGossip) { neighborsGossip: Field<Int, GossipGradient<Int>> ->
         var bestGossip = localGossip
         val neighbors = neighborsGossip.toMap().keys
 
         for ((neighborId, neighborGossip) in neighborsGossip.toMap()) {
-            alignedOn(neighborId) {
-                val recentPath = neighborGossip.path.asReversed().drop(1)
-                val pathIsValid = recentPath.none { it == localId || it in neighbors }
-                val nextGossip = if (pathIsValid) neighborGossip else neighborGossip.base(neighborId)
-
-                val neighborDistance = distances[neighborId]
-                val totalDistance = nextGossip.distance + neighborDistance
-
-                if (totalDistance < bestGossip.distance && neighborGossip.content.isNotEmpty()) {
-                    bestGossip = nextGossip.addHop(totalDistance, localGossip.localDistance, localId)
-                }
+            val recentPath = neighborGossip.path.asReversed().drop(1)
+            val pathIsValid = recentPath.none { it == localId || it in neighbors }
+            val nextGossip = if (pathIsValid) neighborGossip else neighborGossip.base(neighborId)
+            val totalDistance = nextGossip.distance + distanceMap.getOrDefault(neighborId, nextGossip.distance)
+            if (totalDistance < bestGossip.distance && neighborGossip.content.isNotEmpty()) {
+                bestGossip = nextGossip.addHop(totalDistance, localGossip.localDistance, localId)
             }
         }
         bestGossip
     }
+
     /*
     Filter the message before sharing it.
      */
