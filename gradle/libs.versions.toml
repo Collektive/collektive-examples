@@ -18,7 +18,7 @@ alchemist = ["alchemist", "alchemist-euclidean-geometry", "alchemist-incarnation
 collektive = ["collektive", "collektive-incarnation", "collektive-stdlib"]
 
 [plugins]
-multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:3.5.1"
+multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:3.5.4"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-qa = "org.danilopianini.gradle-kotlin-qa:0.89.1"
