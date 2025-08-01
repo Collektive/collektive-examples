@@ -34,7 +34,7 @@ val heap: Long =
             println("Detected ${memAvailableKb}MB RAM available.")
             memAvailableKb * 9 / 10
         } catch (e: Exception) {
-            println("Could not detect RAM, falling back to default.")
+            println("Could not detect RAM, falling back to default. Error: ${e.message}")
             14 * 1024L
         }
     } else {
