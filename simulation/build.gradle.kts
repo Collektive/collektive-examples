@@ -1,3 +1,5 @@
+import org.codehaus.groovy.ast.tools.GeneralUtils.args
+import sun.jvmstat.monitor.MonitoredVmUtil.mainClass
 import java.awt.GraphicsEnvironment
 import java.io.ByteArrayOutputStream
 import java.util.Locale
@@ -26,11 +28,15 @@ val heap: Long =
     maxHeap ?: if (System.getProperty("os.name").lowercase().contains("linux")) {
         ByteArrayOutputStream()
             .use { output ->
-                exec {
-                    executable = "bash"
-                    args = listOf("-c", "cat /proc/meminfo | grep MemAvailable | grep -o '[0-9]*'")
+                val result = tasks.register("detectAvailableMemory", JavaExec::class) {
+                    group = "system"
+                    description = "Detects available memory in the system"
+                    mainClass.set("it.unibo.alchemist.Alchemist")
+                    classpath = sourceSets["main"].runtimeClasspath
+                    args("-c", "cat /proc/meminfo | grep MemAvailable | grep -o '[0-9]*'")
                     standardOutput = output
                 }
+                result.get().exec()
                 output.toString().trim().toLong() / 1024
             }.also { println("Detected ${it}MB RAM available.") } * 9 / 10
     } else {
