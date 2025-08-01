@@ -1,8 +1,5 @@
-import org.codehaus.groovy.ast.tools.GeneralUtils.args
-import sun.jvmstat.monitor.MonitoredVmUtil.mainClass
 import java.awt.GraphicsEnvironment
-import java.io.ByteArrayOutputStream
-import java.util.Locale
+import java.util.*
 
 plugins {
     application
@@ -26,23 +23,24 @@ dependencies {
 val maxHeap: Long? by project
 val heap: Long =
     maxHeap ?: if (System.getProperty("os.name").lowercase().contains("linux")) {
-        ByteArrayOutputStream()
-            .use { output ->
-                val result = tasks.register("detectAvailableMemory", JavaExec::class) {
-                    group = "system"
-                    description = "Detects available memory in the system"
-                    mainClass.set("it.unibo.alchemist.Alchemist")
-                    classpath = sourceSets["main"].runtimeClasspath
-                    args("-c", "cat /proc/meminfo | grep MemAvailable | grep -o '[0-9]*'")
-                    standardOutput = output
-                }
-                result.get().exec()
-                output.toString().trim().toLong() / 1024
-            }.also { println("Detected ${it}MB RAM available.") } * 9 / 10
+        try {
+            val memAvailableKb = ProcessBuilder("bash", "-c", "grep MemAvailable /proc/meminfo | grep -o '[0-9]*'")
+                .redirectErrorStream(true)
+                .start()
+                .inputStream
+                .bufferedReader()
+                .use { it.readText().trim() }
+                .toLong() / 1024
+            println("Detected ${memAvailableKb}MB RAM available.")
+            memAvailableKb * 9 / 10
+        } catch (e: Exception) {
+            println("Could not detect RAM, falling back to default.")
+            14 * 1024L
+        }
     } else {
-        // Guess 16GB RAM of which 2 used by the OS
         14 * 1024L
     }
+
 val taskSizeFromProject: Int? by project
 val taskSize = taskSizeFromProject ?: 512
 val threadCount = maxOf(1, minOf(Runtime.getRuntime().availableProcessors(), heap.toInt() / taskSize))
