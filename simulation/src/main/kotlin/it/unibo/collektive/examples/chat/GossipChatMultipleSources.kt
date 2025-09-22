@@ -4,7 +4,9 @@ import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
+import it.unibo.collektive.aggregate.values
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
+import it.unibo.collektive.stdlib.collapse.fold
 
 /**
  * Runs a multi-source proximity chat using [gossipGradient].
@@ -28,7 +30,7 @@ fun Aggregate<Int>.chatMultipleSources(
      */
     val localSources: Set<Int> = if (isSource) setOf(localId) else emptySet()
     val sources: Set<Int> = share(localSources) { neighborSets: Field<Int, Set<Int>> ->
-        neighborSets.neighborsValues.fold(localSources) { accumulator, neighborSet ->
+        neighborSets.all.values.fold(localSources) { accumulator, neighborSet ->
             accumulator + neighborSet
         }
     }
