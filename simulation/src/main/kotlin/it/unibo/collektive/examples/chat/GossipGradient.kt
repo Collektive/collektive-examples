@@ -3,6 +3,9 @@ package it.unibo.collektive.examples.chat
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.share
+import it.unibo.collektive.aggregate.toMap
+import it.unibo.collektive.stdlib.maps.FieldedMapsExtensions.toMap
+import it.unibo.collektive.stdlib.sequences.FieldedMapsExtensions.toMap
 
 /**
  * Data structure representing a state in a gossip-based gradient algorithm.
@@ -74,12 +77,12 @@ fun Aggregate<Int>.gossipGradient(
         path = listOf(localId),
     )
 
-    val distanceMap = distances.toMap()
+    val distanceMap = distances.all.toMap()
     val result = share(localGossip) { neighborsGossip: Field<Int, GossipGradient<Int>> ->
         var bestGossip = localGossip
-        val neighbors = neighborsGossip.toMap().keys
+        val neighbors = neighborsGossip.all.toMap().keys
 
-        for ((neighborId, neighborGossip) in neighborsGossip.toMap()) {
+        for ((neighborId, neighborGossip) in neighborsGossip.all.toMap()) {
             val recentPath = neighborGossip.path.asReversed().drop(1)
             val pathIsValid = recentPath.none { it == localId || it in neighbors }
             val nextGossip = if (pathIsValid) neighborGossip else neighborGossip.base(neighborId)
