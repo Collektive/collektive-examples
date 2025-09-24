@@ -4,8 +4,8 @@ import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.stdlib.spreading.distanceTo
-import it.unibo.collektive.stdlib.spreading.gossipMax
-import it.unibo.collektive.stdlib.spreading.gossipMin
+import it.unibo.collektive.stdlib.spreading.hopGossipMax
+import it.unibo.collektive.stdlib.spreading.hopGossipMin
 import kotlin.math.abs
 import kotlin.math.hypot
 
@@ -32,16 +32,15 @@ private const val DISTANCE_OUTER_RING = 10.0
 fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
     // Creates a gradient from a randomly chosen node (using gossipMin), measuring
     // distances based on the provided metric.
-    val distToRandom = distanceTo(gossipMin(localId) == localId, metric = metric)
+    val distToRandom = distanceTo(hopGossipMin(localId) == localId, metric = metric)
     // Finds the node that is farthest from the random starting node. This will serve
     // as the first “extreme” of the network.
-    val firstExtreme = gossipMax(distToRandom to localId, compareBy { it.first }).second
+    val firstExtreme = hopGossipMax(DistanceToLocal(distToRandom, localId)).second
     // Builds a distance gradient starting from the first extreme node.
     val distanceToExtreme = distanceTo(firstExtreme == localId, metric = metric)
     // Finds the node that is farthest from the first extreme.
     // This defines the other end of the main axis (the second “extreme”).
-    val (distanceBetweenExtremes, otherExtreme) =
-        gossipMax(distanceToExtreme to localId, compareBy { it.first })
+    val (distanceBetweenExtremes, otherExtreme) = hopGossipMax(DistanceToLocal(distanceToExtreme, localId))
     // Builds a distance gradient from the second extreme.
     val distanceToOtherExtreme = distanceTo(otherExtreme == localId, metric = metric)
     // Approximates the center of the network by computing the intersection of
@@ -50,8 +49,7 @@ fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
         abs(distanceBetweenExtremes - distanceToExtreme - distanceToOtherExtreme)
     val distanceFromOpposedDiagonal = abs(distanceToExtreme - distanceToOtherExtreme)
     val approximateDistance = hypot(distanceFromOpposedDiagonal, distanceFromMainDiameter)
-    val centralNode = gossipMin(approximateDistance to localId, compareBy { it.first }).second
-    // Measures how far each node is from the computed center.
+    val centralNode = hopGossipMin(DistanceToLocal(approximateDistance, localId)).second
     val distanceFromCenter = distanceTo(centralNode == localId)
     return when (distanceFromCenter) {
         in 0.0..DISTANCE_CENTER -> COLOR_CENTER
@@ -65,3 +63,29 @@ fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
 /** Executes the bullsEye and prepares its result for visualization. */
 fun Aggregate<Int>.bullsEyeEntrypoint(simulatedDevice: CollektiveDevice<*>) =
     bullsEye(with(simulatedDevice) { distances() })
+
+/**
+ * Represents a pair of comparable values and provides a way to compare them.
+ *
+ * This class is typically used in scenarios where two values need to be compared together,
+ * with the primary comparison based on the first value and a secondary comparison based on the second value
+ * if the first values are equal.
+ *
+ * @param F the type of the first comparable value
+ * @param S the type of the second comparable value
+ *
+ * @property first the first comparable value
+ * @property second the second comparable value
+ *
+ * Implements [Comparable] to allow objects of this type to be compared with each other.
+ * The comparison is performed first on the `first` property and, if those values are equal, on the `second` property.
+ */
+private data class DistanceToLocal<F : Comparable<F>, S : Comparable<S>>(
+    @JvmField val first: F,
+    @JvmField val second: S,
+) : Comparable<DistanceToLocal<F, S>> {
+    override fun compareTo(other: DistanceToLocal<F, S>): Int {
+        val firstCompare = first.compareTo(other.first)
+        return if (firstCompare != 0) firstCompare else second.compareTo(other.second)
+    }
+}
