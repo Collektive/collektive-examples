@@ -84,8 +84,7 @@ private data class DistanceToLocal<F : Comparable<F>, S : Comparable<S>>(
     @JvmField val first: F,
     @JvmField val second: S,
 ) : Comparable<DistanceToLocal<F, S>> {
-    override fun compareTo(other: DistanceToLocal<F, S>): Int {
-        val firstCompare = first.compareTo(other.first)
-        return if (firstCompare != 0) firstCompare else second.compareTo(other.second)
-    }
+    override fun compareTo(other: DistanceToLocal<F, S>): Int =
+        // !! I don't want the comparison between "seconds", in this case it could lead to unwanted results
+        first.compareTo(other.first)
 }
