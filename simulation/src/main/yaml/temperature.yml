@@ -2,7 +2,7 @@ incarnation: collektive
 
 network-model:
   type: ConnectWithinDistance
-  parameters: [5]
+  parameters: [ 20 ]
 
 _pool: &program
   - time-distribution: 1
@@ -12,7 +12,59 @@ _pool: &program
         parameters: [ it.unibo.collektive.examples.temperature.TemperatureKt.temperatureEntrypoint ]
 
 deployments:
-  - type: Rectangle
-    parameters: [ 20, 0, 0, 20, 20 ]
+  - type: Grid
+    parameters: [ 0, 0, 200, 200, 10, 10, 20, 20 ]
     programs:
       - *program
+    contents:
+      - molecule: heat_source
+        concentration: false
+      - molecule: cold_source
+        concentration: false
+
+  - type: Point
+    parameters: [ 100, 100 ]
+    programs:
+      - *program
+    contents:
+      - molecule: heat_source
+        concentration: true
+      - molecule: cold_source
+        concentration: false
+
+  - type: Point
+    parameters: [ 0, 0 ]
+    programs:
+      - *program
+    contents:
+      - molecule: cold_source
+        concentration: true
+      - molecule: heat_source
+        concentration: false
+  - type: Point
+    parameters: [ 200, 0 ]
+    programs:
+      - *program
+    contents:
+      - molecule: cold_source
+        concentration: true
+      - molecule: heat_source
+        concentration: false
+  - type: Point
+    parameters: [ 0, 200 ]
+    programs:
+      - *program
+    contents:
+      - molecule: cold_source
+        concentration: true
+      - molecule: heat_source
+        concentration: false
+  - type: Point
+    parameters: [ 200, 200 ]
+    programs:
+      - *program
+    contents:
+      - molecule: cold_source
+        concentration: true
+      - molecule: heat_source
+        concentration: false
