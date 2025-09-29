@@ -46,14 +46,14 @@
       "val": 0
     },
     "minprop": {
-      "max": 10,
-      "min": -10,
-      "val": 0
+      "max": 50,
+      "min": 0,
+      "val": 20
     },
     "maxprop": {
-      "max": 10,
-      "min": -10,
-      "val": 10
+      "max": 50,
+      "min": 0,
+      "val": 30
     },
     "colorCache": {
       "value": -16777216
@@ -178,49 +178,5 @@
     "colorCache": {
       "value": -65536
     }
-  },
-  {
-    "type": "class it.unibo.alchemist.boundary.gui.effects.DrawBidimensionalGaussianLayersGradient",
-    "samples": {
-      "max": 400,
-      "min": 10,
-      "val": 100
-    },
-    "minLayerValue": "0.0",
-    "maxLayerValue": "0.0",
-    "minLayerValueCached": "0.0",
-    "maxLayerValueCached": "0.0",
-    "minLayerValueDouble": 0.0,
-    "maxLayerValueDouble": 0.0,
-    "mapper": {
-      "type": "class it.unibo.alchemist.boundary.gui.effects.BidimensionalGaussianLayersMapper",
-      "minAndMaxToBeSet": true
-    },
-    "layerFilter": false,
-    "molString": "",
-    "alpha": {
-      "max": 255,
-      "min": 0,
-      "val": 127
-    },
-    "red": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "green": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "blue": {
-      "max": 255,
-      "min": 0,
-      "val": 255
-    },
-    "colorCache": {
-      "value": 2130706687
-    },
-    "markerNodeID": 256
   }
 ]

@@ -4,16 +4,27 @@ network-model:
   type: ConnectWithinDistance
   parameters: [ 20 ]
 
-_pool: &program
-  - time-distribution: 1
-    type: Event
-    actions:
-      - type: RunCollektiveProgram
-        parameters: [ it.unibo.collektive.examples.temperature.TemperatureKt.temperatureEntrypoint ]
+_anchors:
+  program: &program
+    - time-distribution: 1
+      type: Event
+      actions:
+        - type: RunCollektiveProgram
+          parameters: [ it.unibo.collektive.examples.temperature.TemperatureKt.temperatureEntrypoint ]
+  heat_source_content: &heat_source_content
+    - molecule: heat_source
+      concentration: true
+    - molecule: cold_source
+      concentration: false
+  cold_source_content: &cold_source_content
+    - molecule: cold_source
+      concentration: true
+    - molecule: heat_source
+      concentration: false
 
 deployments:
   - type: Grid
-    parameters: [ 0, 0, 200, 200, 10, 10, 20, 20 ]
+    parameters: [ 0, 0, 200, 200, 10, 10, 10, 10 ]
     programs:
       - *program
     contents:
@@ -24,47 +35,25 @@ deployments:
 
   - type: Point
     parameters: [ 100, 100 ]
-    programs:
-      - *program
-    contents:
-      - molecule: heat_source
-        concentration: true
-      - molecule: cold_source
-        concentration: false
-
+    programs: [ *program ]
+    contents: *heat_source_content
+  - type: Point
+    parameters: [ 50, 100 ]
+    programs: [ *program ]
+    contents: *heat_source_content
   - type: Point
     parameters: [ 0, 0 ]
-    programs:
-      - *program
-    contents:
-      - molecule: cold_source
-        concentration: true
-      - molecule: heat_source
-        concentration: false
+    programs: [ *program ]
+    contents: *cold_source_content
   - type: Point
     parameters: [ 200, 0 ]
-    programs:
-      - *program
-    contents:
-      - molecule: cold_source
-        concentration: true
-      - molecule: heat_source
-        concentration: false
+    programs: [ *program ]
+    contents: *cold_source_content
   - type: Point
     parameters: [ 0, 200 ]
-    programs:
-      - *program
-    contents:
-      - molecule: cold_source
-        concentration: true
-      - molecule: heat_source
-        concentration: false
+    programs: [ *program ]
+    contents: *cold_source_content
   - type: Point
     parameters: [ 200, 200 ]
-    programs:
-      - *program
-    contents:
-      - molecule: cold_source
-        concentration: true
-      - molecule: heat_source
-        concentration: false
+    programs: [ *program ]
+    contents: *cold_source_content
