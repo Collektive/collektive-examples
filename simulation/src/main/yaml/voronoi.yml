@@ -1,0 +1,40 @@
+incarnation: collektive
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ 20 ]
+
+_pool: &program
+  - time-distribution: 1
+    type: Event
+    actions:
+      - type: RunCollektiveProgram
+        parameters: [ it.unibo.collektive.examples.voronoi.VoronoiKt.voronoi ]
+
+_point_source: &point_source
+  programs:
+    - *program
+  contents:
+    - molecule: source
+      concentration: true
+
+deployments:
+  - type: Grid
+    parameters: [ 0, 0, 200, 200, 10, 10, 10, 10 ]
+    programs:
+      - *program
+    contents:
+      - molecule: source
+        concentration: false
+  - type: Point
+    parameters: [ 20, 20 ]
+    <<: *point_source
+  - type: Point
+    parameters: [ 180, 180 ]
+    <<: *point_source
+  - type: Point
+    parameters: [ 20, 180 ]
+    <<: *point_source
+  - type: Point
+    parameters: [ 180, 20 ]
+    <<: *point_source
