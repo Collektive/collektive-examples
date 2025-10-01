@@ -1,0 +1,28 @@
+incarnation: collektive
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ 10 ]
+
+_pool: &program
+  - time-distribution: 1
+    type: Event
+    actions:
+      - type: RunCollektiveProgram
+        parameters: [ it.unibo.collektive.examples.inCircle.InCircleKt.inCircleEntrypoint ]
+
+deployments:
+  - type: Grid
+    parameters: [ 0, 0, 200, 200, 5, 5, 1, 1 ]
+    programs:
+      - *program
+    contents:
+      - molecule: center
+        concentration: false
+  - type: Point
+    parameters: [ 100, 100 ]
+    programs:
+      - *program
+    contents:
+      - molecule: center
+        concentration: true
