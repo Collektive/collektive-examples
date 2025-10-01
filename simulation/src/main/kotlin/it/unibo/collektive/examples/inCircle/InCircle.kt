@@ -5,39 +5,35 @@ import it.unibo.alchemist.model.Position
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
-import it.unibo.collektive.examples.chat.gossipGradient
 import it.unibo.collektive.stdlib.spreading.gradientCast
 import kotlin.math.pow
 
 private const val RADIUS = 30.0
 
-fun Aggregate<Int>.inCircleEntrypoint(
-    env: EnvironmentVariables,
-    collektiveDevice: CollektiveDevice<*>
-): Boolean =
+/**
+ * Entry point for the program which computes whether the device is within a circle of a given radius.
+ */
+fun Aggregate<Int>.inCircleEntrypoint(env: EnvironmentVariables, collektiveDevice: CollektiveDevice<*>): Boolean =
     with(collektiveDevice) {
         inCircle(
             center = env["center"],
             p = environment.getPosition(collektiveDevice.node),
-            metric = { distances() }
+            metric = { distances() },
         )
     }
 
-fun Aggregate<Int>.inCircle(
-    center: Boolean,
-    p: Position<*>,
-    metric: () -> Field<Int, Double>
-): Boolean =
-    with(p) {
-        // Broadcast the center position to the whole network
-        val centerPos = gradientCast(
-            source = center,
-            local = this,
-            metric = metric()
-        )
-        distanceToSquared(centerPos) <= RADIUS.pow(2)
-    }
-
+/**
+ * Determines if the current device is within a circle of a specified radius from a center point.
+ */
+fun Aggregate<Int>.inCircle(center: Boolean, p: Position<*>, metric: () -> Field<Int, Double>): Boolean = with(p) {
+    // Broadcast the center position to the whole network
+    val centerPos = gradientCast(
+        source = center,
+        local = this,
+        metric = metric(),
+    )
+    distanceToSquared(centerPos) <= RADIUS.pow(2)
+}
 
 /**
  * @param other the other vector,
@@ -57,5 +53,3 @@ private fun Position<*>.distanceToSquared(other: Position<*>): Double {
     val diff = coordinates.zip(other.coordinates) { c1, c2 -> c1 - c2 }.toDoubleArray()
     return diff.dot(diff)
 }
-
-
