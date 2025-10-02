@@ -6,6 +6,7 @@ import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.stdlib.spreading.gradientCast
+import it.unibo.collektive.stdlib.util.Point2D
 import kotlin.math.pow
 
 private const val RADIUS = 30.0
@@ -17,15 +18,15 @@ fun Aggregate<Int>.inCircleEntrypoint(env: EnvironmentVariables, collektiveDevic
     with(collektiveDevice) {
         inCircle(
             center = env["center"],
-            p = environment.getPosition(collektiveDevice.node),
+            p = environment.getPosition(collektiveDevice.node).toPoint2D(),
             metric = { distances() },
         )
     }
 
 /**
- * Determines if the current device is within a circle of a specified radius from a center point.
+ * Determines if the current device (located in [p]) is within a circle of a specified radius from a [center] point.
  */
-fun Aggregate<Int>.inCircle(center: Boolean, p: Position<*>, metric: () -> Field<Int, Double>): Boolean = with(p) {
+fun Aggregate<Int>.inCircle(center: Boolean, p: Point2D, metric: () -> Field<Int, Double>): Boolean = with(p) {
     // Broadcast the center position to the whole network
     val centerPos = gradientCast(
         source = center,
@@ -36,20 +37,15 @@ fun Aggregate<Int>.inCircle(center: Boolean, p: Position<*>, metric: () -> Field
 }
 
 /**
- * @param other the other vector,
- * @return the dot product between this and [other].
- * @throws IllegalArgumentException if the vectors have different sizes
+ * Computes the squared distance between this point and [other] point.
  */
-private fun DoubleArray.dot(other: DoubleArray): Double {
-    require(size == other.size) { "Vector must have same dimension." }
-    return zip(other) { a, b -> a * b }.sum()
+private fun Point2D.distanceToSquared(other: Point2D): Double {
+    val dx = x - other.x
+    val dy = y - other.y
+    return dx * dx + dy * dy
 }
 
 /**
- * @param other the other position
- * @return the squared distance between this position and [other]
+ * Converts a [Position] to a [Point2D] collektive type.
  */
-private fun Position<*>.distanceToSquared(other: Position<*>): Double {
-    val diff = coordinates.zip(other.coordinates) { c1, c2 -> c1 - c2 }.toDoubleArray()
-    return diff.dot(diff)
-}
+private fun Position<*>.toPoint2D(): Point2D = Point2D(coordinates[0] to coordinates[1])
