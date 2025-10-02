@@ -1,7 +1,6 @@
 package it.unibo.collektive.examples.ring
 
 import it.unibo.alchemist.collektive.device.CollektiveDevice
-import it.unibo.alchemist.model.Time
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
@@ -20,7 +19,7 @@ fun Aggregate<Int>.ringEntryPoint(collektiveDevice: CollektiveDevice<*>, env: En
     with(collektiveDevice) {
         ring(
             center = env["center"],
-            currentTime = { environment.simulation.time },
+            currentTime = { environment.simulation.time.toDouble() },
             metric = { distances() },
         )
     }
@@ -31,7 +30,7 @@ fun Aggregate<Int>.ringEntryPoint(collektiveDevice: CollektiveDevice<*>, env: En
  * a thickness defined by [WAVE_THICKNESS], and a period defined by [WAVE_PERIOD].
  * It returns a boolean field indicating whether the ring is active at each node.
  */
-private fun Aggregate<Int>.ring(center: Boolean, currentTime: () -> Time, metric: () -> Field<Int, Double>): Boolean =
+private fun Aggregate<Int>.ring(center: Boolean, currentTime: () -> Double, metric: () -> Field<Int, Double>): Boolean =
     run {
         val waveTime = broadcastTime(center, currentTime, metric)
         val distance = distanceTo(center, metric = metric())
@@ -44,9 +43,9 @@ private fun Aggregate<Int>.ring(center: Boolean, currentTime: () -> Time, metric
  */
 private fun Aggregate<Int>.broadcastTime(
     center: Boolean,
-    currentTime: () -> Time,
+    currentTime: () -> Double,
     metric: () -> Field<Int, Double>,
-): Time = gradientCast(
+): Double = gradientCast(
     source = center,
     local = currentTime(),
     metric = metric(),
@@ -56,5 +55,5 @@ private fun Aggregate<Int>.broadcastTime(
  * Check if the ring is active at the given [waveTime] and [distance] from the center.
  * A ring is active if the distance from the center is within the wave thickness.
  */
-private fun isRingActive(waveTime: Time, distance: Double): Boolean =
+private fun isRingActive(waveTime: Double, distance: Double): Boolean =
     abs(WAVE_SPEED * (waveTime.toDouble() % WAVE_PERIOD) - distance) < WAVE_THICKNESS
