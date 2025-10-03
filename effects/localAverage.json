@@ -33,7 +33,7 @@
       "min": 0,
       "val": 12
     },
-    "molFilter": false,
+    "molFilter": true,
     "molString": "it.unibo.collektive.examples.localAverage.LocalAverageKt.localAverageEntryPoint",
     "molPropertyFilter": true,
     "property": "",
@@ -53,7 +53,7 @@
     "maxprop": {
       "max": 10,
       "min": -10,
-      "val": 10
+      "val": 1
     },
     "colorCache": {
       "value": -12469530

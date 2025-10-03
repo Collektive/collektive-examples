@@ -4,60 +4,57 @@ import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.stdlib.collapse.fold
+import it.unibo.collektive.stdlib.util.Point3D
 import org.apache.commons.math3.random.RandomGenerator
 import kotlin.math.pow
+import kotlin.math.round
 import kotlin.math.sqrt
-
-private const val DEFAULT_RANDOM_VECTOR_MAX = 10
-private const val ROUNDING_MULTIPLIER = 10000.0
 
 /**
  * Entry point for the local average computation algorithm.
- * This function initializes each device with a random 3D vector that remains constant
- * throughout the simulation, then computes the local average of neighboring vectors
- * and returns their magnitude as a scalar field.
+ * Initializes each device with a random vector in R^3 (represented as a 3D point)
+ * that remains constant throughout the simulation. Then, computes the local average
+ * between the device's vector and those of its neighbors, returning their magnitude
+ * as a scalar field.
  */
 fun Aggregate<Int>.localAverageEntryPoint(collektiveDevice: CollektiveDevice<*>): Double = with(collektiveDevice) {
-    // v is initialized to a random vector at the first round, keeping its value constant afterwards
-    val v = evolve(randomVector(randomGenerator)) { it }
-    localAverage(v)
+    // `v` is initialized to a random vector at the first round,
+    // keeping its value constant afterward.
+    val v = evolve(randomPoint(randomGenerator)) { it }
+    localAverage(v).magnitude().round(4)
 }
 
 /**
- * Computes the local average of the vectors in the neighborhood of the current device.
- * Each device has a vector of integers [v] \in R^3 which represents its current state.
- * The function calculates the component-wise average of all neighboring vectors and
- * returns the Euclidean magnitude of the resulting average vector.
+ * Computes the local average of vectors in the neighborhood of the current device.
+ * Each device holds a point [v] in R^3 representing its current state.
+ * The function returns the component-wise average of the vectors from the device and its neighbors.
  */
-fun Aggregate<Int>.localAverage(v: Triple<Int, Int, Int>): Double = neighboring(v).neighbors.let { neighbors ->
-    // Summing up the vectors using folding on the Field (foldHood)
-    neighbors.fold(Triple(0, 0, 0)) { (accX, accY, accZ), neighbor ->
-        val (x, y, z) = neighbor.value
-        Triple(accX + x, accY + y, accZ + z)
-    }.let { (sumX, sumY, sumZ) ->
-        // Count the number of neighbors
-        val count = neighbors.size.toDouble()
-        // Compute the average vector
-        Triple(sumX / count, sumY / count, sumZ / count)
-    }
+fun Aggregate<Int>.localAverage(v: Point3D): Point3D = with(neighboring(v).all) {
+    fold(point(0.0, 0.0, 0.0)) { acc, nbr -> acc + nbr.value } / size.toDouble()
 }
-    // Return its magnitude
-    .magnitude()
-    .roundTo4Decimals()
-    .takeIf { it.isFinite() } ?: 0.0
 
 /**
- * Computes the Euclidean magnitude of a 3D vector represented as a Triple.
+ * Computes the Euclidean magnitude of a [Point3D].
  */
-fun Triple<Double, Double, Double>.magnitude(): Double = sqrt(first.pow(2) + second.pow(2) + third.pow(2))
+fun Point3D.magnitude(): Double = sqrt(x.pow(2) + y.pow(2) + z.pow(2))
 
 /**
- * Generates a random 3D vector with each component being a random integer between 0 and [top].
+ * Generates a random [Point3D].
  */
-fun randomVector(rgn: RandomGenerator, top: Int = DEFAULT_RANDOM_VECTOR_MAX): Triple<Int, Int, Int> =
-    Triple(rgn.nextInt(top), rgn.nextInt(top), rgn.nextInt(top))
+fun randomPoint(rgn: RandomGenerator): Point3D = with(rgn) {
+    point(nextDouble(), nextDouble(), nextDouble())
+}
 
 /**
- * A simple function to round a Double to a specific decimal places.
+ * Rounds a Double to the specified number of [decimals] places.
  */
-fun Double.roundTo4Decimals(): Double = kotlin.math.round(this * ROUNDING_MULTIPLIER) / ROUNDING_MULTIPLIER
+fun Double.round(decimals: Int): Double {
+    var multiplier = 1.0
+    repeat(decimals) { multiplier *= 10 }
+    return round(this * multiplier) / multiplier
+}
+
+/**
+ * Creates a [Point3D] given [x], [y], and [z] coordinates.
+ */
+fun point(x: Double, y: Double, z: Double): Point3D = Point3D(Triple(x, y, z))
