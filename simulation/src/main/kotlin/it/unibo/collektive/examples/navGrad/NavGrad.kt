@@ -33,7 +33,8 @@ fun Aggregate<Int>.navGradEntrypoint(collektiveDevice: CollektiveDevice<*>, env:
             mover = isMover,
             source = source,
             nbrRange = { distances() },
-            nbrVec = { neighboring(p).alignedMapValues(mapNeighborhood { p }, { p, newO -> p - newO }) })
+            nbrVec = { neighboring(p).alignedMapValues(mapNeighborhood { p }, { p, newO -> p - newO }) },
+        )
         move(dir)
         // Return the distance to the source for visualization purposes.
         distanceTo(source = source, metric = distances())
@@ -53,7 +54,7 @@ fun Aggregate<Int>.navGrad(
     mover: Boolean,
     source: Boolean,
     nbrRange: () -> Field<Int, Double>,
-    nbrVec: () -> Field<Int, Point2D>
+    nbrVec: () -> Field<Int, Point2D>,
 ): Vector2D = shareDistanceTo(!mover, source, nbrRange).let { distance ->
     val g = grad(distance, nbrRange, nbrVec)
     when {
@@ -70,14 +71,15 @@ fun Aggregate<Int>.navGrad(
 fun Aggregate<Int>.shareDistanceTo(
     isCalculating: Boolean,
     source: Boolean,
-    nbrRange: () -> Field<Int, Double>
+    nbrRange: () -> Field<Int, Double>,
 ): Double {
     // Compute the distance to the source
     val toSource = distanceTo(source, nbrRange())
     // If this node is calculating, it uses its own distance to source.
     // Otherwise, its distance is considered infinite.
     val myDist = if (isCalculating) toSource else Double.POSITIVE_INFINITY
-    // Compute the potential dist for each neighbor by adding the distance from the neighbor to its distance to the source.
+    // Compute the potential dist for each neighbor
+    // by adding the distance from the neighbor to its distance to the source.
     val potentialDist = nbrRange() + neighboring(myDist)
     // Find the minimum distance among all neighbors.
     val minDistance = potentialDist.all.valueOfMinBy { (_, value) -> value }
