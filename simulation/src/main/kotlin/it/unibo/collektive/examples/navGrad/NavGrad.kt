@@ -54,12 +54,12 @@ fun Aggregate<Int>.navGrad(
     mover: Boolean,
     source: Boolean,
     nbrRange: () -> Field<Int, Double>,
-    nbrVec: () -> Field<Int, Point2D>,
+    nbrVec: () -> Field<Int, Vector2D>,
 ): Vector2D = shareDistanceTo(!mover, source, nbrRange).let { distance ->
     val g = grad(distance, nbrRange, nbrVec)
     when {
         mover && g.magnitude() > 0.0 -> g.normalize()
-        else -> Point2D(0.0 to 0.0)
+        else -> Vector2D(0.0 to 0.0)
     }
 }
 
@@ -98,18 +98,18 @@ fun Aggregate<Int>.shareDistanceTo(
 fun Aggregate<Int>.grad(v: Double, nbrRange: () -> Field<Int, Double>, nbrVec: () -> Field<Int, Vector2D>): Vector2D {
     // Compute the difference in the value of v between this node and its neighbors.
     val differences = mapNeighborhood { v } - neighboring(v)
-    // Get the coordinates of neighbors.
-    val coordinates = nbrVec()
+    // Get vectors pointing to neighbors.
+    val directions = nbrVec()
     // Get the distances to neighbors.
     val distances = nbrRange()
     // Combine the differences, coordinates, and distances to compute the gradient vector.
-    return distances.alignedMapValues(differences, coordinates, { dist, diff, coord ->
+    return distances.alignedMapValues(differences, directions, { dist, diff, dir ->
         when {
-            dist == 0.0 || !(abs(diff) < Double.POSITIVE_INFINITY) -> Point2D(0.0 to 0.0)
-            else -> coord.normalize() * (diff / dist)
+            dist == 0.0 || !(abs(diff) < Double.POSITIVE_INFINITY) -> Vector2D(0.0 to 0.0)
+            else -> dir.normalize() * (diff / dist)
         }
     }).all.run {
-        fold(Point2D(0.0 to 0.0)) { acc, (_, value) -> acc + value } / size.toDouble()
+        fold(Vector2D(0.0 to 0.0)) { acc, (_, value) -> acc + value } / size.toDouble()
     }
 }
 
@@ -117,12 +117,12 @@ fun Aggregate<Int>.grad(v: Double, nbrRange: () -> Field<Int, Double>, nbrVec: (
  * Normalizes the vector, returning a new vector with the same direction but with magnitude 1.
  * If the vector has a magnitude of 0, it returns a zero vector.
  */
-fun Point2D.normalize(): Point2D = this / (magnitude().takeIf { it > 0.0 } ?: 1.0)
+fun Vector2D.normalize(): Vector2D = this / (magnitude().takeIf { it > 0.0 } ?: 1.0)
 
 /**
  * Calculates the Euclidean magnitude (length) of the vector.
  */
-fun Point2D.magnitude(): Double = sqrt(x * x + y * y)
+fun Vector2D.magnitude(): Double = sqrt(x * x + y * y)
 
 /**
  * Converts an Alchemist [Position] to a [Point2D].
