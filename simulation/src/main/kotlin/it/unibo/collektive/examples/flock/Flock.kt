@@ -77,9 +77,9 @@ fun Aggregate<Int>.flock(
  * This function combines the directions from all neighbors by applying their respective
  * [weights] and summing the resulting vectors. .
  */
-fun Field<Int, Point2D>.intHood(weights: Field<Int, Double>): Point2D =
+fun Field<Int, Vector2D>.intHood(weights: Field<Int, Double>): Vector2D =
     with(alignedMapValues(weights) { point, weight -> point * weight }.all) {
-        fold(Point2D(0.0 to 0.0)) { acc, entry -> acc + entry.value }
+        fold(Vector2D(0.0 to 0.0)) { acc, entry -> acc + entry.value }
     }
 
 /**
