@@ -14,7 +14,6 @@ import it.unibo.collektive.examples.utils.move
 import it.unibo.collektive.examples.utils.normalize
 import it.unibo.collektive.examples.utils.vdot
 import it.unibo.collektive.stdlib.collapse.fold
-import it.unibo.collektive.stdlib.util.Point2D
 import kotlin.math.PI
 
 private const val VELOCITY = 0.1
@@ -25,7 +24,7 @@ private const val CLOSE_NEIGHBOR_THRESHOLD = 5.0
 private const val FAR_NEIGHBOR_THRESHOLD = 10.0
 
 /**
- *
+ * Entry point for the flock example.
  */
 fun Aggregate<Int>.flockEntryPoint(collektiveDevice: CollektiveDevice<*>, env: EnvironmentVariables): Unit =
     with(collektiveDevice) {
