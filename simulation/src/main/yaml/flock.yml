@@ -1,0 +1,63 @@
+incarnation: collektive
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ 30 ]
+
+_program: &program
+  - time-distribution: 1
+    type: Event
+    actions:
+      - type: RunCollektiveProgram
+        parameters: [ it.unibo.collektive.examples.flock.FlockKt.flockEntryPoint ]
+
+_follower_contents: &follower_contents
+  - molecule: leader
+    concentration: false
+
+_leader_contents: &leader_contents
+  - molecule: leader
+    concentration: true
+
+_flock_deployment: &flock_deployment
+  type: GraphStreamDeployment
+  programs: [ *program ]
+  contents: *follower_contents
+
+_leader_point: &leader_point
+  type: Point
+  programs: [ *program ]
+  contents: *leader_contents
+
+deployments:
+  # Flock 1
+  - <<: *flock_deployment
+    parameters: [ 20, -150, -150, 5, RandomGenerator ]
+  - <<: *leader_point
+    parameters: [ -150, -150 ]
+  - <<: *leader_point
+    parameters: [ -140, -140 ]
+
+  # Flock 2
+  - <<: *flock_deployment
+    parameters: [ 20, 150, -150, 5, RandomGenerator ]
+  - <<: *leader_point
+    parameters: [ 150, -150 ]
+  - <<: *leader_point
+    parameters: [ 140, -140 ]
+
+  # Flock 3
+  - <<: *flock_deployment
+    parameters: [ 20, -150, 150, 5, RandomGenerator ]
+  - <<: *leader_point
+    parameters: [ -150, 150 ]
+  - <<: *leader_point
+    parameters: [ -140, 140 ]
+
+  # Flock 4
+  - <<: *flock_deployment
+    parameters: [ 20, 150, 150, 5, RandomGenerator ]
+  - <<: *leader_point
+    parameters: [ 150, 150 ]
+  - <<: *leader_point
+    parameters: [ 140, 140 ]
