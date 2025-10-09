@@ -27,20 +27,16 @@ fun Aggregate<Int>.inCircleEntrypoint(env: EnvironmentVariables, collektiveDevic
  * Determines if the current device (located in [location])
  * is within a circle of a specified radius from a [center] point.
  */
-fun Aggregate<Int>.inCircle(
-    center: Boolean,
-    location: Point2D,
-    metric: () -> Field<Int, Double>,
-): Boolean = with(location) {
-    // Broadcast the center position to the whole network
-    val centerPos = gradientCast(
-        source = center,
-        local = this,
-        metric = metric(),
-    )
-    distanceToSquared(centerPos) <= RADIUS.pow(2)
-}
-
+fun Aggregate<Int>.inCircle(center: Boolean, location: Point2D, metric: () -> Field<Int, Double>): Boolean =
+    with(location) {
+        // Broadcast the center position to the whole network
+        val centerPos = gradientCast(
+            source = center,
+            local = this,
+            metric = metric(),
+        )
+        distanceToSquared(centerPos) <= RADIUS.pow(2)
+    }
 
 /**
  * Computes the squared distance between this point and [other] point.
