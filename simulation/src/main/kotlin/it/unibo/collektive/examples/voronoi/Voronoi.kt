@@ -50,8 +50,8 @@ fun Aggregate<Int>.voronoi(collektiveDevice: CollektiveDevice<*>, env: Environme
  * Find the closest source by computing a multi-gradient from all sources.
  * If there are no sources, return 0.
  */
-private fun Aggregate<Int>.closestSource(d: CollektiveDevice<*>, env: EnvironmentVariables): Int =
-    multiGradient(d, env).let { toSources ->
+private fun Aggregate<Int>.closestSource(collektiveDevice: CollektiveDevice<*>, env: EnvironmentVariables): Int =
+    multiGradient(collektiveDevice, env).let { toSources ->
         toSources.minByOrNull { it.value }?.key ?: 0
     }
 
