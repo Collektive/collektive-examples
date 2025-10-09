@@ -56,4 +56,4 @@ private fun Aggregate<Int>.broadcastTime(
  * A ring is active if the distance from the center is within the wave thickness.
  */
 private fun isRingActive(waveTime: Double, distance: Double): Boolean =
-    abs(WAVE_SPEED * (waveTime.toDouble() % WAVE_PERIOD) - distance) < WAVE_THICKNESS
+    abs(WAVE_SPEED * (waveTime % WAVE_PERIOD) - distance) < WAVE_THICKNESS
