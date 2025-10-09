@@ -20,7 +20,7 @@ import kotlin.math.sqrt
 fun Aggregate<Int>.localAverageEntryPoint(collektiveDevice: CollektiveDevice<*>): Double = with(collektiveDevice) {
     // `v` is initialized to a random vector at the first round,
     // keeping its value constant afterward.
-    val v = evolve(randomPoint(randomGenerator)) { it }
+    val vector = evolve(randomPoint(randomGenerator)) { it }
     localAverage(v).magnitude().round(4)
 }
 
