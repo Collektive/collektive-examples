@@ -1,0 +1,54 @@
+package it.unibo.collektive.examples.track
+
+import it.unibo.alchemist.collektive.device.CollektiveDevice
+import it.unibo.collektive.aggregate.Field
+import it.unibo.collektive.aggregate.api.Aggregate
+import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
+import it.unibo.collektive.examples.channel.channel
+import it.unibo.collektive.examples.navGrad.Vector2D
+import it.unibo.collektive.examples.navGrad.coordinates
+import it.unibo.collektive.examples.utils.pointTo
+import it.unibo.collektive.stdlib.spreading.gradientCast
+import it.unibo.collektive.stdlib.util.Point2D
+
+/**
+ * Entrypoint for the tracking program.
+ */
+fun Aggregate<Int>.trackEntrypoint(collektiveDevice: CollektiveDevice<*>, env: EnvironmentVariables): Boolean =
+    with(collektiveDevice) {
+        val target: Boolean = env["target"]
+        val dst: Boolean = env["dst"]
+        // Check if the device is part of the channel between target and dst
+        val inChannel = channel(collektiveDevice, target, dst, channelWidth = 10.0)
+        // Compute the direction to the target, relative to dst
+        val targetDir = track(target, dst, inChannel, coordinates()) { distances() }
+        pointTo(targetDir)
+        // Return whether the device is in the channel between target and dst
+        inChannel
+    }
+
+/**
+ * Computes the direction to the [target], relative to [dst].
+ * If the device is not in the [channel], it returns a zero vector.
+ * If the device is in the [channel] but not [dst], it returns a zero vector.
+ * If the device is [dst], it returns the vector pointing to the [target].
+ */
+fun Aggregate<Int>.track(
+    target: Boolean,
+    dst: Boolean,
+    channel: Boolean,
+    coordinates: Point2D,
+    metric: () -> Field<Int, Double>,
+): Vector2D = when {
+    channel -> {
+        // Broadcast the target's coordinates to the channel
+        val targetCoordinates = gradientCast(
+            source = target,
+            local = coordinates,
+            metric = metric(),
+        )
+        if (dst) targetCoordinates - coordinates else Vector2D(0.0 to 0.0)
+    }
+
+    else -> Vector2D(0.0 to 0.0)
+}
