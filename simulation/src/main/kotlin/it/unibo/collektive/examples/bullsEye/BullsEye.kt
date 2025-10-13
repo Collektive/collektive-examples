@@ -4,8 +4,8 @@ import it.unibo.alchemist.collektive.device.CollektiveDevice
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.stdlib.spreading.distanceTo
-import it.unibo.collektive.stdlib.spreading.hopGossipMax
-import it.unibo.collektive.stdlib.spreading.hopGossipMin
+import it.unibo.collektive.stdlib.spreading.gossipMax
+import it.unibo.collektive.stdlib.spreading.gossipMin
 import kotlin.math.abs
 import kotlin.math.hypot
 
@@ -32,15 +32,15 @@ private const val DISTANCE_OUTER_RING = 10.0
 fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
     // Creates a gradient from a randomly chosen node (using gossipMin), measuring
     // distances based on the provided metric.
-    val distToRandom = distanceTo(hopGossipMin(localId) == localId, metric = metric)
+    val distToRandom = distanceTo(gossipMin(localId) == localId, metric = metric)
     // Finds the node that is farthest from the random starting node. This will serve
     // as the first “extreme” of the network.
-    val firstExtreme = hopGossipMax(DistanceToLocal(distToRandom, localId)).second
+    val firstExtreme = gossipMax(DistanceToLocal(distToRandom, localId)).second
     // Builds a distance gradient starting from the first extreme node.
     val distanceToExtreme = distanceTo(firstExtreme == localId, metric = metric)
     // Finds the node that is farthest from the first extreme.
     // This defines the other end of the main axis (the second “extreme”).
-    val (distanceBetweenExtremes, otherExtreme) = hopGossipMax(DistanceToLocal(distanceToExtreme, localId))
+    val (distanceBetweenExtremes, otherExtreme) = gossipMax(DistanceToLocal(distanceToExtreme, localId))
     // Builds a distance gradient from the second extreme.
     val distanceToOtherExtreme = distanceTo(otherExtreme == localId, metric = metric)
     // Approximates the center of the network by computing the intersection of
@@ -49,7 +49,7 @@ fun Aggregate<Int>.bullsEye(metric: Field<Int, Double>): Int {
         abs(distanceBetweenExtremes - distanceToExtreme - distanceToOtherExtreme)
     val distanceFromOpposedDiagonal = abs(distanceToExtreme - distanceToOtherExtreme)
     val approximateDistance = hypot(distanceFromOpposedDiagonal, distanceFromMainDiameter)
-    val centralNode = hopGossipMin(DistanceToLocal(approximateDistance, localId)).second
+    val centralNode = gossipMin(DistanceToLocal(approximateDistance, localId)).second
     val distanceFromCenter = distanceTo(centralNode == localId)
     return when (distanceFromCenter) {
         in 0.0..DISTANCE_CENTER -> COLOR_CENTER
