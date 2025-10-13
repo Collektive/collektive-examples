@@ -52,7 +52,7 @@ fun Aggregate<Int>.connect(
     nbrVec: () -> Field<Int, Vector2D>,
 ): Vector2D = distanceTo(dest, metric()).let { d ->
     val thePath = spath(src, d)
-    return when {
+    when {
         thePath -> {
             val nbrD = neighboring(d)
             val minD = with(nbrD.all) { valueOfMinBy { (_, dist) -> dist } }
