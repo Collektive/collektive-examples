@@ -17,25 +17,25 @@ import it.unibo.collektive.stdlib.util.Point2D
 fun Aggregate<Int>.trackEntrypoint(collektiveDevice: CollektiveDevice<*>, env: EnvironmentVariables): Boolean =
     with(collektiveDevice) {
         val target: Boolean = env["target"]
-        val dst: Boolean = env["dst"]
+        val destination: Boolean = env["dst"]
         // Check if the device is part of the channel between target and dst
-        val inChannel = channel(collektiveDevice, target, dst, channelWidth = 10.0)
+        val inChannel = channel(collektiveDevice, target, destination, channelWidth = 10.0)
         // Compute the direction to the target, relative to dst
-        val targetDir = track(target, dst, inChannel, coordinates()) { distances() }
-        pointTo(targetDir)
+        val toTarget = track(target, destination, inChannel, coordinates()) { distances() }
+        pointTo(toTarget)
         // Return whether the device is in the channel between target and dst
         inChannel
     }
 
 /**
- * Computes the direction to the [target], relative to [dst].
+ * Computes the direction to the [target], relative to [destination].
  * If the device is not in the [channel], it returns a zero vector.
- * If the device is in the [channel] but not [dst], it returns a zero vector.
- * If the device is [dst], it returns the vector pointing to the [target].
+ * If the device is in the [channel] but not [destination], it returns a zero vector.
+ * If the device is [destination], it returns the vector pointing to the [target].
  */
 fun Aggregate<Int>.track(
     target: Boolean,
-    dst: Boolean,
+    destination: Boolean,
     channel: Boolean,
     coordinates: Point2D,
     metric: () -> Field<Int, Double>,
@@ -47,7 +47,7 @@ fun Aggregate<Int>.track(
             local = coordinates,
             metric = metric(),
         )
-        if (dst) targetCoordinates - coordinates else Vector2D(0.0 to 0.0)
+        if (destination) targetCoordinates - coordinates else Vector2D(0.0 to 0.0)
     }
 
     else -> Vector2D(0.0 to 0.0)
