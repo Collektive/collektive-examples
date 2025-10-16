@@ -49,7 +49,8 @@ fun Aggregate<Int>.flockEntryPoint(collektiveDevice: CollektiveDevice<*>, env: E
  * Implements flocking behavior.
  * Each device computes a new direction based on its initial direction [initialDirection]
  * (which points towards the origin if the device is a leader, or is zero otherwise),
- * the distance to its neighbors [neighborDistances], and the directions pointing to its neighbors [neighborDirectionVectors].
+ * the distance to its neighbors [neighborDistances],
+ * and the directions pointing to its neighbors [neighborDirectionVectors].
  * The behavior is defined as follows:
  * - If a neighbor is closer than 5 units, steer away from it.
  * - If a neighbor is farther than 10 units, steer slightly towards it.
