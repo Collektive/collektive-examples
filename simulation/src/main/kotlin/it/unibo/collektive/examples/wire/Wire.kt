@@ -22,47 +22,50 @@ import it.unibo.collektive.stdlib.spreading.distanceTo
  */
 fun Aggregate<Int>.wire(collektiveDevice: CollektiveDevice<*>, env: EnvironmentVariables): Unit =
     with(collektiveDevice) {
-        val src: Boolean = env["src"]
-        val dest: Boolean = env["dest"]
+        val source: Boolean = env["src"]
+        val destination: Boolean = env["dest"]
         val obstacle: Boolean = env["obstacle"]
-        val nbrObst = with(neighboring(obstacle).all) { any { it.value } }
-        val p = coordinates()
+        val hasObstacleInNeighborhood = neighboring(obstacle).all.any { it.value }
+        val position = coordinates()
         val connectionDir = when {
-            nbrObst && (!src && !dest) -> Vector2D(0.0 to 0.0)
+            hasObstacleInNeighborhood && (!source && !destination) -> Vector2D(0.0 to 0.0)
             else -> connect(
-                src = src,
-                dest = dest,
+                source = source,
+                destination = destination,
                 metric = { distances() },
-                nbrVec = { neighboring(p).alignedMapValues(mapNeighborhood { p }, { p, newO -> p - newO }) },
+                neighborDirectionVectors = {
+                    neighboring(position).alignedMapValues(mapNeighborhood { position }) { p, newO -> p - newO }
+                },
             )
         }
         pointTo(connectionDir)
     }
 
 /**
- * Connect [src] to [dest] using the given [metric] to measure distances and [nbrVec] to get the direction
- * to each neighbor.
- * This function computes the direction of the next hop on the path from [src] to [dest].
- * If the current node is not on the path from [src] to [dest], return the zero vector.
+ * Connect [source] to [destination] using the given [metric] to measure distances
+ * and [neighborDirectionVectors] to get the direction to each neighbor.
+ * This function computes the direction of the next hop on the path from [source] to [destination].
+ * If the current node is not on the path from [source] to [destination], return the zero vector.
  */
 fun Aggregate<Int>.connect(
-    src: Boolean,
-    dest: Boolean,
+    source: Boolean,
+    destination: Boolean,
     metric: () -> Field<Int, Double>,
-    nbrVec: () -> Field<Int, Vector2D>,
-): Vector2D = distanceTo(dest, metric()).let { d ->
-    val thePath = spath(src, d)
-    when {
-        thePath -> {
-            val nbrD = neighboring(d)
-            val minD = with(nbrD.all) { valueOfMinBy { (_, dist) -> dist } }
-            with(
-                nbrVec()
-                    .alignedMapValues(nbrD) { dir, dist -> if (dist == minD) dir else Vector2D(0.0 to 0.0) }
-                    .all,
-            ) { fold(Vector2D(0.0 to 0.0)) { acc, (_, v) -> acc + v } }
+    neighborDirectionVectors: () -> Field<Int, Vector2D>,
+): Vector2D {
+    val toDest = distanceTo(destination, metric())
+    val isOnShortestPath = shortestPath(source, toDest)
+    return when {
+        isOnShortestPath -> {
+            val neighborDistances = neighboring(toDest)
+            val minNeighborhoodDistance = neighborDistances.all.valueOfMinBy { (_, dist) -> dist }
+            neighborDirectionVectors()
+                .alignedMapValues(neighborDistances) { dir, dist ->
+                    if (dist == minNeighborhoodDistance) dir else Vector2D(0.0 to 0.0)
+                }
+                .all
+                .fold(Vector2D(0.0 to 0.0)) { acc, (_, v) -> acc + v }
         }
-
         else -> Vector2D(0.0 to 0.0)
     }
 }
@@ -71,12 +74,14 @@ fun Aggregate<Int>.connect(
  * Check whenever the current node is on the path from [src] to destination.
  * [d] is the distance to the destination.
  */
-fun Aggregate<Int>.spath(src: Boolean, d: Double): Boolean = share(false) { nbrIsPath ->
+fun Aggregate<Int>.shortestPath(src: Boolean, d: Double): Boolean = share(false) { nbrIsPath ->
     val minId = with(neighboring(d).all) { minBy { (_, value) -> value }.id }
-    val isPath =
-        with((neighboring(minId).mapValues { it == localId }.and(nbrIsPath)).all) { any { (_, value) -> value } }
+    val isOnShortestPath = neighboring(minId)
+        .mapValues { it == localId }.and(nbrIsPath)
+        .all
+        .any { (_, value) -> value }
     when {
         src -> true
-        else -> isPath
+        else -> isOnShortestPath
     }
 }
