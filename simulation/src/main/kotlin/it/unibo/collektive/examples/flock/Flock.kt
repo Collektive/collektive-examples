@@ -29,13 +29,17 @@ private const val FAR_NEIGHBOR_THRESHOLD = 10.0
 fun Aggregate<Int>.flockEntryPoint(collektiveDevice: CollektiveDevice<*>, env: EnvironmentVariables): Unit =
     with(collektiveDevice) {
         val leader: Boolean = env["leader"]
-        val p = coordinates()
+        val position = coordinates()
         // If the node is a leader move towards the origin, otherwise stay still
-        val dir = p.normalize() * -LEADER_DIRECTION_WEIGHT * (if (leader) 1.0 else 0.0)
+        val initialDirection = position.normalize() * -LEADER_DIRECTION_WEIGHT * (if (leader) 1.0 else 0.0)
         val flockDir = flock(
-            dir = dir,
-            nbrRange = { distances() },
-            nbrVec = { neighboring(p).alignedMapValues(mapNeighborhood { p }) { p, newO -> p - newO } },
+            initialDirection = initialDirection,
+            neighborDistances = { distances() },
+            neighborDirectionVectors = {
+                neighboring(position).alignedMapValues(mapNeighborhood { position }) { p, newO ->
+                    p - newO
+                }
+            },
         )
         // Move the node in the computed directions
         move(flockDir, VELOCITY)
@@ -43,9 +47,9 @@ fun Aggregate<Int>.flockEntryPoint(collektiveDevice: CollektiveDevice<*>, env: E
 
 /**
  * Implements flocking behavior.
- * Each device computes a new direction based on its initial direction [dir]
+ * Each device computes a new direction based on its initial direction [initialDirection]
  * (which points towards the origin if the device is a leader, or is zero otherwise),
- * the distance to its neighbors [nbrRange], and the directions pointing to its neighbors [nbrVec].
+ * the distance to its neighbors [neighborDistances], and the directions pointing to its neighbors [neighborDirectionVectors].
  * The behavior is defined as follows:
  * - If a neighbor is closer than 5 units, steer away from it.
  * - If a neighbor is farther than 10 units, steer slightly towards it.
@@ -53,11 +57,14 @@ fun Aggregate<Int>.flockEntryPoint(collektiveDevice: CollektiveDevice<*>, env: E
  * The resulting direction is normalized and combined with the current direction.
  */
 fun Aggregate<Int>.flock(
-    dir: Vector2D,
-    nbrRange: () -> Field<Int, Double>,
-    nbrVec: () -> Field<Int, Vector2D>,
-): Vector2D = share(Vector2D(0.0 to 0.0)) { nbrV ->
-    val d = nbrV.alignedMapValues(nbrRange(), nbrVec()) { vel, dist, dir ->
+    initialDirection: Vector2D,
+    neighborDistances: () -> Field<Int, Double>,
+    neighborDirectionVectors: () -> Field<Int, Vector2D>,
+): Vector2D = share(Vector2D(0.0 to 0.0)) { neighborVelocities ->
+    val direction = neighborVelocities.alignedMapValues(
+        neighborDistances(),
+        neighborDirectionVectors(),
+    ) { vel, dist, dir ->
         when {
             // steer away if too close
             dist > 0.0 && dist <= CLOSE_NEIGHBOR_THRESHOLD -> dir.normalize() * -1.0
@@ -66,9 +73,8 @@ fun Aggregate<Int>.flock(
             // align if at a good distance
             else -> vel.normalize()
         }
-    }.intHood(neighboring(spatialWeight(CONNECTIVITY_RADIUS))).normalize()
-    val v = nbrV.local.value
-    (dir + if (d vdot d > 0) d else v).normalize()
+    }.sumWeightedNeighbors(neighboring(spatialWeight(CONNECTIVITY_RADIUS))).normalize()
+    (initialDirection + if (direction vdot direction > 0) direction else neighborVelocities.local.value).normalize()
 }
 
 /**
@@ -76,10 +82,9 @@ fun Aggregate<Int>.flock(
  * This function combines the directions from all neighbors by applying their respective
  * [weights] and summing the resulting vectors. .
  */
-fun Field<Int, Vector2D>.intHood(weights: Field<Int, Double>): Vector2D =
-    with(alignedMapValues(weights) { point, weight -> point * weight }.all) {
-        fold(Vector2D(0.0 to 0.0)) { acc, entry -> acc + entry.value }
-    }
+fun Field<Int, Vector2D>.sumWeightedNeighbors(weights: Field<Int, Double>): Vector2D =
+    alignedMapValues(weights) { point, weight -> point * weight }.all
+        .fold(Vector2D(0.0 to 0.0)) { acc, entry -> acc + entry.value }
 
 /**
  * Computes the spatial weight of a device given a [radius].
@@ -87,8 +92,8 @@ fun Field<Int, Vector2D>.intHood(weights: Field<Int, Double>): Vector2D =
  * divided by the number of devices in the neighborhood.
  * If there is only one device in the neighborhood, the spatial weight is equal to the area of the circle.
  */
-fun Aggregate<Int>.spatialWeight(radius: Double): Double = with(neighborhood().all) {
-    val countDevices = size
+fun Aggregate<Int>.spatialWeight(radius: Double): Double {
+    val neighborsSize = neighborhood().all.size
     val totalArea = PI * radius * radius
-    totalArea / countDevices
+    return totalArea / neighborsSize
 }
