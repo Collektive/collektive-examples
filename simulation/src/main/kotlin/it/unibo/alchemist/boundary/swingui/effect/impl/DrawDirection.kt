@@ -5,6 +5,7 @@ import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Node
 import it.unibo.alchemist.model.Position2D
 import it.unibo.alchemist.model.physics.environments.Physics2DEnvironment
+import it.unibo.alchemist.model.positions.Euclidean2DPosition
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Graphics2D
@@ -15,17 +16,14 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlin.times
-import kotlin.unaryMinus
 
 /**
  * Effect that draws a unit direction vector as an arrow from the node's position.
  */
 @Suppress("DEPRECATION")
-class DrawDirection @JvmOverloads constructor(
-    private val c: Color = Color.RED,
-    private val unitLength: Double = UNIT_ARROW_LENGTH,
-) : it.unibo.alchemist.boundary.swingui.effect.api.Effect {
+class DrawDirection(private val c: Color = Color.RED) : it.unibo.alchemist.boundary.swingui.effect.api.Effect {
+
+    override fun getColorSummary(): Color = c
 
     override fun <T, P : Position2D<P>> apply(
         graphics: Graphics2D,
@@ -33,75 +31,70 @@ class DrawDirection @JvmOverloads constructor(
         environment: Environment<T, P>,
         wormhole: Wormhole2D<P>,
     ) {
-        if (environment is Physics2DEnvironment<*>) {
-            @Suppress("UNCHECKED_CAST")
-            drawDirectionArrow(
-                graphics,
-                node,
-                environment as Physics2DEnvironment<T>,
-                wormhole,
-            )
+        require(environment is Physics2DEnvironment<T>) {
+            "DrawDirection effect can only be applied in Physics2DEnvironment."
+        }
+        val direction = computeDirection(environment, node)
+            .takeIf { it != Euclidean2DPosition(0.0, 0.0) }
+            ?: return
+        drawDirectedArrow(graphics, environment, node, wormhole, direction)
+    }
+
+    private fun <T> computeDirection(environment: Physics2DEnvironment<T>, node: Node<T>): Euclidean2DPosition =
+        with(environment.getHeading(node)) {
+            sqrt(x * x + y * y)
+                .takeIf { it != 0.0 }
+                ?.let { magnitude -> Euclidean2DPosition(x / magnitude, y / magnitude) }
+                ?: Euclidean2DPosition(0.0, 0.0)
+        }
+
+    private fun <T, P : Position2D<P>> drawDirectedArrow(
+        graphics: Graphics2D,
+        environment: Environment<T, P>,
+        node: Node<T>,
+        wormhole: Wormhole2D<P>,
+        direction: Euclidean2DPosition,
+    ) {
+        val viewPoint = wormhole.getViewPoint(environment.getPosition(node))
+        val arrow = createArrowPath(direction)
+        val transform = with(viewPoint) {
+            AffineTransform().apply {
+                translate(x.toDouble(), y.toDouble())
+                wormhole.zoom.let { scale(it, it) }
+                scale(1.0, -1.0)
+            }
+        }
+        renderArrow(graphics, arrow, transform)
+    }
+
+    private fun createArrowPath(direction: Euclidean2DPosition): Path2D.Double = with(direction) {
+        val (endX, endY) = this * UNIT_ARROW_LENGTH
+        val angle = atan2(y, x)
+        return Path2D.Double().apply {
+            moveTo(0.0, 0.0)
+            lineTo(endX, endY)
+            addArrowHeads(endX, endY, angle)
         }
     }
 
-    override fun getColorSummary(): Color = c
-
-    private fun <T, P : Position2D<P>> drawDirectionArrow(
-        graphics: Graphics2D,
-        node: Node<T>,
-        environment: Physics2DEnvironment<T>,
-        wormhole: Wormhole2D<P>,
-    ) {
-        val zoom = wormhole.zoom
-        val pos = environment.getPosition(node)
-
-        @Suppress("UNCHECKED_CAST")
-        val viewPoint = wormhole.getViewPoint(pos as P)
-        val x = viewPoint.x
-        val y = viewPoint.y
-        // Get the direction vector
-        val direction = environment.getHeading(node)
-        val magnitude = sqrt(direction.x * direction.x + direction.y * direction.y)
-        if (magnitude == 0.0) {
-            return // Skip nodes with zero heading
+    private fun Path2D.Double.addArrowHeads(endX: Double, endY: Double, angle: Double) {
+        sequenceOf(-ARROW_HEAD_ANGLE, ARROW_HEAD_ANGLE).forEach { offset ->
+            val headAngle = angle + offset
+            val headX = endX - ARROW_HEAD_LENGTH * cos(headAngle)
+            val headY = endY - ARROW_HEAD_LENGTH * sin(headAngle)
+            moveTo(endX, endY)
+            lineTo(headX, headY)
         }
-        // Normalize to unit vector
-        val normX = direction.x / magnitude
-        val normY = direction.y / magnitude
-        // Draw unit vector with fixed length
-        val endX = normX * unitLength
-        val endY = normY * unitLength
-        // Set arrow shape
-        val arrow = Path2D.Double().apply {
-            moveTo(0.0, 0.0)
-            lineTo(endX, endY)
-            val angle = atan2(normY, normX)
+    }
 
-            // Set arrow head
-            fun addArrowHead(angleOffset: Double) {
-                val headX = endX - ARROW_HEAD_LENGTH * cos(angle + angleOffset)
-                val headY = endY - ARROW_HEAD_LENGTH * sin(angle + angleOffset)
-                moveTo(endX, endY)
-                lineTo(headX, headY)
-            }
-            addArrowHead(-ARROW_HEAD_ANGLE)
-            addArrowHead(ARROW_HEAD_ANGLE)
-        }
-        // Transform to screen coordinates
-        val transform = AffineTransform().apply {
-            translate(x.toDouble(), y.toDouble())
-            scale(zoom, zoom)
-            scale(1.0, -1.0)
-        }
-        val transformedArrow = transform.createTransformedShape(arrow)
-        // Draw the direction
-        graphics.color = c
-        graphics.stroke = BasicStroke(ARROW_STROKE_WIDTH)
-        graphics.draw(transformedArrow)
+    private fun renderArrow(graphics: Graphics2D, arrow: Path2D.Double, transform: AffineTransform) = graphics.apply {
+        color = c
+        stroke = BasicStroke(ARROW_STROKE_WIDTH)
+        draw(transform.createTransformedShape(arrow))
     }
 
     /**
-     * Companion object for constants.
+     * Contains constants for DrawDirection.
      */
     companion object {
         @JvmStatic
