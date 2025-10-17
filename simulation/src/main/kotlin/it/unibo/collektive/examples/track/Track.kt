@@ -52,6 +52,5 @@ fun Aggregate<Int>.track(
         )
         if (destination) targetCoordinates - coordinates else vectorZero
     }
-
     else -> vectorZero
 }
