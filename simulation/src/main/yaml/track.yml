@@ -1,0 +1,51 @@
+incarnation: collektive
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ 50 ]
+
+environment:
+  type: ContinuousPhysics2DEnvironment
+
+_program: &program
+  - time-distribution: 1
+    type: Event
+    actions:
+      - type: RunCollektiveProgram
+        parameters: [ it.unibo.collektive.examples.track.TrackKt.trackEntrypoint ]
+
+_walk: &random_walk
+  - type: Event
+    time-distribution: 1
+    actions: { type: BrownianMove, parameters: [ 5.0 ] }
+
+deployments:
+  - type: Grid
+    parameters: [ -100, -100, 100, 100, 20, 20, 20, 20 ]
+    programs:
+      - *program
+    contents:
+      - molecule: target
+        concentration: false
+      - molecule: dst
+        concentration: false
+  - type: Point
+    parameters: [ 20, 20 ]
+    programs:
+      - *program
+      - *random_walk
+    contents:
+      - molecule: target
+        concentration: true
+      - molecule: dst
+        concentration: false
+  - type: Point
+    parameters: [ -20, -20 ]
+    programs:
+      - *program
+      - *random_walk
+    contents:
+      - molecule: target
+        concentration: false
+      - molecule: dst
+        concentration: true
