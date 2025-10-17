@@ -10,6 +10,7 @@ import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.examples.utils.Vector2D
 import it.unibo.collektive.examples.utils.coordinates
 import it.unibo.collektive.examples.utils.pointTo
+import it.unibo.collektive.examples.utils.vectorZero
 import it.unibo.collektive.stdlib.booleans.FieldedBooleans.and
 import it.unibo.collektive.stdlib.collapse.any
 import it.unibo.collektive.stdlib.collapse.fold
@@ -28,7 +29,7 @@ fun Aggregate<Int>.wire(collektiveDevice: CollektiveDevice<*>, env: EnvironmentV
         val hasObstacleInNeighborhood = neighboring(obstacle).all.any { it.value }
         val position = coordinates()
         val connectionDir = when {
-            hasObstacleInNeighborhood && (!source && !destination) -> Vector2D(0.0 to 0.0)
+            hasObstacleInNeighborhood && (!source && !destination) -> vectorZero
             else -> connect(
                 source = source,
                 destination = destination,
@@ -61,12 +62,12 @@ fun Aggregate<Int>.connect(
             val minNeighborhoodDistance = neighborDistances.all.valueOfMinBy { (_, dist) -> dist }
             neighborDirectionVectors()
                 .alignedMapValues(neighborDistances) { dir, dist ->
-                    if (dist == minNeighborhoodDistance) dir else Vector2D(0.0 to 0.0)
+                    if (dist == minNeighborhoodDistance) dir else vectorZero
                 }
                 .all
-                .fold(Vector2D(0.0 to 0.0)) { acc, (_, v) -> acc + v }
+                .fold(vectorZero) { acc, (_, v) -> acc + v }
         }
-        else -> Vector2D(0.0 to 0.0)
+        else -> vectorZero
     }
 }
 
