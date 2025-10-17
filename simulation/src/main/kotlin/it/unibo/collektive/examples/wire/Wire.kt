@@ -53,11 +53,11 @@ fun Aggregate<Int>.connect(
     metric: () -> Field<Int, Double>,
     neighborDirectionVectors: () -> Field<Int, Vector2D>,
 ): Vector2D {
-    val toDest = distanceTo(destination, metric())
-    val isOnShortestPath = shortestPath(source, toDest)
+    val toDestination = distanceTo(destination, metric())
+    val isOnShortestPath = shortestPath(source, toDestination)
     return when {
         isOnShortestPath -> {
-            val neighborDistances = neighboring(toDest)
+            val neighborDistances = neighboring(toDestination)
             val minNeighborhoodDistance = neighborDistances.all.valueOfMinBy { (_, dist) -> dist }
             neighborDirectionVectors()
                 .alignedMapValues(neighborDistances) { dir, dist ->
@@ -71,17 +71,17 @@ fun Aggregate<Int>.connect(
 }
 
 /**
- * Check whenever the current node is on the path from [src] to destination.
- * [d] is the distance to the destination.
+ * Check whenever the current node is on the path from [source] to destination.
+ * [toDestination] is the distance to the destination.
  */
-fun Aggregate<Int>.shortestPath(src: Boolean, d: Double): Boolean = share(false) { nbrIsPath ->
-    val minId = with(neighboring(d).all) { minBy { (_, value) -> value }.id }
+fun Aggregate<Int>.shortestPath(source: Boolean, toDestination: Double): Boolean = share(false) { nbrIsPath ->
+    val minId = neighboring(toDestination).all.minBy { (_, value) -> value }.id
     val isOnShortestPath = neighboring(minId)
         .mapValues { it == localId }.and(nbrIsPath)
         .all
         .any { (_, value) -> value }
     when {
-        src -> true
+        source -> true
         else -> isOnShortestPath
     }
 }
