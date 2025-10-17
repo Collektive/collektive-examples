@@ -8,8 +8,11 @@ import it.unibo.collektive.examples.channel.channel
 import it.unibo.collektive.examples.navGrad.Vector2D
 import it.unibo.collektive.examples.navGrad.coordinates
 import it.unibo.collektive.examples.utils.pointTo
+import it.unibo.collektive.examples.utils.vectorZero
 import it.unibo.collektive.stdlib.spreading.gradientCast
 import it.unibo.collektive.stdlib.util.Point2D
+
+private const val CHANNEL_WIDTH = 10.0
 
 /**
  * Entrypoint for the tracking program.
@@ -19,7 +22,7 @@ fun Aggregate<Int>.trackEntrypoint(collektiveDevice: CollektiveDevice<*>, env: E
         val target: Boolean = env["target"]
         val destination: Boolean = env["dst"]
         // Check if the device is part of the channel between target and dst
-        val inChannel = channel(collektiveDevice, target, destination, channelWidth = 10.0)
+        val inChannel = channel(collektiveDevice, target, destination, CHANNEL_WIDTH)
         // Compute the direction to the target, relative to dst
         val toTarget = track(target, destination, inChannel, coordinates()) { distances() }
         pointTo(toTarget)
@@ -47,8 +50,8 @@ fun Aggregate<Int>.track(
             local = coordinates,
             metric = metric(),
         )
-        if (destination) targetCoordinates - coordinates else Vector2D(0.0 to 0.0)
+        if (destination) targetCoordinates - coordinates else vectorZero
     }
 
-    else -> Vector2D(0.0 to 0.0)
+    else -> vectorZero
 }
