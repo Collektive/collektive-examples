@@ -13,7 +13,7 @@ import kotlin.math.sqrt
 typealias Vector2D = Point2D
 
 /**
- * A constant representing a zero vector (0,0).
+ * Zero vector (0,0).
  */
 val vectorZero = Vector2D(0.0 to 0.0)
 
