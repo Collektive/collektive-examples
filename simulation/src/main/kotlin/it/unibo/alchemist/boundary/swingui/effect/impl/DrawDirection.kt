@@ -1,5 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package it.unibo.alchemist.boundary.swingui.effect.impl
 
+import it.unibo.alchemist.boundary.swingui.effect.api.Effect
 import it.unibo.alchemist.boundary.ui.api.Wormhole2D
 import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Node
@@ -20,8 +23,7 @@ import kotlin.math.sqrt
 /**
  * Effect that draws a unit direction vector as an arrow from the node's position.
  */
-@Suppress("DEPRECATION")
-class DrawDirection(private val c: Color = Color.RED) : it.unibo.alchemist.boundary.swingui.effect.api.Effect {
+class DrawDirection(private val c: Color = Color.RED) : Effect {
 
     override fun getColorSummary(): Color = c
 
