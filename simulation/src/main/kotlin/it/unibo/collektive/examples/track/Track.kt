@@ -5,7 +5,7 @@ import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.examples.channel.channel
-import it.unibo.collektive.examples.navGrad.Vector2D
+import it.unibo.collektive.examples.utils.Vector2D
 import it.unibo.collektive.examples.utils.coordinates
 import it.unibo.collektive.examples.utils.pointTo
 import it.unibo.collektive.examples.utils.vectorZero
