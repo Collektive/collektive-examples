@@ -34,7 +34,7 @@
       "val": 20
     },
     "molFilter": true,
-    "molString": "it.unibo.collektive.examples.voronoi.VoronoiKt.voronoi",
+    "molString": "it.unibo.collektive.examples.voronoi.VoronoiKt.voronoiEntryPoint",
     "molPropertyFilter": true,
     "property": "",
     "writingPropertyValue": false,

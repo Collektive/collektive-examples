@@ -1,10 +1,14 @@
 package it.unibo.collektive.examples.voronoi
 
 import it.unibo.alchemist.collektive.device.CollektiveDevice
+import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.examples.multiGradient.multiGradient
+import it.unibo.collektive.stdlib.spreading.distanceTo
+import it.unibo.collektive.stdlib.spreading.gradientCast
+import kotlin.text.get
 
 private const val BORDER_COLOR = 1024
 private const val MIN_COLOR_DISTANCE = 128
@@ -12,8 +16,16 @@ private const val VERTEX_COLOR = BORDER_COLOR - MIN_COLOR_DISTANCE
 private const val MAX_COLOR_VALUE = VERTEX_COLOR - 1
 
 /**
+ * Entry point for the Voronoi tessellation example.
+ */
+fun Aggregate<Int>.voronoiEntryPoint(collektiveDevice: CollektiveDevice<*>, env: EnvironmentVariables): Int = voronoi(
+    source = env["source"],
+    metric = with(collektiveDevice) { { distances() } },
+)
+
+/**
  * Computes the Voronoi tessellation (https://en.wikipedia.org/wiki/Voronoi_diagram)
- * based on a set of sources, producing a field of integers which identify
+ * based on a set of [source]s, producing a field of integers which identify
  * the region each device belongs to.
  * A device can take one of the following roles:
  * - **Vertex**: it is at the junction of three or more Voronoi cells.
@@ -24,9 +36,9 @@ private const val MAX_COLOR_VALUE = VERTEX_COLOR - 1
  *   is calculated based on the ID of the closest source.
  * The sources are identified through environment variables.
  */
-fun Aggregate<Int>.voronoi(collektiveDevice: CollektiveDevice<*>, env: EnvironmentVariables): Int {
+fun Aggregate<Int>.voronoi(source: Boolean, metric: () -> Field<Int, Double>): Int {
     // Find the closest source
-    val closestSource = closestSource(collektiveDevice, env)
+    val closestSource = closestSource(source, metric)
     // Share the id of the closest source with neighbors
     val neighborClosestSources = neighboring(closestSource)
     // Count how many distinct sources are in the neighborhood (including the current device)
@@ -50,10 +62,11 @@ fun Aggregate<Int>.voronoi(collektiveDevice: CollektiveDevice<*>, env: Environme
  * Find the closest source by computing a multi-gradient from all sources.
  * If there are no sources, return 0.
  */
-private fun Aggregate<Int>.closestSource(collektiveDevice: CollektiveDevice<*>, env: EnvironmentVariables): Int =
-    multiGradient(collektiveDevice, env).let { toSources ->
-        toSources.minByOrNull { it.value }?.key ?: 0
-    }
+private fun Aggregate<Int>.closestSource(source: Boolean, metric: () -> Field<Int, Double>): Int = gradientCast(
+    source = source,
+    local = localId,
+    metric = metric(),
+)
 
 /**
  * Map a source ID to a color value.
