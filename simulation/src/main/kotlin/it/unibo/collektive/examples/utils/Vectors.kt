@@ -1,7 +1,6 @@
 package it.unibo.collektive.examples.utils
 
 import it.unibo.collektive.examples.navGrad.Vector2D
-import it.unibo.collektive.examples.navGrad.magnitude
 import it.unibo.collektive.stdlib.util.Point2D
 import kotlin.math.sqrt
 

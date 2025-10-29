@@ -6,7 +6,7 @@ import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
 import it.unibo.collektive.examples.channel.channel
 import it.unibo.collektive.examples.navGrad.Vector2D
-import it.unibo.collektive.examples.navGrad.coordinates
+import it.unibo.collektive.examples.utils.coordinates
 import it.unibo.collektive.examples.utils.pointTo
 import it.unibo.collektive.examples.utils.vectorZero
 import it.unibo.collektive.stdlib.spreading.gradientCast
