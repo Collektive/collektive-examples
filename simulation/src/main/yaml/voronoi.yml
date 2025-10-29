@@ -9,7 +9,7 @@ _pool: &program
     type: Event
     actions:
       - type: RunCollektiveProgram
-        parameters: [ it.unibo.collektive.examples.voronoi.VoronoiKt.voronoi ]
+        parameters: [ it.unibo.collektive.examples.voronoi.VoronoiKt.voronoiEntryPoint ]
 
 _point_source: &point_source
   programs:
