@@ -6,19 +6,18 @@ import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.mapNeighborhood
 import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
+import it.unibo.collektive.examples.utils.Vector2D
 import it.unibo.collektive.examples.utils.coordinates
 import it.unibo.collektive.examples.utils.magnitude
 import it.unibo.collektive.examples.utils.move
 import it.unibo.collektive.examples.utils.normalize
+import it.unibo.collektive.examples.utils.vectorZero
 import it.unibo.collektive.stdlib.collapse.fold
 import it.unibo.collektive.stdlib.collapse.valueOfMinBy
 import it.unibo.collektive.stdlib.doubles.FieldedDoubles.minus
 import it.unibo.collektive.stdlib.doubles.FieldedDoubles.plus
 import it.unibo.collektive.stdlib.spreading.distanceTo
-import it.unibo.collektive.stdlib.util.Point2D
 import kotlin.math.abs
-
-typealias Vector2D = Point2D
 
 private const val VELOCITY = 0.2
 
@@ -63,7 +62,7 @@ fun Aggregate<Int>.navGrad(
     val g = grad(distance, neighborDistances, neighborDirectionVectors)
     when {
         mover && g.magnitude() > 0.0 -> g.normalize()
-        else -> Vector2D(0.0 to 0.0)
+        else -> vectorZero
     }
 }
 
@@ -113,10 +112,10 @@ fun Aggregate<Int>.grad(
     // Combine the differences, coordinates, and distances to compute the gradient vector.
     return distances.alignedMapValues(differences, directions, { dist, diff, dir ->
         when {
-            dist == 0.0 || !(abs(diff) < Double.POSITIVE_INFINITY) -> Vector2D(0.0 to 0.0)
+            dist == 0.0 || !(abs(diff) < Double.POSITIVE_INFINITY) -> vectorZero
             else -> dir.normalize() * (diff / dist)
         }
     }).all.run {
-        fold(Vector2D(0.0 to 0.0)) { acc, (_, value) -> acc + value } / size.toDouble()
+        fold(vectorZero) { acc, (_, value) -> acc + value } / size.toDouble()
     }
 }
