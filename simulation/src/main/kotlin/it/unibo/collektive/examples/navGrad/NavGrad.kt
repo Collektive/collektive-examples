@@ -1,22 +1,23 @@
 package it.unibo.collektive.examples.navGrad
 
 import it.unibo.alchemist.collektive.device.CollektiveDevice
-import it.unibo.alchemist.model.Position
 import it.unibo.collektive.aggregate.Field
 import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.mapNeighborhood
 import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.alchemist.device.sensors.EnvironmentVariables
+import it.unibo.collektive.examples.utils.Vector2D
+import it.unibo.collektive.examples.utils.coordinates
+import it.unibo.collektive.examples.utils.magnitude
+import it.unibo.collektive.examples.utils.move
+import it.unibo.collektive.examples.utils.normalize
+import it.unibo.collektive.examples.utils.vectorZero
 import it.unibo.collektive.stdlib.collapse.fold
 import it.unibo.collektive.stdlib.collapse.valueOfMinBy
 import it.unibo.collektive.stdlib.doubles.FieldedDoubles.minus
 import it.unibo.collektive.stdlib.doubles.FieldedDoubles.plus
 import it.unibo.collektive.stdlib.spreading.distanceTo
-import it.unibo.collektive.stdlib.util.Point2D
 import kotlin.math.abs
-import kotlin.math.sqrt
-
-typealias Vector2D = Point2D
 
 private const val VELOCITY = 0.2
 
@@ -32,10 +33,12 @@ fun Aggregate<Int>.navGradEntrypoint(collektiveDevice: CollektiveDevice<*>, env:
         val dir = navGrad(
             mover = isMover,
             source = source,
-            nbrRange = { distances() },
-            nbrVec = { neighboring(p).alignedMapValues(mapNeighborhood { p }, { p, newO -> p - newO }) },
+            neighborDistances = { distances() },
+            neighborDirectionVectors = {
+                neighboring(p).alignedMapValues(mapNeighborhood { p }, { p, newO -> p - newO })
+            },
         )
-        move(dir)
+        move(dir, VELOCITY)
         // Return the distance to the source for visualization purposes.
         distanceTo(source = source, metric = distances())
     }
@@ -47,40 +50,40 @@ fun Aggregate<Int>.navGradEntrypoint(collektiveDevice: CollektiveDevice<*>, env:
  *   by following the gradient of a potential field. This vector represents the optimal direction of movement.
  * - If a node is **not** a [mover] or if the gradient is zero, the function returns a zero vector,
  *   indicating that no movement should occur.
- * The calculation relies on the [nbrRange] and [nbrVec] functions to obtain the distances
+ * The calculation relies on the [neighborDistances] and [neighborDirectionVectors] functions to obtain the distances
  * and vectors pointing to neighboring nodes, respectively.
  */
 fun Aggregate<Int>.navGrad(
     mover: Boolean,
     source: Boolean,
-    nbrRange: () -> Field<Int, Double>,
-    nbrVec: () -> Field<Int, Vector2D>,
-): Vector2D = shareDistanceTo(!mover, source, nbrRange).let { distance ->
-    val g = grad(distance, nbrRange, nbrVec)
+    neighborDistances: () -> Field<Int, Double>,
+    neighborDirectionVectors: () -> Field<Int, Vector2D>,
+): Vector2D = shareDistanceTo(!mover, source, neighborDistances).let { distance ->
+    val g = grad(distance, neighborDistances, neighborDirectionVectors)
     when {
         mover && g.magnitude() > 0.0 -> g.normalize()
-        else -> Vector2D(0.0 to 0.0)
+        else -> vectorZero
     }
 }
 
 /**
  * Share the distance from the [isCalculating] or [source] to all non [isCalculating] nodes.
- * The [nbrRange] function provides the distances to neighboring nodes.
+ * The [neighborDistances] function provides the distances to neighboring nodes.
  * The function returns the computed distance as a Double.
  */
 fun Aggregate<Int>.shareDistanceTo(
     isCalculating: Boolean,
     source: Boolean,
-    nbrRange: () -> Field<Int, Double>,
+    neighborDistances: () -> Field<Int, Double>,
 ): Double {
     // Compute the distance to the source
-    val toSource = distanceTo(source, nbrRange())
+    val toSource = distanceTo(source, neighborDistances())
     // If this node is calculating, it uses its own distance to source.
     // Otherwise, its distance is considered infinite.
     val myDist = if (isCalculating) toSource else Double.POSITIVE_INFINITY
     // Compute the potential dist for each neighbor
     // by adding the distance from the neighbor to its distance to the source.
-    val potentialDist = nbrRange() + neighboring(myDist)
+    val potentialDist = neighborDistances() + neighboring(myDist)
     // Find the minimum distance among all neighbors.
     val minDistance = potentialDist.all.valueOfMinBy { (_, value) -> value }
     // If the node is calculating, return its own distance; otherwise, return the minimum distance found.
@@ -91,55 +94,28 @@ fun Aggregate<Int>.shareDistanceTo(
  * Compute the gradient of a scalar field [v].
  * The gradient is calculated using the differences in the values of [v] between the node and its neighbors,
  * as well as the distances and directions to those neighbors.
- * The [nbrRange] function provides the distances to neighboring nodes,
- * and the [nbrVec] function provides the vectors pointing to neighboring nodes.
+ * The [neighborDistances] function provides the distances to neighboring nodes,
+ * and the [neighborDirectionVectors] function provides the vectors pointing to neighboring nodes.
  * The function returns the gradient as a [Vector2D].
  */
-fun Aggregate<Int>.grad(v: Double, nbrRange: () -> Field<Int, Double>, nbrVec: () -> Field<Int, Vector2D>): Vector2D {
+fun Aggregate<Int>.grad(
+    v: Double,
+    neighborDistances: () -> Field<Int, Double>,
+    neighborDirectionVectors: () -> Field<Int, Vector2D>,
+): Vector2D {
     // Compute the difference in the value of v between this node and its neighbors.
     val differences = mapNeighborhood { v } - neighboring(v)
     // Get vectors pointing to neighbors.
-    val directions = nbrVec()
+    val directions = neighborDirectionVectors()
     // Get the distances to neighbors.
-    val distances = nbrRange()
+    val distances = neighborDistances()
     // Combine the differences, coordinates, and distances to compute the gradient vector.
     return distances.alignedMapValues(differences, directions, { dist, diff, dir ->
         when {
-            dist == 0.0 || !(abs(diff) < Double.POSITIVE_INFINITY) -> Vector2D(0.0 to 0.0)
+            dist == 0.0 || !(abs(diff) < Double.POSITIVE_INFINITY) -> vectorZero
             else -> dir.normalize() * (diff / dist)
         }
     }).all.run {
-        fold(Vector2D(0.0 to 0.0)) { acc, (_, value) -> acc + value } / size.toDouble()
+        fold(vectorZero) { acc, (_, value) -> acc + value } / size.toDouble()
     }
-}
-
-/**
- * Normalizes the vector, returning a new vector with the same direction but with magnitude 1.
- * If the vector has a magnitude of 0, it returns a zero vector.
- */
-fun Vector2D.normalize(): Vector2D = this / (magnitude().takeIf { it > 0.0 } ?: 1.0)
-
-/**
- * Calculates the Euclidean magnitude (length) of the vector.
- */
-fun Vector2D.magnitude(): Double = sqrt(x * x + y * y)
-
-/**
- * Converts an Alchemist [Position] to a [Point2D].
- */
-fun Position<*>.toPoint2D(): Point2D = Point2D(coordinates[0] to coordinates[1])
-
-/**
- * Gets the current position of the device in the environment as a [Point2D].
- */
-fun CollektiveDevice<*>.coordinates(): Point2D = environment.getPosition(node).toPoint2D()
-
-/**
- * Moves the device in the environment towards a given [direction].
- * The new position is calculated by adding the [direction] vector (multiplied by a constant [VELOCITY])
- * to the current position.
- */
-fun CollektiveDevice<*>.move(direction: Vector2D) {
-    val newPos = coordinates() + (direction * VELOCITY)
-    environment.moveNodeToPosition(node, environment.makePosition(newPos.x, newPos.y))
 }

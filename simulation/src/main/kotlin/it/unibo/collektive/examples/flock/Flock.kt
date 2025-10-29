@@ -13,6 +13,7 @@ import it.unibo.collektive.examples.utils.coordinates
 import it.unibo.collektive.examples.utils.move
 import it.unibo.collektive.examples.utils.normalize
 import it.unibo.collektive.examples.utils.vdot
+import it.unibo.collektive.examples.utils.vectorZero
 import it.unibo.collektive.stdlib.collapse.fold
 import kotlin.math.PI
 
@@ -61,7 +62,7 @@ fun Aggregate<Int>.flock(
     initialDirection: Vector2D,
     neighborDistances: () -> Field<Int, Double>,
     neighborDirectionVectors: () -> Field<Int, Vector2D>,
-): Vector2D = share(Vector2D(0.0 to 0.0)) { neighborVelocities ->
+): Vector2D = share(vectorZero) { neighborVelocities ->
     val direction = neighborVelocities.alignedMapValues(
         neighborDistances(),
         neighborDirectionVectors(),
@@ -85,7 +86,7 @@ fun Aggregate<Int>.flock(
  */
 fun Field<Int, Vector2D>.sumWeightedNeighbors(weights: Field<Int, Double>): Vector2D =
     alignedMapValues(weights) { point, weight -> point * weight }.all
-        .fold(Vector2D(0.0 to 0.0)) { acc, entry -> acc + entry.value }
+        .fold(vectorZero) { acc, entry -> acc + entry.value }
 
 /**
  * Computes the spatial weight of a device given a [radius].
