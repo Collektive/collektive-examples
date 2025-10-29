@@ -23,7 +23,7 @@ fun Aggregate<Int>.temperatureEntrypoint(env: EnvironmentVariables): Double =
  */
 fun Aggregate<Int>.temperature(heatSource: Boolean, coldSource: Boolean): Double =
     share(INITIAL_TEMPERATURE) { previousTemperatures ->
-        val averageTemperature = previousTemperatures.neighbors
+        val averageTemperature = previousTemperatures.all
             .values
             .sequence
             .average().takeIf { it.isFinite() } ?: INITIAL_TEMPERATURE
