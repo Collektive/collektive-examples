@@ -70,8 +70,10 @@ fun Aggregate<Int>.flock(
         when {
             // steer away if too close
             dist > 0.0 && dist <= CLOSE_NEIGHBOR_THRESHOLD -> dir.normalize() * -1.0
+
             // steer slightly towards if too far
             dist > FAR_NEIGHBOR_THRESHOLD -> dir.normalize() * FAR_NEIGHBOR_ATTRACTION_WEIGHT
+
             // align if at a good distance
             else -> vel.normalize()
         }
