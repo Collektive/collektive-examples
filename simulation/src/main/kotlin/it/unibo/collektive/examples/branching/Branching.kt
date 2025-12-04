@@ -10,8 +10,7 @@ fun Aggregate<Int>.branching(isSource: Boolean): Int {
     val count = neighborhood().neighbors.size
     return when {
         isSource -> 0
-        // note that moving neighborhood().neighborsCount here would exclude the source from the count!
-        else -> count
+        else -> count // note that moving neighborhood().neighborsCount here would exclude the source from the count!
     }
 }
 

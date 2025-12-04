@@ -30,6 +30,7 @@ fun Aggregate<Int>.wire(collektiveDevice: CollektiveDevice<*>, env: EnvironmentV
         val position = coordinates()
         val connectionDir = when {
             hasObstacleInNeighborhood && (!source && !destination) -> vectorZero
+
             else -> connect(
                 source = source,
                 destination = destination,
@@ -67,6 +68,7 @@ fun Aggregate<Int>.connect(
                 .all
                 .fold(vectorZero) { acc, (_, v) -> acc + v }
         }
+
         else -> vectorZero
     }
 }
