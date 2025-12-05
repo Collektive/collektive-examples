@@ -1,0 +1,74 @@
+services:
+  prepare:
+    image: alpine:3.20.3
+    volumes:
+      - .:/experiment:rw
+    entrypoint: /bin/sh -c
+    command:
+      - |
+        mkdir -p /experiment/data
+        chmod 777 /experiment/data
+        mkdir -p /experiment/charts
+        chmod 777 /experiment/charts
+
+  gossipExperiment:
+    image: angelacortecchia/${PROJECT_NAME:-unknown}:${VERSION:-latest}
+    build:
+      context: .
+      dockerfile: docker/sim/Dockerfile
+    volumes:
+      - angela.cortecchia-volume:/experiment/data
+    environment:
+      - GRADLE_TASK=runGradientBatch
+#      - MAX_SEED=31
+
+#  simulation1:
+#    image: angelacortecchia/${PROJECT_NAME:-unknown}-simulation:${VERSION:-latest}
+#    build:
+#      context: .
+#      dockerfile: ./docker/sim/Dockerfile
+#    environment:
+#      MIN: 1
+#      MAX: 5
+#      DEFAULT: 2
+#    depends_on:
+#      - prepare
+#    volumes:
+#      - ./data:/experiment/data
+
+# This is the charts generation service, currently commented out
+
+#  charts:
+#    depends_on:
+#      prepare:
+#        condition: service_completed_successfully
+#      simulation1:
+#        condition: service_completed_successfully
+#      simulation2:
+#        condition: service_completed_successfully
+#      simulation3:
+#        condition: service_completed_successfully
+#    image: angelacortecchia/${PROJECT_NAME:-unknown}-charts:${VERSION:-latest}
+#    build:
+#      dockerfile: ./docker/charts/Dockerfile
+#      context: .
+#    volumes:
+#      - ./data:/experiment/data
+#      - ./charts:/experiment/charts
+
+  finish:
+    depends_on:
+#      charts:
+#        condition: service_completed_successfully
+      prepare:
+        condition: service_completed_successfully
+    image: alpine:3.20.3
+    volumes:
+      - .:/experiment:rw
+    entrypoint: /bin/sh -c
+    command:
+      - |
+        find /experiment/data -type d -exec chmod 777 {} \;
+        find /experiment/charts -type d -exec chmod 777 {} \;
+        find /experiment/data -type f -exec chmod 666 {} \;
+        find /experiment/charts -type f -exec chmod 666 {} \;
