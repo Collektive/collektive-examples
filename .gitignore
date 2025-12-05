@@ -12,3 +12,4 @@ data
 plot
 
 .kotlin/
+.DS_Store
