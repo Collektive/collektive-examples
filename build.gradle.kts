@@ -1,6 +1,6 @@
-import io.gitlab.arturbosch.detekt.Detekt
-import io.gitlab.arturbosch.detekt.DetektPlugin
-import io.gitlab.arturbosch.detekt.report.ReportMergeTask
+import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.plugin.DetektPlugin
+import dev.detekt.gradle.report.ReportMergeTask
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.withType
 import org.jlleitschuh.gradle.ktlint.tasks.GenerateReportsTask
@@ -43,19 +43,10 @@ allprojects {
         }
     }
 
-    // Enforce the use of the Kotlin version in all subprojects
-    configurations.matching { it.name != "detekt" }.all {
-        resolutionStrategy.eachDependency {
-            if (requested.group == "org.jetbrains.kotlin") {
-                useVersion(rootProject.libs.versions.kotlin.asProvider().get())
-            }
-        }
-    }
-
     tasks.withType<Detekt>().configureEach { finalizedBy(reportMerge) }
     tasks.withType<GenerateReportsTask>().configureEach { finalizedBy(reportMerge) }
     reportMerge {
-        input.from(tasks.withType<Detekt>().map { it.sarifReportFile })
+        input.from(tasks.withType<Detekt>().map { it.reports.checkstyle.outputLocation })
         input.from(tasks.withType<GenerateReportsTask>().flatMap { it.reportsOutputDirectory.asFileTree.files })
     }
 }
