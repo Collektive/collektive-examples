@@ -5,10 +5,10 @@ import it.unibo.collektive.aggregate.api.Aggregate
 import it.unibo.collektive.aggregate.api.neighboring
 import it.unibo.collektive.stdlib.collapse.fold
 import it.unibo.collektive.stdlib.util.Point3D
-import org.apache.commons.math3.random.RandomGenerator
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sqrt
+import org.apache.commons.math3.random.RandomGenerator
 
 /**
  * Entry point for the local average computation algorithm.
