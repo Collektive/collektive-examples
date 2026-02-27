@@ -1,0 +1,12 @@
+.git/
+.github/
+.gradle/
+.idea/
+.spyproject/
+build/
+charts/
+data/
+release.config.js
+renovate.json
+package-lock.json
+package.json
