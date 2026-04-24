@@ -1,5 +1,5 @@
 [versions]
-alchemist = "43.0.40"
+alchemist = "43.0.41"
 collektive = "28.2.3"
 kotlin = "2.3.21"
 kotlin-logging = "7.0.7"
