@@ -1,5 +1,8 @@
 incarnation: collektive
 
+variables:
+  channelWidth: &channelWidth 0.5
+
 network-model:
   type: ConnectWithinDistance
   parameters: [10]
@@ -17,6 +20,8 @@ deployments:
     programs:
       - *program
     contents:
+      - molecule: channelWidth
+        concentration: *channelWidth
       - molecule: obstacle
         concentration: false
       - molecule: source
@@ -40,6 +45,8 @@ deployments:
     programs:
       - *program
     contents:
+      - molecule: channelWidth
+        concentration: *channelWidth
       - molecule: source
         concentration: true
       - molecule: target
@@ -51,6 +58,8 @@ deployments:
     programs:
       - *program
     contents:
+      - molecule: channelWidth
+        concentration: *channelWidth
       - molecule: target
         concentration: true
       - molecule: source

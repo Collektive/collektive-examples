@@ -10,15 +10,24 @@ import it.unibo.collektive.stdlib.spreading.gradientCast
  */
 context(collektiveDevice: CollektiveDevice<*>)
 fun Aggregate<Int>.channelWithObstaclesEntrypoint(): Boolean = with(collektiveDevice) {
-    channelWithObstacles(collektiveDevice["source"], collektiveDevice["target"], collektiveDevice["obstacle"])
+    channelWithObstacles(
+        collektiveDevice["source"],
+        collektiveDevice["target"],
+        collektiveDevice["obstacle"],
+        collektiveDevice["channelWidth"],
+    )
 }
 
 /**
  * Compute the channel between the [source] and the [target] avoiding [obstacle].
  */
 context(collektiveDevice: CollektiveDevice<*>)
-fun Aggregate<Int>.channelWithObstacles(source: Boolean, target: Boolean, obstacle: Boolean): Boolean =
-    !obstacle && channel(source, target, channelWidth = 0.5)
+fun Aggregate<Int>.channelWithObstacles(
+    source: Boolean,
+    target: Boolean,
+    obstacle: Boolean,
+    channelWidth: Double,
+): Boolean = !obstacle && channel(source, target, channelWidth)
 
 /**
  * Compute the channel between the [source] and the [destination] with a specific [channelWidth].
