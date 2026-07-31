@@ -2,7 +2,7 @@
   {
     "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
     "curIncarnation": "collektive",
-    "mode": "FILL_ELLIPSE",
+    "mode": "FILL_RECTANGLE",
     "red": {
       "max": 255,
       "min": 0,
@@ -21,7 +21,7 @@
     "alpha": {
       "max": 255,
       "min": 0,
-      "val": 255
+      "val": 36
     },
     "scaleFactor": {
       "max": 100,
@@ -31,7 +31,7 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 4
+      "val": 18
     },
     "molFilter": false,
     "molString": "",
@@ -56,13 +56,13 @@
       "val": 10
     },
     "colorCache": {
-      "value": -16776961
+      "value": 603980031
     }
   },
   {
     "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
     "curIncarnation": "collektive",
-    "mode": "FILL_ELLIPSE",
+    "mode": "FILL_RECTANGLE",
     "red": {
       "max": 255,
       "min": 0,
@@ -91,7 +91,7 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 10
+      "val": 23
     },
     "molFilter": true,
     "molString": "it.unibo.collektive.examples.channel.ChannelWithObstaclesKt.channelWithObstaclesEntrypoint",
@@ -186,17 +186,17 @@
     "red": {
       "max": 255,
       "min": 0,
-      "val": 0
+      "val": 255
     },
     "blue": {
       "max": 255,
       "min": 0,
-      "val": 255
+      "val": 0
     },
     "green": {
       "max": 255,
       "min": 0,
-      "val": 255
+      "val": 189
     },
     "alpha": {
       "max": 255,
@@ -236,13 +236,13 @@
       "val": 1
     },
     "colorCache": {
-      "value": -16711681
+      "value": -17152
     }
   },
   {
     "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
     "curIncarnation": "collektive",
-    "mode": "FILL_RECTANGLE",
+    "mode": "FILL_ELLIPSE",
     "red": {
       "max": 255,
       "min": 0,
@@ -256,7 +256,7 @@
     "green": {
       "max": 255,
       "min": 0,
-      "val": 255
+      "val": 0
     },
     "alpha": {
       "max": 255,
@@ -271,7 +271,7 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 22
+      "val": 27
     },
     "molFilter": true,
     "molString": "source",
@@ -296,7 +296,7 @@
       "val": 10
     },
     "colorCache": {
-      "value": -256
+      "value": -65536
     }
   }
 ]

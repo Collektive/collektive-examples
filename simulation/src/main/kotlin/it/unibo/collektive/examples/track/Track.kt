@@ -22,7 +22,7 @@ fun Aggregate<Int>.trackEntrypoint(collektiveDevice: CollektiveDevice<*>, env: E
         val target: Boolean = env["target"]
         val destination: Boolean = env["dst"]
         // Check if the device is part of the channel between target and dst
-        val inChannel = channel(collektiveDevice, target, destination, CHANNEL_WIDTH)
+        val inChannel = channel(target, destination, CHANNEL_WIDTH)
         // Compute the direction to the target, relative to dst
         val toTarget = track(target, destination, inChannel, coordinates()) { distances() }
         pointTo(toTarget)
