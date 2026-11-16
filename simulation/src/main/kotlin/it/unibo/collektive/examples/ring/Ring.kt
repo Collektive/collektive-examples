@@ -19,7 +19,7 @@ fun Aggregate<Int>.ringEntryPoint(collektiveDevice: CollektiveDevice<*>, env: En
     with(collektiveDevice) {
         ring(
             center = env["center"],
-            currentTime = { environment.simulation.time.toDouble() },
+            currentTime = { environment.simulation.time.current.toDouble() },
             metric = { distances() },
         )
     }

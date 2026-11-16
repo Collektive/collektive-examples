@@ -14,7 +14,7 @@ fun Position<*>.toPoint2D(): Point2D = Point2D(coordinates[0] to coordinates[1])
 /**
  * Gets the current position of the device in the environment as a [Point2D].
  */
-fun CollektiveDevice<*>.coordinates(): Point2D = environment.getPosition(node).toPoint2D()
+fun CollektiveDevice<*>.coordinates(): Point2D = environment.currentPositionOf(node).toPoint2D()
 
 /**
  * Moves the device in the environment towards a given [direction].
@@ -23,7 +23,7 @@ fun CollektiveDevice<*>.coordinates(): Point2D = environment.getPosition(node).t
  */
 fun CollektiveDevice<*>.move(direction: Vector2D, velocity: Double) {
     val newPos = coordinates() + (direction * velocity)
-    environment.moveNodeToPosition(node, environment.makePosition(newPos.x, newPos.y))
+    environment.moveNodeTo(node, environment.makePosition(newPos.x, newPos.y))
 }
 
 /**

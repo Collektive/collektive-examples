@@ -18,7 +18,7 @@ fun Aggregate<Int>.inCircleEntrypoint(env: EnvironmentVariables, collektiveDevic
     with(collektiveDevice) {
         inCircle(
             center = env["center"],
-            location = environment.getPosition(collektiveDevice.node).toPoint2D(),
+            location = environment.currentPositionOf(collektiveDevice.node).toPoint2D(),
             metric = { distances() },
         )
     }

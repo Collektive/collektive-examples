@@ -55,7 +55,7 @@ class DrawDirection(private val c: Color = Color.RED) : it.unibo.alchemist.bound
         wormhole: Wormhole2D<P>,
         direction: Euclidean2DPosition,
     ) {
-        val viewPoint = wormhole.getViewPoint(environment.getPosition(node))
+        val viewPoint = wormhole.getViewPoint(environment.currentPositionOf(node))
         val arrow = createArrowPath(direction)
         val transform = with(viewPoint) {
             AffineTransform().apply {
