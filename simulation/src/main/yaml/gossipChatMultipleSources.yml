@@ -11,13 +11,13 @@ network-model:
 _polls:
   _pool: &gossipProgram
     - time-distribution: 1
-      type: Event
+      type: GenericReaction
       actions:
         - type: RunCollektiveProgram
           parameters: [it.unibo.collektive.examples.chat.GossipChatMultipleSourcesKt.gossipChatMultipleSourcesEntrypoint]
     - pool: &move
         - time-distribution: 1
-          type: Event
+          type: GenericReaction
           actions:
             - type: ReproduceGPSTrace
               parameters: [ "vcmuser.gpx", true, "AlignToSimulationTime" ]

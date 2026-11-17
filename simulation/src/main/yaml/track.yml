@@ -9,13 +9,13 @@ environment:
 
 _program: &program
   - time-distribution: 1
-    type: Event
+    type: GenericReaction
     actions:
       - type: RunCollektiveProgram
         parameters: [ it.unibo.collektive.examples.track.TrackKt.trackEntrypoint ]
 
 _walk: &random_walk
-  - type: Event
+  - type: GenericReaction
     time-distribution: 1
     actions: { type: BrownianMove, parameters: [ 5.0 ] }
 
