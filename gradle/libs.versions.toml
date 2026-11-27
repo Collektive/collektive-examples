@@ -6,6 +6,7 @@ kotlin-logging = "7.0.7"
 
 [libraries]
 alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
+alchemist-kotlinscript = { module = "it.unibo.alchemist:alchemist-kotlinscript", version.ref = "alchemist" }
 alchemist-incarnation-protelis = { module = "it.unibo.alchemist:alchemist-incarnation-protelis", version.ref = "alchemist" }
 alchemist-swingui = { module = "it.unibo.alchemist:alchemist-swingui", version.ref = "alchemist" }
 alchemist-ui-tooling = {module = "it.unibo.alchemist:alchemist-ui-tooling", version.ref = "alchemist" }

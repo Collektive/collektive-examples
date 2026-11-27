@@ -14,6 +14,7 @@ multiJvm {
 dependencies {
     implementation(libs.bundles.alchemist)
     implementation(libs.bundles.collektive)
+    runtimeOnly(libs.alchemist.kotlinscript) // Loads the *.alchemist.kts scenarios
     if (!GraphicsEnvironment.isHeadless()) {
         implementation("it.unibo.alchemist:alchemist-swingui:${libs.versions.alchemist.get()}")
     }
@@ -66,13 +67,22 @@ fun String.capitalizeString(): String = this.replaceFirstChar {
     }
 }
 
-File(rootProject.rootDir.path + "/simulation/src/main/yaml")
+// Options read by the scenarios (see it.unibo.collektive.examples.utils.LaunchOptions):
+// Alchemist does not apply --override to Kotlin scripts, so they are passed as system properties.
+val effectsProperty = "collektive.examples.effects"
+val endTimeProperty = "collektive.examples.endTime"
+val isCI = System.getenv("CI") == "true"
+// Simulated end time: 2 in CI, otherwise optional (e.g., ./gradlew runGradientBatch -PendTime=2).
+val endTime: String? = if (isCI) "2" else findProperty("endTime")?.toString()
+
+File(rootProject.rootDir.path + "/simulation/src/main/kts")
     .listFiles()
-    ?.filter { it.extension == "yml" }
-    ?.sortedBy { it.nameWithoutExtension }
+    ?.filter { it.name.endsWith(".alchemist.kts") }
+    ?.sortedBy { it.name }
     ?.forEach {
+        val scenario = it.name.removeSuffix(".alchemist.kts")
         fun basetask(name: String, additionalConfiguration: JavaExec.() -> Unit = {}) = tasks.register<JavaExec>(name) {
-            description = "Launches graphic simulation ${it.nameWithoutExtension}"
+            description = "Launches graphic simulation $scenario"
             mainClass.set("it.unibo.alchemist.Alchemist")
             classpath = sourceSets["main"].runtimeClasspath
             args("run", it.absolutePath)
@@ -81,24 +91,17 @@ File(rootProject.rootDir.path + "/simulation/src/main/yaml")
                     languageVersion.set(JavaLanguageVersion.of(multiJvm.latestJava))
                 },
             )
-            if (System.getenv("CI") == "true") {
-                args("--override", "terminate: { type: AfterTime, parameters: [2] } ")
-            } else {
+            endTime?.let { systemProperty(endTimeProperty, it) }
+            if (!isCI) {
                 this.additionalConfiguration()
             }
         }
-        val capitalizedName = it.nameWithoutExtension.capitalizeString()
+        val capitalizedName = scenario.capitalizeString()
         val graphic by basetask("run${capitalizedName}Graphic") {
             group = alchemistGroupGraphic
             jvmArgs("-Dsun.java2d.opengl=false")
-            args(
-                "--override",
-                "monitors: { type: SwingGUI, parameters: { graphics: ../effects/${it.nameWithoutExtension}.json } }",
-                "--override",
-                "launcher: { parameters: { batch: [], autoStart: false } }",
-                "--verbosity",
-                "error",
-            )
+            systemProperty(effectsProperty, rootProject.file("effects/$scenario.json").absolutePath)
+            args("--verbosity", "error")
         }
         runAllGraphic.dependsOn(graphic)
         val batch by basetask("run${capitalizedName}Batch") {

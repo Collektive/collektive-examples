@@ -73,7 +73,8 @@ curl https://raw.githubusercontent.com/collektive/collektive-examples/master/run
 5. Depending on the platform, run the following command:
     - Bash compatible (Linux, Mac OS X, Git Bash, Cygwin): ``` ./gradlew run<ExperimentName>Graphic ```
     - Windows native (cmd.exe, Powershell): ``` gradlew.bat run<ExperimentName>Graphic ```
-6. Substitute `<ExperimentName>` with the name of the experiment (in PascalCase) specified in the YAML simulation file.
+6. Substitute `<ExperimentName>` with the name of the experiment (in PascalCase):
+   the name of its `<experimentName>.alchemist.kts` simulation file in `simulation/src/main/kts`.
    Or execute ```./gradlew tasks``` to view the list of available tasks.
 
 **NOTES:**
@@ -81,12 +82,19 @@ curl https://raw.githubusercontent.com/collektive/collektive-examples/master/run
 - The tasks *in graphic mode* will run the experiments with the default parameters.
 
 #### Changing experiment's parameters
-To change the parameters of the experiments, you can modify the **YAML** files located in the `src/main/yaml` folder.
+To change the parameters of the experiments, you can modify the Alchemist **Kotlin DSL** scripts
+(`*.alchemist.kts`) located in the `simulation/src/main/kts` folder.
 
 Each change in the parameters will result in a different setup and execution of the experiment.
 
-For further information about the YAML structure,
-please refer to the [Alchemist documentation](https://alchemistsimulator.github.io/reference/yaml/index.html).
+For further information about the Kotlin DSL,
+please refer to the [Alchemist documentation](https://alchemistsimulator.github.io/)
+and to the DSL sources in Alchemist's `alchemist-loading` module (`it.unibo.alchemist.boundary.kotlindsl`).
+
+Alchemist does not apply `--override` to Kotlin scripts:
+the Gradle tasks configure the scenarios through system properties instead
+(see `it.unibo.collektive.examples.utils.LaunchOptions`).
+For instance, `./gradlew run<ExperimentName>Batch -PendTime=2` stops the simulation after 2 units of simulated time.
 
 ### Reproduce the experiment results
 
@@ -99,7 +107,7 @@ and with different combinations of parameters.
 Running the experiments in batch mode in a normal computer may take a very long time (e.g., days),
 depending on the available hardware.
 Moreover, 
-be sure that the YAML file of the experiment you want to run in batch mode
+be sure that the simulation file of the experiment you want to run in batch mode
 is properly configured with the desired parameters.
 
 #### Reproduce the experiments with containers (recommended)
@@ -124,7 +132,7 @@ is properly configured with the desired parameters.
     - `./gradlew runAllBatch` on Linux, MacOS, or Windows if a bash-compatible shell is available;
     - `gradlew.bat runAllBatch` on Windows cmd or Powershell;
 4. Once the experiment is finished, the results will be available in the `data` folder, 
-**if data extraction is properly configured in the YAML files**.
+**if data extraction is properly configured in the simulation files**.
 
 #### Generate the charts
 
